@@ -2,14 +2,12 @@ import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'reac
 import { TextInput, Button } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-
-
 const { width, height } = Dimensions.get("screen");
 
-export default function LoginScreen() {
+export default function PasswordUserScreen() {
     return (
         <View style={style.container}>
-            {/* Precisa ajeitar a logo */}
+
             <View style={style.firstPierce}>
                 <Image source={require("../../../assets/LogoBranca.png")} />
             </View>
@@ -21,35 +19,16 @@ export default function LoginScreen() {
                 >
                     <View style={{ justifyContent: "center", alignItems: "center", }}>
                         <Text style={style.text}>
-                            Entre em sua conta
+                            Recuperação de senha
                         </Text>
-                        {/* View Input text */}
-                        <View>
-                            <TextInput
-                                style={style.inputText}
-                                label={'E-mail'}
-                                mode='outlined'
-                                right={
-                                    <TextInput.Icon
-                                        icon={({ size, color }) => (
-                                            <MaterialCommunityIcons
-                                                name="email-outline"  // ícone com contorno
-                                                size={size}
-                                                color="#006765"  // cor do contorno (verde)
-                                            />
-                                        )}
-                                    />
-                                }
-                                theme={{
-                                    colors: {
-                                        outline: '#D3D3D3',
-                                        background: "white",
-                                        primary: "#006765",
-                                    },
-                                    roundness: 10,
+                        <View style={style.viewSubTitle}>
+                            <Text style={style.subtitle}>
+                                Crie sua nova senha e volta a navegar em nossa plataforma :)
+                            </Text>
+                        </View>
 
-                                }}
-                            />
+                        <View>
+                            {/* Senha*/}
                             <TextInput style={style.inputText}
                                 label={'Senha'}
                                 mode='outlined'
@@ -57,7 +36,32 @@ export default function LoginScreen() {
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="lock-outline"
+                                                name="eye-outline"
+                                                size={size}
+                                                color="#006765"
+                                            />
+                                        )}
+                                    />
+                                }
+                                secureTextEntry={true} theme={{
+                                    colors: {
+                                        outline: '#D3D3D3',
+                                        background: "white",
+                                        primary: "#006765",
+                                    },
+                                    roundness: 10,
+                                }}
+
+                            />
+                            {/* Confirme sua senha*/}
+                            <TextInput style={style.inputText}
+                                label={'Confirme sua senha'}
+                                mode='outlined'
+                                right={
+                                    <TextInput.Icon
+                                        icon={({ size, color }) => (
+                                            <MaterialCommunityIcons
+                                                name="eye-off-outline"
                                                 size={size}
                                                 color="#006765"
                                             />
@@ -75,72 +79,29 @@ export default function LoginScreen() {
 
                             />
                         </View>
-                        <View style={style.viewText}>
-                            <Text style={{
-                                color: "#006765",
-                                fontWeight: "bold",
-                                textDecorationLine: "underline",
-                                alignSelf: "flex-end"
 
-                            }}>Esqueci minha senha</Text>
-                        </View>
 
                         <View style={style.viewButton}>
-                            <Button
-                                mode="contained"
-                                disabled={false}
-                                style={style.layoutButton}
-                                labelStyle={style.buttonText}
-                                theme={{
-                                    colors: {
-                                        primary: "#07C3C3",
-                                        text: "white",
-                                    },
 
-                                }}
-                            >Entrar</Button>
-                            <Button mode="outlined"
+
+                            <Button mode="contained"
                                 disabled={false}
                                 style={style.layoutButton}
 
                                 labelStyle={style.buttonText}
                                 theme={{
                                     colors: {
-                                        outline: '#07C3C3',
+                                        
                                         primary: '#07C3C3',
                                     },
 
                                 }}
-                            >Cadastrar</Button>
+                            >Continuar</Button>
 
                         </View>
 
                         {/* Conexão */}
-                        <View style={style.container2}>
 
-                            <View style={style.dividerContainer}>
-                                <View style={style.line} />
-                                <Text style={style.dividerText}>Conectar usando</Text>
-                                <View style={style.line} />
-                            </View>
-                            <View style={style.ButtonConectView}>
-                                <Button
-                                    icon={'google'}   
-                                    mode="contained"
-                                    style={style.iconButton}
-                                    contentStyle={style.iconButtonContent}
-                                    theme={{
-                                        colors: {
-                                            primary: "#006765",
-                                        },
-                                    }}
-                                >{""}</Button>
-
-
-                                {/* <Button icon={'facebook'} mode='text' style={style.ExternoButtonConect} contentStyle={style.InteriorButtonConect} /> */}
-                            </View>
-
-                        </View>
                     </View>
 
                 </ImageBackground>
@@ -192,79 +153,35 @@ const style = StyleSheet.create({
     inputText: {
         width: width * 0.65,
         height: height * 0.059,
-        marginTop: 20
+        marginTop: 10
     },
     layoutButton: {
-        width: "100%",
-        height: "40%",
+        width: width * 0.7,
+        height: height * 0.08,
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
     },
     buttonText: {
         fontSize: 20,
+        fontWeight:"bold",
+        
     },
 
     viewButton: {
-        width: width * 0.7,
-        height: height * 0.18,
-        justifyContent: "space-between"
+        flex: 0.7,
+        justifyContent: "center"
     },
-    viewText: {
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        width: width * 0.65,
-        margin: 40,
+    subtitle: {
+        color: "#0E9693",
 
     },
-    container2: {
-        paddingHorizontal: 20,
-        alignItems: "center",
-    },
-    dividerContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginVertical: 20,
-    },
-    line: {
-        flex: 0.32,
-        height: 1,
-        backgroundColor: "#20524E",
-    },
-    dividerText: {
-        marginHorizontal: 10,
-        color: "#006765",
-        fontWeight: "bold",
-    },
-
-
-
-    iconButton: {
-        borderRadius: 25,
-        width: 50,
-        height: 50,
-        margin: 5,
-        padding: 0,
-        justifyContent: "center",
-
-    },
-    iconButtonContent: {
-        margin: 0,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
-
-
-
-    ButtonConectView: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 1
-
+    viewSubTitle:{
+        flexDirection:"row",
+        textAlign:"center",
+        margin:20,
 
 
     },
-
+    
 });

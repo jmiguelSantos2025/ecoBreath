@@ -1,12 +1,10 @@
 import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-
+import  MaterialCommunityIcons  from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const { width, height } = Dimensions.get("screen");
 
-export default function LoginScreen() {
+export default function NewUserScreen() {
     return (
         <View style={style.container}>
             {/* Precisa ajeitar a logo */}
@@ -19,21 +17,22 @@ export default function LoginScreen() {
                 <ImageBackground source={require("../../../assets/wave.png")}
                     style={style.imageBackground}
                 >
-                    <View style={{ justifyContent: "center", alignItems: "center", }}>
+                    <View style={{ justifyContent: "center", alignItems: "center", marginTop: width*0.05}}>
                         <Text style={style.text}>
-                            Entre em sua conta
+                            Cadastre uma conta
                         </Text>
                         {/* View Input text */}
                         <View>
+                            {/*Usuário */}
                             <TextInput
                                 style={style.inputText}
-                                label={'E-mail'}
+                                label={'Usuário'}
                                 mode='outlined'
                                 right={
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="email-outline"  // ícone com contorno
+                                                name="account-circle-outline"  // ícone com contorno
                                                 size={size}
                                                 color="#006765"  // cor do contorno (verde)
                                             />
@@ -50,6 +49,33 @@ export default function LoginScreen() {
 
                                 }}
                             />
+                            {/* Email*/}
+                            <TextInput
+                                style={style.inputText}
+                                label={'E-mail'}
+                                mode='outlined'
+                                right={
+                                    <TextInput.Icon
+                                        icon={({ size, color }) => (
+                                            <MaterialCommunityIcons
+                                                name="email-outline"  // ícone com contorno
+                                                size={size}
+                                                color="#006765"
+                                            />
+                                        )}
+                                    />
+                                }
+                                theme={{
+                                    colors: {
+                                        outline: '#D3D3D3',
+                                        background: "white",
+                                        primary: "#006765",
+                                    },
+                                    roundness: 10,
+
+                                }}
+                            />
+                            {/* Senha*/}
                             <TextInput style={style.inputText}
                                 label={'Senha'}
                                 mode='outlined'
@@ -58,6 +84,31 @@ export default function LoginScreen() {
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
                                                 name="lock-outline"
+                                                size={size}
+                                                color="#006765"
+                                            />
+                                        )}
+                                    />
+                                }
+                                secureTextEntry={true} theme={{
+                                    colors: {
+                                        outline: '#D3D3D3',
+                                        background: "white",
+                                        primary: "#006765",
+                                    },
+                                    roundness: 10,
+                                }}
+
+                            />
+                            {/* Confirme sua senha*/}
+                            <TextInput style={style.inputText}
+                                label={'Confirme sua senha'}
+                                mode='outlined'
+                                right={
+                                    <TextInput.Icon
+                                        icon={({ size, color }) => (
+                                            <MaterialCommunityIcons
+                                                name="check-circle-outline"
                                                 size={size}
                                                 color="#006765"
                                             />
@@ -86,19 +137,8 @@ export default function LoginScreen() {
                         </View>
 
                         <View style={style.viewButton}>
-                            <Button
-                                mode="contained"
-                                disabled={false}
-                                style={style.layoutButton}
-                                labelStyle={style.buttonText}
-                                theme={{
-                                    colors: {
-                                        primary: "#07C3C3",
-                                        text: "white",
-                                    },
 
-                                }}
-                            >Entrar</Button>
+
                             <Button mode="outlined"
                                 disabled={false}
                                 style={style.layoutButton}
@@ -125,16 +165,17 @@ export default function LoginScreen() {
                             </View>
                             <View style={style.ButtonConectView}>
                                 <Button
-                                    icon={'google'}   
+                                icon={'google'}
                                     mode="contained"
                                     style={style.iconButton}
-                                    contentStyle={style.iconButtonContent}
                                     theme={{
                                         colors: {
                                             primary: "#006765",
                                         },
                                     }}
-                                >{""}</Button>
+                                >
+                                    {""}
+                                </Button>
 
 
                                 {/* <Button icon={'facebook'} mode='text' style={style.ExternoButtonConect} contentStyle={style.InteriorButtonConect} /> */}
@@ -192,11 +233,11 @@ const style = StyleSheet.create({
     inputText: {
         width: width * 0.65,
         height: height * 0.059,
-        marginTop: 20
+        marginTop: 10
     },
     layoutButton: {
-        width: "100%",
-        height: "40%",
+        width: width * 0.7,
+        height: height * 0.08,
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
@@ -206,15 +247,14 @@ const style = StyleSheet.create({
     },
 
     viewButton: {
-        width: width * 0.7,
-        height: height * 0.18,
-        justifyContent: "space-between"
+        flex: 0.7,
+        justifyContent: "center"
     },
     viewText: {
         flexDirection: "row",
         justifyContent: "flex-end",
         width: width * 0.65,
-        margin: 40,
+        margin: 30,
 
     },
     container2: {
