@@ -1,10 +1,28 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
+import { View,Animated, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import  MaterialCommunityIcons  from 'react-native-vector-icons/MaterialCommunityIcons';
+import React,{useRef} from 'react';
 
 const { width, height } = Dimensions.get("screen");
 
 export default function NewUserScreen() {
+    const opacityAnim = useRef(new Animated.Value(1)).current;
+    const handlePressIn = () => {
+        Animated.timing(opacityAnim, {
+            toValue: 0.5, // Diminui a opacidade
+            duration: 100,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.timing(opacityAnim, {
+            toValue: 1, // Volta à opacidade original
+            duration: 100,
+            useNativeDriver: true,
+        }).start();
+    };
+
     return (
         <View style={style.container}>
             {/* Precisa ajeitar a logo */}
@@ -142,7 +160,10 @@ export default function NewUserScreen() {
                             <Button mode="outlined"
                                 disabled={false}
                                 style={style.layoutButton}
-
+                                onPressIn={handlePressIn}
+                                onPressOut={handlePressOut}
+                                
+                                
                                 labelStyle={style.buttonText}
                                 theme={{
                                     colors: {
