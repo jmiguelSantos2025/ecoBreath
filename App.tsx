@@ -6,7 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 // import LoginScreen from './src/pages/LoginScreen';
 // import NewUserScreen from './src/pages/NewUserScreen'
 // import EmailRescueScreen from './src/pages/EmailRescueScreen';
-import PasswordRescueScreen from './src/pages/PasswordRescueScreen' 
+import PasswordRescueScreen from './src/pages/PasswordRescueScreen'
 import ForgotPassword from './src/pages/ForgotPassword'
 import ConfirmScreen from './src/pages/ConfirmScreen'
 import MainScreen from './src/pages/MainScreen'
@@ -26,19 +26,24 @@ import ErrorScreen from './src/pages/ErrorScreen'
 import ManutencionScreen from './src/pages/ManutencionScreen';
 import GraphicsScreenAirQuality from './src/pages/GraphicsScreenAirQuality';
 import NotificationScreen from './src/pages/NotificationScreen';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import FirstScreenToUseScreen from './src/pages/FirstScreenToUseScreen';
+import GraphicsScreen from './src/pages/GraphicsScreen';
+
 export default function App() {
-  return (
-    <View style = {styles.container}>
-      <StatusBar/>
-      <NotificationScreen/> 
-    </View> 
+  return(
+      <View style={styles.container}>
+        <StatusBar />
+        <GraphicsScreen/>
+      </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems:"center",
-    justifyContent:"flex-start"
+    alignItems: "center",
+    justifyContent: "flex-start"
   },
 });
