@@ -1,12 +1,23 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, } from 'react-native';
+import { TextInput, Button, IconButton } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useState} from 'react';
 
 
 
-const { width, height } = Dimensions.get("screen");
+const { width, height } = Dimensions.get("window");
 
 export default function LoginScreen() {
+    const[email,setEmail] = useState('');
+    const[password,setPassword] = useState('');
+    function Database(){
+        if(email && password){
+            
+
+        }else{
+            alert("Preencha os campos antes de prosseguir");
+        }
+    }
     return (
         <View style={style.container}>
             {/* Precisa ajeitar a logo */}
@@ -29,11 +40,12 @@ export default function LoginScreen() {
                                 style={style.inputText}
                                 label={'E-mail'}
                                 mode='outlined'
+                                onChangeText={(Text)=>setEmail(Text)}
                                 right={
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="email-outline"  // ícone com contorno
+                                                name="email-outline"
                                                 size={size}
                                                 color="#006765"  // cor do contorno (verde)
                                             />
@@ -64,14 +76,19 @@ export default function LoginScreen() {
                                         )}
                                     />
                                 }
-                                secureTextEntry={true} theme={{
+                                onChangeText={(Text)=>setPassword(Text)}
+                                secureTextEntry={true} 
+                                theme={{
                                     colors: {
                                         outline: '#D3D3D3',
                                         background: "white",
                                         primary: "#006765",
                                     },
                                     roundness: 10,
-                                }}
+                                }
+
+                                }
+
 
                             />
                         </View>
@@ -91,6 +108,8 @@ export default function LoginScreen() {
                                 disabled={false}
                                 style={style.layoutButton}
                                 labelStyle={style.buttonText}
+                                onPress={Database}
+                                
                                 theme={{
                                     colors: {
                                         primary: "#07C3C3",
@@ -98,6 +117,7 @@ export default function LoginScreen() {
                                     },
 
                                 }}
+                                
                             >Entrar</Button>
                             <Button mode="outlined"
                                 disabled={false}
@@ -123,21 +143,31 @@ export default function LoginScreen() {
                                 <Text style={style.dividerText}>Conectar usando</Text>
                                 <View style={style.line} />
                             </View>
-                            <View style={style.ButtonConectView}>
-                                <Button
-                                    icon={'google'}   
-                                    mode="contained"
-                                    style={style.iconButton}
-                                    contentStyle={style.iconButtonContent}
-                                    theme={{
-                                        colors: {
-                                            primary: "#006765",
-                                        },
-                                    }}
-                                >{""}</Button>
 
+                            <View style={style.viewContainerIcon}>
 
-                                {/* <Button icon={'facebook'} mode='text' style={style.ExternoButtonConect} contentStyle={style.InteriorButtonConect} /> */}
+                                <View style={style.containerIconButton}>
+
+                                    <IconButton
+                                        icon='google'
+                                        size={24}
+                                        style={style.iconButton}
+                                        iconColor="white"
+
+                                    />
+
+                                </View>
+                                <View style={style.containerIconButton}>
+
+                                    <IconButton
+                                        icon='facebook'
+                                        size={24}
+                                        style={style.iconButton}
+                                        iconColor="white"
+
+                                    />
+
+                                </View>
                             </View>
 
                         </View>
@@ -161,7 +191,7 @@ const style = StyleSheet.create({
     },
     firstPierce: {
         width: width,
-        height: "28%",
+        height: "23%",
         justifyContent: "center",
         alignItems: "center",
         paddingTop: height * 0.05,
@@ -171,7 +201,11 @@ const style = StyleSheet.create({
     secondPierce: {
 
         width: "100%",
-        height: "75%",
+        height: "81%",
+        // position: "absolute" ,
+        // bottom:0, alternativa
+        
+
 
 
     },
@@ -186,7 +220,7 @@ const style = StyleSheet.create({
     text: {
         color: "#13C1CA",
         fontWeight: "bold",
-        fontSize: height * 0.02,
+        fontSize: height * 0.023,
 
     },
     inputText: {
@@ -241,30 +275,22 @@ const style = StyleSheet.create({
 
     iconButton: {
         borderRadius: 25,
-        width: 50,
-        height: 50,
-        margin: 5,
-        padding: 0,
-        justifyContent: "center",
-
-    },
-    iconButtonContent: {
-        margin: 0,
+        width: 25,
+        height: 25,
         justifyContent: "center",
         alignItems: "center",
     },
-
-
-
-
-    ButtonConectView: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 1
-
-
+    containerIconButton: {
+        backgroundColor: "#006765",
+        borderRadius: 50,
+        padding: 5,
 
     },
+    viewContainerIcon: {
+        flexDirection:"row",
+        gap:10,
+
+
+    }
 
 });

@@ -1,9 +1,11 @@
+import { useRouter } from 'expo-router';
+
 import { View, StyleSheet, Image, Text, Dimensions, ImageBackground } from 'react-native';
 
 
-const { width, height } = Dimensions.get("screen");
-
+const { width, height } = Dimensions.get("window");
 export default function TransitionScreenThird() {
+  const router = useRouter();
   return (
     <View style={style.conteiner}>
 
@@ -24,7 +26,7 @@ export default function TransitionScreenThird() {
           style={style.ImageBackground}
           resizeMode='cover'>
           <View style = {style.conteinerText}>
-            <Text style={style.text}>
+            <Text style={style.text} onPress={()=> router.push("/LoginScreen")}>
               Vamos lá
             </Text>
           </View>

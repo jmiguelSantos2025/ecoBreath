@@ -4,7 +4,8 @@ import 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
 
-export default function FirstScreenToUseScreen({navigation} ) {
+
+export default function FirstScreenToUseScreen() {
     
     return (
         <View style={style.containerFull}>
@@ -23,7 +24,7 @@ export default function FirstScreenToUseScreen({navigation} ) {
             </ImageBackground>
 
             <View style={style.viewTextBottom} >
-                <TouchableOpacity style={{flex:1, }} onPress={()=> navigation.navigate('LoginScreen')}>
+                <TouchableOpacity style={{flex:1, }} >
                 <Text style={style.textBottom} >Vamos lá!</Text>
                 </TouchableOpacity>
             </View>
