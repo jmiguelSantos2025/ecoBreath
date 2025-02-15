@@ -2,6 +2,7 @@ import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, } from 'rea
 import { TextInput, Button, IconButton } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useState} from 'react';
+import { logOut, signIn, signUp } from '../../Components/authenticator';
 
 
 
@@ -10,12 +11,36 @@ const { width, height } = Dimensions.get("window");
 export default function LoginScreen() {
     const[email,setEmail] = useState('');
     const[password,setPassword] = useState('');
-    function Database(){
-        if(email && password){
-            
 
-        }else{
+    const handleSignUp = async()=>{
+        const result = await signUp(email,password);
+        if(result.message){
+            alert(result.message);
+            setEmail('');
+            setPassword('');
+            
+        }
+        else{
+            alert(result.message);
+
+        }
+        
+    }
+    const handleSignIn = async()=>{
+        const result = await signIn(email,password);
+    }
+    const handleSignOut = async()=>{
+        const result = await logOut();
+    }
+
+    const Database = async()=>{
+        if(!email || !password){
+
             alert("Preencha os campos antes de prosseguir");
+            return;
+        }else{
+        
+           await handleSignUp();
         }
     }
     return (
@@ -34,12 +59,14 @@ export default function LoginScreen() {
                         <Text style={style.text}>
                             Entre em sua conta
                         </Text>
-                        {/* View Input text */}
+                        
                         <View>
                             <TextInput
                                 style={style.inputText}
                                 label={'E-mail'}
+                                value={email}
                                 mode='outlined'
+                                
                                 onChangeText={(Text)=>setEmail(Text)}
                                 right={
                                     <TextInput.Icon
@@ -47,7 +74,7 @@ export default function LoginScreen() {
                                             <MaterialCommunityIcons
                                                 name="email-outline"
                                                 size={size}
-                                                color="#006765"  // cor do contorno (verde)
+                                                color="#006765"  
                                             />
                                         )}
                                     />
@@ -65,6 +92,7 @@ export default function LoginScreen() {
                             <TextInput style={style.inputText}
                                 label={'Senha'}
                                 mode='outlined'
+                                value={password}
                                 right={
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
