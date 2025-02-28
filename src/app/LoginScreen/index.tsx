@@ -38,6 +38,7 @@ export default function LoginScreen() {
 
             alert("Preencha os campos antes de prosseguir");
             return;
+            
         }else{
         
            await handleSignUp();
