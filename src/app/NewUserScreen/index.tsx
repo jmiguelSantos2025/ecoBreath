@@ -1,27 +1,64 @@
-import { View,Animated, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import  MaterialCommunityIcons  from 'react-native-vector-icons/MaterialCommunityIcons';
-import React,{useRef} from 'react';
+import { useState } from 'react';
+import { logOut, signIn, signUp } from '../../Components/authenticator';
 
 const { width, height } = Dimensions.get("screen");
 
 export default function NewUserScreen() {
-    const opacityAnim = useRef(new Animated.Value(1)).current;
-    const handlePressIn = () => {
-        Animated.timing(opacityAnim, {
-            toValue: 0.5, // Diminui a opacidade
-            duration: 100,
-            useNativeDriver: true,
-        }).start();
-    };
+    const [user,setUser] = useState('');
+    const [email,setEmail] = useState('');
+    const [password,setPassword] = useState('');
+    const [confirm,setConfirm] = useState('');
+    const handleSignUp = async()=>{
+        if(password == confirm){
 
-    const handlePressOut = () => {
-        Animated.timing(opacityAnim, {
-            toValue: 1, // Volta à opacidade original
-            duration: 100,
-            useNativeDriver: true,
-        }).start();
-    };
+            const result = await signUp(email,password);
+            if(result.message){
+                alert(result.message);
+                setEmail('');
+                setConfirm('');
+                setPassword('');
+                
+            }
+            else{
+                alert(result.message);
+    
+            }
+            
+        }else{
+            alert("Você deve colocar senhas iguais");
+        }
+    }
+    const Database = async()=>{
+        if(!email || !password){
+
+            alert("Preencha os campos antes de prosseguir");
+            return;
+            
+        }else{
+        
+           await handleSignUp();
+        }
+    }
+
+    // const opacityAnim = useRef(new Animated.Value(1)).current;
+    // const handlePressIn = () => {
+    //     Animated.timing(opacityAnim, {
+    //         toValue: 0.5, // Diminui a opacidade
+    //         duration: 100,
+    //         useNativeDriver: true,
+    //     }).start();
+    // };
+
+    // const handlePressOut = () => {
+    //     Animated.timing(opacityAnim, {
+    //         toValue: 1, // Volta à opacidade original
+    //         duration: 100,
+    //         useNativeDriver: true,
+    //     }).start();
+    // };
 
     return (
         <View style={style.container}>
@@ -44,19 +81,22 @@ export default function NewUserScreen() {
                             {/*Usuário */}
                             <TextInput
                                 style={style.inputText}
+
+                                onChangeText={(Text)=>setUser(Text)}
                                 label={'Usuário'}
                                 mode='outlined'
                                 right={
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="account-circle-outline"  // ícone com contorno
+                                                name="account-circle-outline"  
                                                 size={size}
-                                                color="#006765"  // cor do contorno (verde)
+                                                color="#006765"  
                                             />
                                         )}
                                     />
                                 }
+                                value={user}
                                 theme={{
                                     colors: {
                                         outline: '#D3D3D3',
@@ -70,13 +110,15 @@ export default function NewUserScreen() {
                             {/* Email*/}
                             <TextInput
                                 style={style.inputText}
+                                onChangeText={(Text)=>setEmail(Text)}
+                                value={email}
                                 label={'E-mail'}
                                 mode='outlined'
                                 right={
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="email-outline"  // ícone com contorno
+                                                name="email-outline"  
                                                 size={size}
                                                 color="#006765"
                                             />
@@ -96,6 +138,7 @@ export default function NewUserScreen() {
                             {/* Senha*/}
                             <TextInput style={style.inputText}
                                 label={'Senha'}
+                                onChangeText={(Text)=>setPassword(Text)}
                                 mode='outlined'
                                 right={
                                     <TextInput.Icon
@@ -108,6 +151,7 @@ export default function NewUserScreen() {
                                         )}
                                     />
                                 }
+                                value={password}
                                 secureTextEntry={true} theme={{
                                     colors: {
                                         outline: '#D3D3D3',
@@ -121,6 +165,7 @@ export default function NewUserScreen() {
                             {/* Confirme sua senha*/}
                             <TextInput style={style.inputText}
                                 label={'Confirme sua senha'}
+                                onChangeText={(Text)=>setConfirm(Text)}
                                 mode='outlined'
                                 right={
                                     <TextInput.Icon
@@ -133,6 +178,7 @@ export default function NewUserScreen() {
                                         )}
                                     />
                                 }
+                                value={confirm}
                                 secureTextEntry={true} theme={{
                                     colors: {
                                         outline: '#D3D3D3',
@@ -160,8 +206,9 @@ export default function NewUserScreen() {
                             <Button mode="outlined"
                                 disabled={false}
                                 style={style.layoutButton}
-                                onPressIn={handlePressIn}
-                                onPressOut={handlePressOut}
+                                // onPressIn={handlePressIn}
+                                // onPressOut={handlePressOut}
+                                onPress={Database}
                                 
                                 
                                 labelStyle={style.buttonText}
@@ -187,6 +234,7 @@ export default function NewUserScreen() {
                             <View style={style.ButtonConectView}>
                                 <Button
                                 icon={'google'}
+                                
                                     mode="contained"
                                     style={style.iconButton}
                                     theme={{
@@ -199,7 +247,7 @@ export default function NewUserScreen() {
                                 </Button>
 
 
-                                {/* <Button icon={'facebook'} mode='text' style={style.ExternoButtonConect} contentStyle={style.InteriorButtonConect} /> */}
+                                
                             </View>
 
                         </View>
@@ -223,7 +271,7 @@ const style = StyleSheet.create({
     },
     firstPierce: {
         width: width,
-        height: "28%",
+        height: "22%",
         justifyContent: "center",
         alignItems: "center",
         paddingTop: height * 0.05,

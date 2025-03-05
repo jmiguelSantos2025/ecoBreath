@@ -5,7 +5,7 @@ import {createUserWithEmailAndPassword,signInWithEmailAndPassword,AuthError, sig
 export const signUp = async(email:string,password:string)=>{
     try{
         const userCredential = await createUserWithEmailAndPassword(auth,email,password);
-        return {sucess:true, message:"Usuários cadastrados com sucesso!" ,user: userCredential.user};
+        return {sucess:true, message:"Usuários cadastrados!" ,user: userCredential.user};
 
     }catch(error:any){
         return{sucess:false,message: error.message};

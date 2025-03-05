@@ -39,39 +39,42 @@ export default function TransitionScreenThird() {
 const style = StyleSheet.create({
 
   conteiner: {
-    width: width,
-    height: height,
+    width: "100%",
+    height: "100%",
     backgroundColor: "#fff",
 
 
   },
   firstpierce: {
-    width: width,
-    height: height * 0.5,
+    width: "100%",
+    height: "40%",
     justifyContent: "center",
     alignItems: "center",
+    paddingTop:"5%",
   },
   secondPierce: {
     width: "100%",
-    height:"100%",
+    height: "100%",
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    resizeMode:"contain"
 
 
   },
   letter: {
     color: "#60c7ed",
     fontSize: width * 0.035,
-    padding: 6,
+    padding:10,
 
 
   },
   ImageBackground: {
     width: "100%",
-    height: "90%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
+    
     
   },
   text:{

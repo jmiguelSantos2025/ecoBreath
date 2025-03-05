@@ -3,6 +3,7 @@ import { TextInput, Button, IconButton } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useState} from 'react';
 import { logOut, signIn, signUp } from '../../Components/authenticator';
+import { router } from 'expo-router';
 
 
 
@@ -12,27 +13,20 @@ export default function LoginScreen() {
     const[email,setEmail] = useState('');
     const[password,setPassword] = useState('');
 
-    const handleSignUp = async()=>{
-        const result = await signUp(email,password);
+    const handleSignIn = async()=>{
+        const result = await signIn(email,password);
         if(result.message){
-            alert(result.message);
             setEmail('');
             setPassword('');
+            router.push('/MainScreen');
+            
+            
             
         }
         else{
             alert(result.message);
-
         }
-        
     }
-    const handleSignIn = async()=>{
-        const result = await signIn(email,password);
-    }
-    const handleSignOut = async()=>{
-        const result = await logOut();
-    }
-
     const Database = async()=>{
         if(!email || !password){
 
@@ -41,16 +35,15 @@ export default function LoginScreen() {
             
         }else{
         
-           await handleSignUp();
+           await handleSignIn();
         }
     }
     return (
         <View style={style.container}>
             {/* Precisa ajeitar a logo */}
             <View style={style.firstPierce}>
-                <Image source={require("../../../assets/LogoBranca.png")} />
+                <Image source={require("../../../assets/LogoBranca.png")} style={{justifyContent:"center",alignItems:"center"}} />
             </View>
-
 
             <View style={style.secondPierce}>
                 <ImageBackground source={require("../../../assets/wave.png")}
@@ -121,8 +114,8 @@ export default function LoginScreen() {
 
                             />
                         </View>
-                        <View style={style.viewText}>
-                            <Text style={{
+                        <View style={style.viewText} >
+                            <Text onPress={()=>router.push('/NewUserScreen')} style={{
                                 color: "#006765",
                                 fontWeight: "bold",
                                 textDecorationLine: "underline",
@@ -210,8 +203,8 @@ export default function LoginScreen() {
 
 const style = StyleSheet.create({
     container: {
-        width: width,
-        height: height,
+        width: "100%",
+        height: "100%",
         backgroundColor: "#13D8B0",
 
 
@@ -219,23 +212,18 @@ const style = StyleSheet.create({
 
     },
     firstPierce: {
-        width: width,
+        width: "100%",
         height: "23%",
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: height * 0.05,
+        paddingTop: "5%",
 
 
     },
     secondPierce: {
 
         width: "100%",
-        height: "81%",
-        // position: "absolute" ,
-        // bottom:0, alternativa
-        
-
-
+        height: "77%",
 
     },
     imageBackground: {
@@ -250,6 +238,7 @@ const style = StyleSheet.create({
         color: "#13C1CA",
         fontWeight: "bold",
         fontSize: height * 0.023,
+        
 
     },
     inputText: {

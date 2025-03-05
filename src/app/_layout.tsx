@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export default function Layout() {
   useEffect(() => {
-    router.replace("/TransitionScreenThird");
+    router.replace("/TransitionScreenOne");
   }, []);
 
   return <Stack screenOptions={{headerShown:false}}/>;
