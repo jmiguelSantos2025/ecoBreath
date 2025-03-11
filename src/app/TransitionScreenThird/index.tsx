@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 
-import { View, StyleSheet, Image, Text, Dimensions, ImageBackground } from 'react-native';
+import { View, StyleSheet, Image, Text, Dimensions, ImageBackground, TouchableOpacity} from 'react-native';
 
 
 const { width, height } = Dimensions.get("window");
@@ -26,9 +26,12 @@ export default function TransitionScreenThird() {
           style={style.ImageBackground}
           resizeMode='cover'>
           <View style = {style.conteinerText}>
-            <Text style={style.text} onPress={()=> router.push("/LoginScreen")}>
+            <TouchableOpacity style={{flex:1,}}
+            onPress={()=> router.push("/LoginScreen")} >
+            <Text style={style.text} >
               Vamos lá
             </Text>
+            </TouchableOpacity>
           </View>
         </ImageBackground>
       </View>
@@ -42,8 +45,6 @@ const style = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "#fff",
-
-
   },
   firstpierce: {
     width: "100%",
@@ -60,12 +61,12 @@ const style = StyleSheet.create({
     alignItems: "center",
     resizeMode:"contain"
 
-
   },
   letter: {
     color: "#60c7ed",
     fontSize: width * 0.035,
     padding:10,
+    
 
 
   },
@@ -81,6 +82,7 @@ const style = StyleSheet.create({
    color: "#fff",
    fontSize: width * 0.05,
    fontWeight: "bold",
+   marginTop: width*0.05,
 },
 conteinerText:{
   height:"50%",

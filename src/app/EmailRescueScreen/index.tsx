@@ -2,7 +2,6 @@ import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'reac
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Button } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
-import { colors } from '@mui/material';
 
 const { width, height } = Dimensions.get("screen");
 

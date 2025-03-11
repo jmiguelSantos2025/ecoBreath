@@ -1,29 +1,22 @@
 import React, { useEffect } from 'react';
 import { View, Image, StyleSheet, Dimensions } from 'react-native';
-import Animated, { useSharedValue, withTiming, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export default function TransitionScreenOne() {
     const scale = useSharedValue(1);
     const router = useRouter();
 
     useEffect(() => {
-        scale.value = withTiming(10, {
-            duration: 2000,
-            easing: Easing.inOut(Easing.ease)
-        }, (finished) => {
-            if (finished) {
-                if (router) {
-                    try {
-                        router.push('/TransitionScreenThird');
-                    } catch (error) {
-                        console.error('Navigation error:', error);
-                    }
-                }
-            }
-        });
+        scale.value = withTiming(10, { duration: 2000 });
+
+        const timeout = setTimeout(() => {
+            router.push('/TransitionScreenThird');
+        }, 2000);
+
+        return () => clearTimeout(timeout);
     }, []);
 
     const animatedContainerStyle = useAnimatedStyle(() => {
@@ -32,6 +25,8 @@ export default function TransitionScreenOne() {
             width: scaledSize,
             height: scaledSize,
             borderRadius: scaledSize / 2,
+            justifyContent: 'center',
+            alignItems: 'center',
         };
     });
 

@@ -14,9 +14,20 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "budleIdentifier": "com.ecoBreath.ecoBreathApp"
     },
     "android": {
+      "intentFilters":{
+        "action": "VIEW",
+        "data":[
+          {
+            "scheme":"ecoBreath",
+            "host":"reset-password"
+          }
+        ],
+        "category":["BROWSABLE", "DEFAULT"]
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

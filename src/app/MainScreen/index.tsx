@@ -78,20 +78,26 @@ export default function MainScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        width:"100%",
+        height:"100%",
         backgroundColor: "#13D8B0",
     },
     firstPierce: {
-        flex: 0.23, 
+        width:"100%",
+        height:"23%",
         justifyContent: "center",
         alignItems: "center",
-    },
-    logo: {
-        width: width * 0.4, 
-        height: height * 0.1, 
+        paddingTop:"5%"
     },
     secondPierce: {
-        flex: 0.77, 
+        width:"100%",
+        height:"85%",
+
+    },
+    logo: {
+        width: width * 0.3, 
+        height: height * 0.2, 
+        resizeMode:"contain"
     },
     imageBackground: {
         width: "100%",
@@ -103,7 +109,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        width: "90%", 
+        width: "90%",
+        marginBottom:height*0.1 
     },
     text: {
         color: "#13C1CA",

@@ -1,17 +1,16 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity} from 'react-native';
 import { TextInput, Button, IconButton } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useState} from 'react';
 import { logOut, signIn, signUp } from '../../Components/authenticator';
 import { router } from 'expo-router';
 
-
-
 const { width, height } = Dimensions.get("window");
-
 export default function LoginScreen() {
+
     const[email,setEmail] = useState('');
     const[password,setPassword] = useState('');
+    const[isVisible, setIsVisible] = useState(true);
 
     const handleSignIn = async()=>{
         const result = await signIn(email,password);
@@ -19,30 +18,31 @@ export default function LoginScreen() {
             setEmail('');
             setPassword('');
             router.push('/MainScreen');
-            
-            
-            
+                    
         }
         else{
             alert(result.message);
         }
     }
+
     const Database = async()=>{
         if(!email || !password){
-
             alert("Preencha os campos antes de prosseguir");
-            return;
-            
+            return;       
         }else{
         
            await handleSignIn();
         }
     }
-    return (
+    const PressIconAction = ()=>{
+        setIsVisible(!isVisible);
+    }    
+        return (
+        
+        
         <View style={style.container}>
-            {/* Precisa ajeitar a logo */}
             <View style={style.firstPierce}>
-                <Image source={require("../../../assets/LogoBranca.png")} style={{justifyContent:"center",alignItems:"center"}} />
+                <Image source={require("../../../assets/LogoBranca.png")} style={style.logo} />
             </View>
 
             <View style={style.secondPierce}>
@@ -66,7 +66,7 @@ export default function LoginScreen() {
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="email-outline"
+                                                name={email =="" ? 'email-outline' : 'email'}
                                                 size={size}
                                                 color="#006765"  
                                             />
@@ -88,18 +88,23 @@ export default function LoginScreen() {
                                 mode='outlined'
                                 value={password}
                                 right={
+                                    
                                     <TextInput.Icon
                                         icon={({ size, color }) => (
                                             <MaterialCommunityIcons
-                                                name="lock-outline"
+                                                name={isVisible ? 'eye-off' : 'eye'}
                                                 size={size}
                                                 color="#006765"
+                                                onPress={PressIconAction}
                                             />
                                         )}
+                                    
+                                    
+                                    
                                     />
                                 }
                                 onChangeText={(Text)=>setPassword(Text)}
-                                secureTextEntry={true} 
+                                secureTextEntry={isVisible} 
                                 theme={{
                                     colors: {
                                         outline: '#D3D3D3',
@@ -115,7 +120,7 @@ export default function LoginScreen() {
                             />
                         </View>
                         <View style={style.viewText} >
-                            <Text onPress={()=>router.push('/NewUserScreen')} style={{
+                            <Text onPress={()=>router.push('/RescuePasswordSetEmail')} style={{
                                 color: "#006765",
                                 fontWeight: "bold",
                                 textDecorationLine: "underline",
@@ -125,35 +130,13 @@ export default function LoginScreen() {
                         </View>
 
                         <View style={style.viewButton}>
-                            <Button
-                                mode="contained"
-                                disabled={false}
-                                style={style.layoutButton}
-                                labelStyle={style.buttonText}
-                                onPress={Database}
-                                
-                                theme={{
-                                    colors: {
-                                        primary: "#07C3C3",
-                                        text: "white",
-                                    },
 
-                                }}
-                                
-                            >Entrar</Button>
-                            <Button mode="outlined"
-                                disabled={false}
-                                style={style.layoutButton}
-
-                                labelStyle={style.buttonText}
-                                theme={{
-                                    colors: {
-                                        outline: '#07C3C3',
-                                        primary: '#07C3C3',
-                                    },
-
-                                }}
-                            >Cadastrar</Button>
+                            <TouchableOpacity activeOpacity={0.6} style={style.layoutButton1} onPress={Database} >
+                                <Text style={style.buttonText1}>Entrar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity activeOpacity={0.6} style={style.layoutButton2} onPress={()=>router.push('/NewUserScreen')}>
+                                <Text style={style.buttonText2}>Cadastrar</Text>
+                            </TouchableOpacity>
 
                         </View>
 
@@ -171,6 +154,7 @@ export default function LoginScreen() {
                                 <View style={style.containerIconButton}>
 
                                     <IconButton
+                                        onPress={()=> router.push('/MainScreen')}
                                         icon='google'
                                         size={24}
                                         style={style.iconButton}
@@ -207,9 +191,6 @@ const style = StyleSheet.create({
         height: "100%",
         backgroundColor: "#13D8B0",
 
-
-
-
     },
     firstPierce: {
         width: "100%",
@@ -221,10 +202,14 @@ const style = StyleSheet.create({
 
     },
     secondPierce: {
-
         width: "100%",
-        height: "77%",
+        height: "85%",
 
+    },
+    logo: {
+        width: width * 0.3, 
+        height: height * 0.2, 
+        resizeMode:"contain"
     },
     imageBackground: {
         width: "100%",
@@ -246,15 +231,33 @@ const style = StyleSheet.create({
         height: height * 0.059,
         marginTop: 20
     },
-    layoutButton: {
+    layoutButton1: {
         width: "100%",
-        height: "40%",
+        height: "45%",
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
+        backgroundColor:"#07C3C3"
     },
-    buttonText: {
+    layoutButton2: {
+        width: "100%",
+        height: "45%",
+        borderRadius: 10,
+        borderColor:"#07C3C3",
+        borderWidth:2,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor:"white"
+    },
+    buttonText1: {
         fontSize: 20,
+        color:"white",
+        fontWeight:"bold"
+    },
+    buttonText2: {
+        fontSize: 20,
+        color:"#07C3C3",
+        fontWeight:"bold"
     },
 
     viewButton: {
@@ -307,6 +310,7 @@ const style = StyleSheet.create({
     viewContainerIcon: {
         flexDirection:"row",
         gap:10,
+        marginBottom:height*0.01,
 
 
     }

@@ -3,36 +3,40 @@ import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
 import { useEffect } from 'react';
-import { get, ref } from 'firebase/database';
+import { get, onValue, ref } from 'firebase/database';
 import { database } from '../../../firebaseConfig';
 import React, {useState} from 'react';
 const { width, height } = Dimensions.get("window");
 
 export default function MonitoringScreen() {
 
+    // const AirQuality = (valor) =>{
+    //     if(valor)
+    // }
     const [dados, setDados] = useState(null);
-    const [valorSensore1, setValorSensores1] = useState(null);
-    const [valorSensore2, setValorSensores2] = useState(null);
+    const [valorSensores1, setValorSensores1] = useState(null);
+    const [valorSensores2, setValorSensores2] = useState(null);
+    const [valorSensores3, setValorSensores3] = useState(null);
     useEffect(() => {
         const dbRef = ref(database, 'Sensores');
-        get(dbRef).then((snapshot) => {
+            const unsubscribe = onValue(dbRef,(snapshot)=>{
           if (snapshot.exists()) {
             const data = snapshot.val();
             setDados(data);
-            setValorSensores1(data.BME280H);
-            setValorSensores2(data.BME280P); 
+            setValorSensores1(data.BME280T);
+            setValorSensores2(data.BME280U); 
+            setValorSensores3(data.Teste); 
           } else {
             console.log("No data available");
           }
-        }).catch((error) => {
-          console.error(error);
         });
-      }, []);
+        return()=>unsubscribe();
+    },[]);
+    function AirQuality(){
 
-      function airQuality(){
+    }
+        
 
-
-      }
     return (
         <View style={styles.container}>
             <View style={styles.firstPierce}>
@@ -60,7 +64,7 @@ export default function MonitoringScreen() {
                                         color="#07C3C3"
                                         style={{ marginBottom: height * 0.02 }}
                                     />
-                                    <Text style={styles.dataText}></Text>
+                                    <Text style={styles.dataText}>{}</Text>
                                     <Text style={styles.buttonText}>Qualidade do ar</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.button} activeOpacity={0.7}>
@@ -73,7 +77,9 @@ export default function MonitoringScreen() {
                                     >
                                         <Path d="M620-520q-25 0-42.5-17.5T560-580q0-17 9.5-34.5t20.5-32q11-14.5 20.5-24l9.5-9.5 9.5 9.5q9.5 9.5 20.5 24t20.5 32Q680-597 680-580q0 25-17.5 42.5T620-520Zm160-120q-25 0-42.5-17.5T720-700q0-17 9.5-34.5t20.5-32q11-14.5 20.5-24l9.5-9.5 9.5 9.5q9.5 9.5 20.5 24t20.5 32Q840-717 840-700q0 25-17.5 42.5T780-640Zm0 240q-25 0-42.5-17.5T720-460q0-17 9.5-34.5t20.5-32q11-14.5 20.5-24l9.5-9.5 9.5 9.5q9.5 9.5 20.5 24t20.5 32Q840-477 840-460q0 25-17.5 42.5T780-400ZM360-120q-83 0-141.5-58.5T160-320q0-48 21-89.5t59-70.5v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q38 29 59 70.5t21 89.5q0 83-58.5 141.5T360-120ZM240-320h240q0-29-12.5-54T432-416l-32-24v-280q0-17-11.5-28.5T360-760q-17 0-28.5 11.5T320-720v280l-32 24q-23 17-35.5 42T240-320Z" />
                                     </Svg>
-                                    <Text style={styles.dataText}>Dado 2</Text>
+                                    <Text style={styles.dataText}>
+{valorSensores3}
+                                    </Text>
                                     <Text style={styles.buttonText}>Temperatura</Text>
                                 </TouchableOpacity>
                             </View>
@@ -90,7 +96,7 @@ export default function MonitoringScreen() {
                                     >
                                         <Path d="M440-360q-17 0-28.5-11.5T400-400v-160q0-17 11.5-28.5T440-600h120q17 0 28.5 11.5T600-560v160q0 17-11.5 28.5T560-360H440Zm20-60h80v-120h-80v120Zm-300 60q-17 0-28.5-11.5T120-400v-160q0-17 11.5-28.5T160-600h120q17 0 28.5 11.5T320-560v40h-60v-20h-80v120h80v-20h60v40q0 17-11.5 28.5T280-360H160Zm520 120v-100q0-17 11.5-28.5T720-380h80v-40H680v-60h140q17 0 28.5 11.5T860-440v60q0 17-11.5 28.5T820-340h-80v40h120v60H680Z" />
                                     </Svg>
-                                    <Text style={styles.dataText}>Dado 3</Text>
+                                    <Text style={styles.dataText}>{valorSensores3}</Text>
                                     <Text style={styles.buttonText}>Contate-nos</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.button} activeOpacity={0.7}>
@@ -128,12 +134,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     logo: {
-        width: width * 0.4, 
-        height: height * 0.1,
+        width: width * 0.3, 
+        height: height * 0.2,
+        resizeMode:"contain",
     },
     secondPierce: {
         width:"100%",
-        height:"77%", 
+        height:"85%", 
     },
     imageBackground: {
         width: "100%",
@@ -145,7 +152,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        width: "90%", 
+        width: "90%",
+        marginBottom:height*0.05 
     },
     mainViewButton: {
         width: "100%",
