@@ -8,7 +8,7 @@ export default function ConectScreen() {
     return (
         <View style={style.container}>
             <View style={style.firstPierce}>
-                <Image source={require("../../../assets/LogoBranca.png")} />
+                <Image source={require("../../../../assets/LogoBranca.png")} style={{resizeMode:"contain", width:110,}} />
             </View>
             <View style={style.secondPierce}>
                 <View style={style.viewIcon}>
@@ -62,22 +62,22 @@ export default function ConectScreen() {
 
 const style = StyleSheet.create({
     container: {
-        width: width,
-        height: height,
+        width: "100%",
+        height: "100%",
         backgroundColor: "#13D8B0",
         overflow: "hidden",
 
     },
     firstPierce: {
-        width: width,
-        height: "27%",
+        width: "100%",
+        height: "23%",
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: height * 0.03,
+        paddingTop: height * 0.01,
     },
     secondPierce: {
         width: "100%",
-        height: "73%",
+        height: "85%",
         backgroundColor: "white",
         borderTopEndRadius: 30,
         borderTopStartRadius: 30,

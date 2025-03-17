@@ -63,7 +63,7 @@ export default function RescuePasswordSetEmail() {
               </Text>
             </View>
 
-            <View>
+            <View style={{flex:1}}>
               <TextInput
                 style={style.inputText}
                 label={"E-mail"}
@@ -142,8 +142,8 @@ const style = StyleSheet.create({
     marginTop: 25,
   },
   inputText: {
-    width: width * 0.65,
-    height: height * 0.059,
+    width: "100%",
+    height: "70%",
     marginTop: 30,
   },
   layoutButton1: {

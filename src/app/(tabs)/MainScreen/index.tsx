@@ -10,7 +10,7 @@ export default function MainScreen() {
         <View style={styles.container}>
             <View style={styles.firstPierce}>
                 <Image 
-                    source={require("../../../assets/LogoBranca.png")} 
+                    source={require("../../../../assets/LogoBranca.png")} 
                     style={styles.logo}
                     resizeMode="contain"
                 />
@@ -18,7 +18,7 @@ export default function MainScreen() {
 
             <View style={styles.secondPierce}>
                 <ImageBackground 
-                    source={require("../../../assets/wave.png")}
+                    source={require("../../../../assets/wave.png")}
                     style={styles.imageBackground}
                     resizeMode="cover"
                 >
@@ -36,7 +36,6 @@ export default function MainScreen() {
                                         size={width * 0.14}
                                         color="#07C3C3"
                                     />
-                
                                     <Text style={styles.buttonText}>Monitoramento</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.button} activeOpacity={0.7}>
@@ -78,74 +77,81 @@ export default function MainScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        width:"100%",
-        height:"100%",
+        width: "100%",
+        height: "100%",
         backgroundColor: "#13D8B0",
     },
     firstPierce: {
-        width:"100%",
-        height:"23%",
+        width: "100%",
+        height: "23%",
         justifyContent: "center",
         alignItems: "center",
-        paddingTop:"5%"
+        paddingTop: "5%",
     },
     secondPierce: {
-        width:"100%",
-        height:"85%",
-
+        width: "100%",
+        height: "90%",
+        overflow: 'hidden',
     },
     logo: {
         width: width * 0.3, 
         height: height * 0.2, 
-        resizeMode:"contain"
+        resizeMode: "contain",
     },
     imageBackground: {
         width: "100%",
         height: "100%",
         justifyContent: "center",
         alignItems: "center",
+        resizeMode: "cover", 
     },
     contentContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        width: "90%",
-        marginBottom:height*0.1 
+        width: "100%",
+        paddingHorizontal: 20, 
     },
     text: {
         color: "#13C1CA",
         fontWeight: "bold",
-        fontSize: width * 0.05, 
+        fontSize: 25, 
         marginBottom: height * 0.02,
     },
     mainViewButton: {
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
+        marginTop:20,
     },
     viewButton: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "center",
         width: "100%",
         marginBottom: height * 0.02, 
     },
     button: {
-        width: "48%", 
+        width: "50%", 
         aspectRatio: 1, 
         borderRadius: 12,
         borderColor: "#07C3C3",
         borderWidth: 2,
-        elevation: 5, // Sombra
+        elevation: 5,
         backgroundColor: "white",
         justifyContent: "center",
         alignItems: "center",
         padding: 10,
+        maxWidth: 150,
+        maxHeight: 150, 
+        margin:10,
+        
     },
     buttonText: {
-        fontSize: width * 0.035, 
+        fontSize: 15, 
         color: "#07C3C3",
         marginTop: height * 0.01, 
         textAlign: "center",
         fontWeight: "bold",
+        maxWidth: "100%", 
     },
 });

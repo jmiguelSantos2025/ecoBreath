@@ -4,12 +4,12 @@
     "slug": "ecoBreath",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/LogoAzul.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme":"ecoBreath",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/LogoAzul.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

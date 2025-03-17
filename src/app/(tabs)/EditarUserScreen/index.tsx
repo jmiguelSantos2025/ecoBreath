@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity } from 'rea
 import { TextInput } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const { width, height } = Dimensions.get('screen');
+const { width, height } = Dimensions.get('window');
 
 export default function EditarUserScreen() {
     return (
@@ -25,7 +25,7 @@ export default function EditarUserScreen() {
                 
                 <View style={style.photoSection}>
                     <Image
-                        source={require('../../../assets/UserProfileIcon.png')}
+                        source={require("../../../../assets/UserProfileIcon.png")}
                         style={style.profileImage}
                     />
                     <Text style={style.editPhotoText}>Editar foto de usuário</Text>
@@ -217,6 +217,7 @@ const style = StyleSheet.create({
         justifyContent: 'flex-start', 
         alignItems: 'center',
         width: '100%',
+        marginBottom:20,
     },
     saveButton: {
         backgroundColor: '#13D8B0',

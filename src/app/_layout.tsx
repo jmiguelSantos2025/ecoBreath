@@ -19,6 +19,7 @@ export default function Layout() {
       <Stack.Screen name="NewUserScreen/index" />
       <Stack.Screen name="RescuePasswordSetEmail/index"/>
       <Stack.Screen name="PasswordRescueScreen/index"/>
+      <Stack.Screen name="(tabs)"/>
     </Stack>
   );
 }

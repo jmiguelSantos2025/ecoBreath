@@ -28,9 +28,9 @@ export default function ForgotPassword() {
                         </View>
 
                         <View>
-                            {/* Senha*/}
+                            
                            
-                            {/* Confirme sua senha*/}
+                            
                             <TextInput
                                                             style={style.inputText}
                                                             label={'E-mail'}
@@ -78,7 +78,7 @@ export default function ForgotPassword() {
 
                         </View>
 
-                        {/* Conexão */}
+                        
 
                     </View>
 

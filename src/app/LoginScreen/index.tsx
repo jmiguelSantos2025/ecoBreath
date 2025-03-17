@@ -1,184 +1,168 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity} from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity, ScrollView } from 'react-native';
 import { TextInput, Button, IconButton } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useState} from 'react';
+import { useState } from 'react';
 import { logOut, signIn, signUp } from '../../Components/authenticator';
 import { router } from 'expo-router';
 
 const { width, height } = Dimensions.get("window");
+
 export default function LoginScreen() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isVisible, setIsVisible] = useState(true);
 
-    const[email,setEmail] = useState('');
-    const[password,setPassword] = useState('');
-    const[isVisible, setIsVisible] = useState(true);
-
-    const handleSignIn = async()=>{
-        const result = await signIn(email,password);
-        if(result.message){
+    const handleSignIn = async () => {
+        const result = await signIn(email, password);
+        if (result.message) {
             setEmail('');
             setPassword('');
             router.push('/MainScreen');
-                    
-        }
-        else{
+        } else {
             alert(result.message);
         }
-    }
+    };
 
-    const Database = async()=>{
-        if(!email || !password){
+    const Database = async () => {
+        if (!email || !password) {
             alert("Preencha os campos antes de prosseguir");
-            return;       
-        }else{
-        
-           await handleSignIn();
+            return;
+        } else {
+            await handleSignIn();
         }
-    }
-    const PressIconAction = ()=>{
+    };
+
+    const PressIconAction = () => {
         setIsVisible(!isVisible);
-    }    
-        return (
-        
-        
+    };
+
+    return (
         <View style={style.container}>
             <View style={style.firstPierce}>
                 <Image source={require("../../../assets/LogoBranca.png")} style={style.logo} />
             </View>
 
             <View style={style.secondPierce}>
-                <ImageBackground source={require("../../../assets/wave.png")}
+                <ImageBackground
+                    source={require("../../../assets/wave.png")}
                     style={style.imageBackground}
+                    resizeMode="cover" // Garante que a imagem cubra todo o espaço
                 >
-                    <View style={{ justifyContent: "center", alignItems: "center", }}>
-                        <Text style={style.text}>
-                            Entre em sua conta
-                        </Text>
-                        
-                        <View>
-                            <TextInput
-                                style={style.inputText}
-                                label={'E-mail'}
-                                value={email}
-                                mode='outlined'
-                                
-                                onChangeText={(Text)=>setEmail(Text)}
-                                right={
-                                    <TextInput.Icon
-                                        icon={({ size, color }) => (
-                                            <MaterialCommunityIcons
-                                                name={email =="" ? 'email-outline' : 'email'}
-                                                size={size}
-                                                color="#006765"  
-                                            />
-                                        )}
-                                    />
-                                }
-                                theme={{
-                                    colors: {
-                                        outline: '#D3D3D3',
-                                        background: "white",
-                                        primary: "#006765",
-                                    },
-                                    roundness: 10,
+                    <ScrollView contentContainerStyle={style.scrollViewContent}>
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+                            <Text style={style.text}>
+                                Entre em sua conta
+                            </Text>
 
-                                }}
-                            />
-                            <TextInput style={style.inputText}
-                                label={'Senha'}
-                                mode='outlined'
-                                value={password}
-                                right={
-                                    
-                                    <TextInput.Icon
-                                        icon={({ size, color }) => (
-                                            <MaterialCommunityIcons
-                                                name={isVisible ? 'eye-off' : 'eye'}
-                                                size={size}
-                                                color="#006765"
-                                                onPress={PressIconAction}
-                                            />
-                                        )}
-                                    
-                                    
-                                    
-                                    />
-                                }
-                                onChangeText={(Text)=>setPassword(Text)}
-                                secureTextEntry={isVisible} 
-                                theme={{
-                                    colors: {
-                                        outline: '#D3D3D3',
-                                        background: "white",
-                                        primary: "#006765",
-                                    },
-                                    roundness: 10,
-                                }
-
-                                }
-
-
-                            />
-                        </View>
-                        <View style={style.viewText} >
-                            <Text onPress={()=>router.push('/RescuePasswordSetEmail')} style={{
-                                color: "#006765",
-                                fontWeight: "bold",
-                                textDecorationLine: "underline",
-                                alignSelf: "flex-end"
-
-                            }}>Esqueci minha senha</Text>
-                        </View>
-
-                        <View style={style.viewButton}>
-
-                            <TouchableOpacity activeOpacity={0.6} style={style.layoutButton1} onPress={Database} >
-                                <Text style={style.buttonText1}>Entrar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.6} style={style.layoutButton2} onPress={()=>router.push('/NewUserScreen')}>
-                                <Text style={style.buttonText2}>Cadastrar</Text>
-                            </TouchableOpacity>
-
-                        </View>
-
-                        {/* Conexão */}
-                        <View style={style.container2}>
-
-                            <View style={style.dividerContainer}>
-                                <View style={style.line} />
-                                <Text style={style.dividerText}>Conectar usando</Text>
-                                <View style={style.line} />
+                            <View>
+                                <TextInput
+                                    style={style.inputText}
+                                    label={'E-mail'}
+                                    value={email}
+                                    mode='outlined'
+                                    onChangeText={(Text) => setEmail(Text)}
+                                    right={
+                                        <TextInput.Icon
+                                            icon={({ size, color }) => (
+                                                <MaterialCommunityIcons
+                                                    name={'email'}
+                                                    size={size}
+                                                    color="#006765"
+                                                />
+                                            )}
+                                        />
+                                    }
+                                    theme={{
+                                        colors: {
+                                            outline: '#D3D3D3',
+                                            background: "white",
+                                            primary: "#006765",
+                                        },
+                                        roundness: 10,
+                                    }}
+                                />
+                                <TextInput
+                                    style={style.inputText}
+                                    label={'Senha'}
+                                    mode='outlined'
+                                    value={password}
+                                    right={
+                                        <TextInput.Icon
+                                            icon={({ size, color }) => (
+                                                <MaterialCommunityIcons
+                                                    name={isVisible ? 'eye-off' : 'eye'}
+                                                    size={size}
+                                                    color="#006765"
+                                                    onPress={PressIconAction}
+                                                />
+                                            )}
+                                        />
+                                    }
+                                    onChangeText={(Text) => setPassword(Text)}
+                                    secureTextEntry={isVisible}
+                                    theme={{
+                                        colors: {
+                                            outline: '#D3D3D3',
+                                            background: "white",
+                                            primary: "#006765",
+                                        },
+                                        roundness: 10,
+                                    }}
+                                />
+                            </View>
+                            <View style={style.viewText}>
+                                <Text
+                                    onPress={() => router.push('/RescuePasswordSetEmail')}
+                                    style={{
+                                        color: "#006765",
+                                        fontWeight: "bold",
+                                        textDecorationLine: "underline",
+                                        alignSelf: "flex-end"
+                                    }}
+                                >
+                                    Esqueci minha senha
+                                </Text>
                             </View>
 
-                            <View style={style.viewContainerIcon}>
-
-                                <View style={style.containerIconButton}>
-
-                                    <IconButton
-                                        onPress={()=> router.push('/MainScreen')}
-                                        icon='google'
-                                        size={24}
-                                        style={style.iconButton}
-                                        iconColor="white"
-
-                                    />
-
-                                </View>
-                                <View style={style.containerIconButton}>
-
-                                    <IconButton
-                                        icon='facebook'
-                                        size={24}
-                                        style={style.iconButton}
-                                        iconColor="white"
-
-                                    />
-
-                                </View>
+                            <View style={style.viewButton}>
+                                <TouchableOpacity activeOpacity={0.6} style={style.layoutButton1} onPress={Database}>
+                                    <Text style={style.buttonText1}>Entrar</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity activeOpacity={0.6} style={style.layoutButton2} onPress={() => router.push('/NewUserScreen')}>
+                                    <Text style={style.buttonText2}>Cadastrar</Text>
+                                </TouchableOpacity>
                             </View>
 
-                        </View>
-                    </View>
+                            {/* Conexão */}
+                            <View style={style.container2}>
+                                <View style={style.dividerContainer}>
+                                    <View style={style.line} />
+                                    <Text style={style.dividerText}>Conectar usando</Text>
+                                    <View style={style.line} />
+                                </View>
 
+                                <View style={style.viewContainerIcon}>
+                                    <View style={style.containerIconButton}>
+                                        <IconButton
+                                            onPress={() => router.push('/MainScreen')}
+                                            icon='google'
+                                            size={24}
+                                            style={style.iconButton}
+                                            iconColor="white"
+                                        />
+                                    </View>
+                                    <View style={style.containerIconButton}>
+                                        <IconButton
+                                            icon='facebook'
+                                            size={24}
+                                            style={style.iconButton}
+                                            iconColor="white"
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </ScrollView>
                 </ImageBackground>
             </View>
         </View>
@@ -190,7 +174,6 @@ const style = StyleSheet.create({
         width: "100%",
         height: "100%",
         backgroundColor: "#13D8B0",
-
     },
     firstPierce: {
         width: "100%",
@@ -198,38 +181,33 @@ const style = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         paddingTop: "5%",
-
-
     },
     secondPierce: {
         width: "100%",
         height: "85%",
-
+        overflow: 'hidden', // Impede que a imagem ultrapasse os limites
     },
     logo: {
-        width: width * 0.3, 
-        height: height * 0.2, 
-        resizeMode:"contain"
+        width: width * 0.3,
+        height: height * 0.2,
+        resizeMode: "contain",
     },
     imageBackground: {
         width: "100%",
         height: "100%",
         justifyContent: "center",
         alignItems: "center",
-
-
+        resizeMode: "cover", // Garante que a imagem cubra todo o espaço
     },
     text: {
         color: "#13C1CA",
         fontWeight: "bold",
         fontSize: height * 0.023,
-        
-
     },
     inputText: {
         width: width * 0.65,
         height: height * 0.059,
-        marginTop: 20
+        marginTop: 20,
     },
     layoutButton1: {
         width: "100%",
@@ -237,40 +215,38 @@ const style = StyleSheet.create({
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor:"#07C3C3"
+        backgroundColor: "#07C3C3",
     },
     layoutButton2: {
         width: "100%",
         height: "45%",
         borderRadius: 10,
-        borderColor:"#07C3C3",
-        borderWidth:2,
+        borderColor: "#07C3C3",
+        borderWidth: 2,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor:"white"
+        backgroundColor: "white",
     },
     buttonText1: {
         fontSize: 20,
-        color:"white",
-        fontWeight:"bold"
+        color: "white",
+        fontWeight: "bold",
     },
     buttonText2: {
         fontSize: 20,
-        color:"#07C3C3",
-        fontWeight:"bold"
+        color: "#07C3C3",
+        fontWeight: "bold",
     },
-
     viewButton: {
         width: width * 0.7,
         height: height * 0.18,
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     viewText: {
         flexDirection: "row",
         justifyContent: "flex-end",
         width: width * 0.65,
         margin: 40,
-
     },
     container2: {
         paddingHorizontal: 20,
@@ -291,9 +267,6 @@ const style = StyleSheet.create({
         color: "#006765",
         fontWeight: "bold",
     },
-
-
-
     iconButton: {
         borderRadius: 25,
         width: 25,
@@ -305,14 +278,16 @@ const style = StyleSheet.create({
         backgroundColor: "#006765",
         borderRadius: 50,
         padding: 5,
-
     },
     viewContainerIcon: {
-        flexDirection:"row",
-        gap:10,
-        marginBottom:height*0.01,
-
-
-    }
-
+        flexDirection: "row",
+        gap: 10,
+        marginBottom: height * 0.01,
+    },
+    scrollViewContent: {
+        flexGrow: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingBottom: 10, 
+    },
 });
