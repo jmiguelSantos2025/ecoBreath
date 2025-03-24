@@ -1,10 +1,22 @@
 import {auth} from '../../firebaseConfig';
-import {createUserWithEmailAndPassword,signInWithEmailAndPassword,AuthError, signOut} from 'firebase/auth'
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword,AuthError, signOut,UserCredential, signInWithPopup, GoogleAuthProvider,signInWithCredential, updateProfile } from 'firebase/auth'
+import { firestore } from '../../firebaseConfig';
+import { doc,setDoc } from 'firebase/firestore';
+import { provider } from '../../firebaseConfig';
 
 
-export const signUp = async(email:string,password:string)=>{
+export const signUp = async(email:string,password:string,username:string)=>{
     try{
-        const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+        const userCredential = await createUserWithEmailAndPassword(auth,email,password);   
+        const user = userCredential.user;
+        await updateProfile(user, {
+        displayName: username,});
+        await setDoc(doc(firestore, "usuarios",user.uid),{
+        username: username,
+        email:user.email,
+        data_criacao: new Date().toISOString(),
+        });
+
         return {sucess:true, message:"Usuários cadastrados!" ,user: userCredential.user};
 
     }catch(error:any){

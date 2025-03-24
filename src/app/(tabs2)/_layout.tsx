@@ -22,6 +22,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="GraphicsScreenAirQuality/index"
+        options={{
+          title: "wifi",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="wifi" size={30} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="ConectScreen/index"
         options={{
           title: "wifi",

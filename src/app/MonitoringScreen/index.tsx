@@ -1,15 +1,16 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
 import { useEffect } from 'react';
 import { get, onValue, ref } from 'firebase/database';
 import { database } from '../../../firebaseConfig';
 import React, { useState } from 'react';
+import { IconButton } from 'react-native-paper';
+import { router } from 'expo-router';
+
 const { width, height } = Dimensions.get("window");
 
 export default function MonitoringScreen() {
-
     const DioxidoDecarbono = (valor: number) => {
         if (valor !== 0) {
             return (valor / 10000).toFixed(1) + "%";
@@ -20,9 +21,9 @@ export default function MonitoringScreen() {
 
     const GasesVolateis = (valor: number) => {
         if (valor !== 0) {
-            return (valor / 10000).toFixed(1) + "%"; 
+            return (valor / 10000).toFixed(1) + "%";
         } else {
-            return "0.0%"; 
+            return "0.0%";
         }
     };
 
@@ -57,7 +58,7 @@ export default function MonitoringScreen() {
                 const data = snapshot.val();
                 setValorSensores1(data.BME280T);
                 setValorSensores2(data.BME280U);
-                setValorSensores3(data.MQ135);
+                setValorSensores3(data.MQ135OUT);
                 setValorSensores4(data.MQ2);
                 setValorSensores5(data.MQ7);
                 setValorSensores6(data.MQ8);
@@ -69,21 +70,28 @@ export default function MonitoringScreen() {
     }, []);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.firstPierce}>
-                <Image
-                    source={require("../../../assets/LogoAzul.png")}
-                    style={styles.logo}
-                    resizeMode="contain"
+        <ImageBackground
+            source={require("../../../assets/TelaTipo2New.png")}
+            style={styles.imageBackground}
+            resizeMode="cover"
+        >
+            <View style={styles.container}>
+                <IconButton
+                    icon="arrow-left"
+                    size={30}
+                    onPress={() => router.back()}
+                    iconColor="white"
+                    style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
                 />
-            </View>
+                <View style={styles.firstPierce}>
+                    <Image
+                        source={require("../../../assets/LogoAzul.png")}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </View>
 
-            <View style={styles.secondPierce}>
-                <ImageBackground
-                    source={require('../../../assets/blueWave.png')}
-                    style={styles.imageBackground}
-                    resizeMode="cover"
-                >
+                <View style={styles.secondPierce}>
                     <View style={styles.contentContainer}>
                         <View style={styles.mainViewButton}>
                             {/* Card 1,2 */}
@@ -146,9 +154,9 @@ export default function MonitoringScreen() {
                             </View>
                         </View>
                     </View>
-                </ImageBackground>
+                </View>
             </View>
-        </View>
+        </ImageBackground>
     );
 }
 
@@ -156,7 +164,6 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         height: "100%",
-        backgroundColor: "white",
     },
     firstPierce: {
         width: "100%",

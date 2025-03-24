@@ -90,8 +90,8 @@ const style = StyleSheet.create({
     viewIcon: {
         backgroundColor: "#13D8B0",
         borderRadius: width * 0.05,
-        width: width * 0.3,
-        height: width * 0.3,
+        width: width * 0.25,
+        height: width * 0.25,
         justifyContent: "center",
         alignItems: "center",
         marginBottom: height * 0.06,
@@ -116,25 +116,15 @@ const style = StyleSheet.create({
         flexDirection: "row",
         textAlign: "center",
         justifyContent:"flex-start",
-        alignItems:"center",
-        paddingHorizontal:width*0.06,
-        
-
     },
     text: {
         fontSize: width * 0.032,
         color: "#0E9693",
         flexShrink:1,
-        
-        
-
     },
     viewIconRight:{
         marginRight:width*0.03,
         marginLeft:width*0.05,
-        
-        
-
     },
     iconRight:{
         width:width*0.05,
@@ -143,21 +133,17 @@ const style = StyleSheet.create({
         textAlign:"center",
         borderRadius:width*0.04,
         fontWeight:"bold",
-        
     },
     viewButton: {
         overflow: "hidden",
         marginBottom: height * 0.1,
-
-
-
     },
     button: {
         borderWidth: 2,
         borderColor: "#08C5C1",
-        paddingVertical: height * 0.025,
-        paddingHorizontal: width * 0.32,
-        borderRadius: width * 0.05,
+        paddingVertical: height * 0.023,
+        paddingHorizontal: width * 0.30,
+        borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#08C5C1"

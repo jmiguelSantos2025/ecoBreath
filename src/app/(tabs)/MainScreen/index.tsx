@@ -1,36 +1,63 @@
 import { router } from 'expo-router';
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { auth } from '../../../../firebaseConfig';
+import { IconButton } from 'react-native-paper';
 
 const { width, height } = Dimensions.get("window");
 
 export default function MainScreen() {
-    return (
-        <View style={styles.container}>
-            <View style={styles.firstPierce}>
-                <Image 
-                    source={require("../../../../assets/LogoBranca.png")} 
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-            </View>
+    const [userName, setUserName] = useState('');
 
-            <View style={styles.secondPierce}>
-                <ImageBackground 
-                    source={require("../../../../assets/wave.png")}
-                    style={styles.imageBackground}
-                    resizeMode="cover"
-                >
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                if (user.displayName) {
+                    setUserName(user.displayName);
+                } else {
+                    setUserName('Usuário');
+                }
+            } else {
+                setUserName('Usuário');
+            }
+        });
+
+        return () => unsubscribe(); 
+    }, []);
+
+    return (
+        <ImageBackground
+            source={require("../../../../assets/TelaFundoTipo1Novo.png")}
+            style={styles.imageBackground}
+            resizeMode="cover"
+        >
+            <View style={styles.container}>
+                <IconButton
+                    icon="arrow-left"
+                    size={30}
+                    onPress={() => router.back()}
+                    iconColor="white"
+                    style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+                />
+                <View style={styles.firstPierce}>
+                    <Image 
+                        source={require("../../../../assets/LogoBranca.png")} 
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </View>
+
+                <View style={styles.secondPierce}>
                     <View style={styles.contentContainer}>
                         <Text style={styles.text}>
-                            Bem-vindo: Usuário
+                            Bem-vindo: {userName}!
                         </Text>
 
                         <View style={styles.mainViewButton}>
                             {/* Card 1 */}
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=> router.push('/MonitoringScreen')}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => router.push('/MonitoringScreen')}>
                                     <MaterialCommunityIcons
                                         name="weather-windy"
                                         size={width * 0.14}
@@ -69,9 +96,9 @@ export default function MainScreen() {
                             </View>
                         </View>
                     </View>
-                </ImageBackground>
+                </View>
             </View>
-        </View>
+        </ImageBackground>
     );
 }
 
@@ -79,7 +106,6 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         height: "100%",
-        backgroundColor: "#13D8B0",
     },
     firstPierce: {
         width: "100%",
@@ -90,8 +116,7 @@ const styles = StyleSheet.create({
     },
     secondPierce: {
         width: "100%",
-        height: "90%",
-        overflow: 'hidden',
+        height: "77%",
     },
     logo: {
         width: width * 0.3, 
@@ -103,7 +128,6 @@ const styles = StyleSheet.create({
         height: "100%",
         justifyContent: "center",
         alignItems: "center",
-        resizeMode: "cover", 
     },
     contentContainer: {
         flex: 1,
@@ -122,7 +146,7 @@ const styles = StyleSheet.create({
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        marginTop:20,
+        marginTop: 20,
     },
     viewButton: {
         flexDirection: "row",
@@ -131,7 +155,7 @@ const styles = StyleSheet.create({
         marginBottom: height * 0.02, 
     },
     button: {
-        width: "50%", 
+        width: "45%", 
         aspectRatio: 1, 
         borderRadius: 12,
         borderColor: "#07C3C3",
@@ -141,13 +165,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 10,
-        maxWidth: 150,
-        maxHeight: 150, 
-        margin:10,
-        
+        maxWidth: 180,
+        maxHeight: 180, 
+        margin: 10,
     },
     buttonText: {
-        fontSize: 15, 
+        fontSize: 16, 
         color: "#07C3C3",
         marginTop: height * 0.01, 
         textAlign: "center",

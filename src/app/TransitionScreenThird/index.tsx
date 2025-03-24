@@ -1,94 +1,99 @@
 import { useRouter } from 'expo-router';
-
-import { View, StyleSheet, Image, Text, Dimensions, ImageBackground, TouchableOpacity} from 'react-native';
-
+import { View, StyleSheet, Image, Text, Dimensions, ImageBackground, TouchableOpacity } from 'react-native';
 
 const { width, height } = Dimensions.get("window");
+
 export default function TransitionScreenThird() {
   const router = useRouter();
+
   return (
-    <View style={style.conteiner}>
+    <View style={style.container}>
+      <ImageBackground
+        source={require('../../../assets/TelaTipo3New.png')}
+        style={style.imageBackground}
+        resizeMode="cover"
+      >
+        <View style={style.firstPierce}>
+          <Image
+            source={require('../../../assets/LogoAzul.png')}
+            style={style.logo}
+          />
+          <Text style={style.welcomeText}>
+            Bem Vindo!
+          </Text>
+          <Text style={style.subText}>
+            Se prepare para explorar o ar mais puro.
+          </Text>
+        </View>
 
-      <View style={style.firstpierce}>
-
-        <Image source={require('../../../assets/LogoAzul.png')} />
-        <Text style={[{ color: "#08c4c2", fontWeight: "bold", fontSize: width * 0.05 }]}>
-          Bem Vindo!
-        </Text>
-        <Text style={style.letter}>
-          Se prepare para explorar o ar mais puro.
-        </Text>
-      </View>
-
-
-      <View style={style.secondPierce}>
-        <ImageBackground source={require("../../../assets/blueWave.png")}
-          style={style.ImageBackground}
-          resizeMode='cover'>
-          <View style = {style.conteinerText}>
-            <TouchableOpacity style={{flex:1,}}
-            onPress={()=> router.push("/LoginScreen")} >
-            <Text style={style.text} >
+        <View style={style.secondPierce}>
+          <TouchableOpacity
+            style={style.button}
+            onPress={() => router.push("/LoginScreen")}
+          >
+            <Text style={style.buttonText}>
               Vamos lá
             </Text>
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
-      </View>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
 
 const style = StyleSheet.create({
-
-  conteiner: {
+  container: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#fff",
   },
-  firstpierce: {
+  imageBackground: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  firstPierce: {
     width: "100%",
     height: "40%",
     justifyContent: "center",
     alignItems: "center",
-    paddingTop:"5%",
+    paddingTop: "5%",
+  },
+  logo: {
+    width: width * 0.3,
+    height: height * 0.2,
+    resizeMode: "contain",
+  },
+  welcomeText: {
+    color: "#08c4c2",
+    fontWeight: "bold",
+    fontSize: width * 0.05,
+    marginTop: 10,
+  },
+  subText: {
+    color: "#60c7ed",
+    fontSize: width * 0.04,
+    marginTop:10,
+    textAlign: "center",
+    paddingHorizontal: 20,
   },
   secondPierce: {
     width: "100%",
-    height: "100%",
-    backgroundColor: "#fff",
+    height: "50%",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: height * 0.1, 
+  },
+  button: {
+    paddingHorizontal: 40,
+    paddingVertical: 15,
+    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    resizeMode:"contain"
-
   },
-  letter: {
-    color: "#60c7ed",
-    fontSize: width * 0.035,
-    padding:10,
-    
-
-
+  buttonText: {
+    color: "#fff",
+    fontSize: width * 0.05,
+    fontWeight: "bold",
   },
-  ImageBackground: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    
-    
-  },
-  text:{
-   color: "#fff",
-   fontSize: width * 0.05,
-   fontWeight: "bold",
-   marginTop: width*0.05,
-},
-conteinerText:{
-  height:"50%",
-  justifyContent:"flex-start",
-  alignItems:"center"
-
-}
-  
 });

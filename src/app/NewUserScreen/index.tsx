@@ -1,10 +1,11 @@
-import {View,Image,StyleSheet,Dimensions,Text,ImageBackground,TouchableOpacity,
-} from "react-native";
+import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
 import { TextInput, IconButton } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useState } from "react";
 import { signUp } from "../../Components/authenticator";
 import { router } from "expo-router";
+import { RFValue } from "react-native-responsive-fontsize";
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -14,21 +15,32 @@ export default function NewUserScreen() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
+  const [confirmPassword, setConfirmPassword] = useState(true);
 
   const PressIcon = () => {
     setPasswordVisible(!passwordVisible);
   };
+  const PressIconConfirm = () => {
+    setConfirmPassword(!confirmPassword);
+  };
 
   const handleSignUp = async () => {
     if (password == confirm) {
-      const result = await signUp(email, password);
+      const result = await signUp(email, password, user);
       if (result.message) {
-        alert(result.message);
+        
         setEmail("");
         setConfirm("");
         setPassword("");
+        setUser("");
+        router.push("LoginScreen");
       } else {
-        alert(result.message);
+        setEmail("");
+        setConfirm("");
+        setPassword("");
+        setUser("");
+        router.push("LoginScreen");
+        
       }
     } else {
       alert("Você deve colocar senhas iguais");
@@ -45,176 +57,201 @@ export default function NewUserScreen() {
   };
 
   return (
-    <View style={style.container}>
-      <View style={style.firstPierce}>
-        <Image source={require("../../../assets/LogoBranca.png")} />
-      </View>
-
-      <View style={style.secondPierce}>
-        <ImageBackground
-          source={require("../../../assets/wave.png")}
-          style={style.imageBackground}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 20 : -200}
+    >
+      <ImageBackground
+        source={require("../../../assets/TelaFundoTipo1Novo.png")}
+        style={style.imageBackground}
+        resizeMode="cover"
+      >
+        <ScrollView
+          contentContainerStyle={style.scrollViewContent}
+          keyboardShouldPersistTaps="handled"
         >
-          <View style={style.contentContainer}>
-            <Text style={style.text}>Cadastre uma conta</Text>
-
-            <View>
-              <TextInput
-                style={style.inputText}
-                onChangeText={(Text) => setUser(Text)}
-                label={"Usuário"}
-                mode="outlined"
-                right={
-                  <TextInput.Icon
-                    icon={({ size, color }) => (
-                      <MaterialCommunityIcons
-                        name={
-                          user == ""
-                            ? "account-circle-outline"
-                            : "account-circle"
-                        }
-                        size={size}
-                        color="#006765"
-                      />
-                    )}
-                  />
-                }
-                value={user}
-                theme={{
-                  colors: {
-                    outline: "#D3D3D3",
-                    background: "white",
-                    primary: "#006765",
-                  },
-                  roundness: 10,
-                }}
-              />
-              <TextInput
-                style={style.inputText}
-                onChangeText={(Text) => setEmail(Text)}
-                value={email}
-                label={"E-mail"}
-                mode="outlined"
-                right={
-                  <TextInput.Icon
-                    icon={({ size, color }) => (
-                      <MaterialCommunityIcons
-                        name={email == "" ? "email-outline" : "email"}
-                        size={size}
-                        color="#006765"
-                      />
-                    )}
-                  />
-                }
-                theme={{
-                  colors: {
-                    outline: "#D3D3D3",
-                    background: "white",
-                    primary: "#006765",
-                  },
-                  roundness: 10,
-                }}
-              />
-              <TextInput
-                style={style.inputText}
-                label={"Senha"}
-                onChangeText={(Text) => setPassword(Text)}
-                mode="outlined"
-                right={
-                  <TextInput.Icon
-                    icon={({ size, color }) => (
-                      <MaterialCommunityIcons
-                        name={passwordVisible ? "eye-off" : "eye"}
-                        size={size}
-                        color="#006765"
-                        onPress={PressIcon}
-                      />
-                    )}
-                  />
-                }
-                value={password}
-                secureTextEntry={passwordVisible}
-                theme={{
-                  colors: {
-                    outline: "#D3D3D3",
-                    background: "white",
-                    primary: "#006765",
-                  },
-                  roundness: 10,
-                }}
-              />
-              <TextInput
-                style={style.inputText}
-                label={"Confirme sua senha"}
-                onChangeText={(Text) => setConfirm(Text)}
-                mode="outlined"
-                right={
-                  <TextInput.Icon
-                    icon={({ size, color }) => (
-                      <MaterialCommunityIcons
-                        name={
-                          confirm == ""
-                            ? "check-circle-outline"
-                            : "check-circle"
-                        }
-                        size={size}
-                        color="#006765"
-                      />
-                    )}
-                  />
-                }
-                value={confirm}
-                secureTextEntry={true}
-                theme={{
-                  colors: {
-                    outline: "#D3D3D3",
-                    background: "white",
-                    primary: "#006765",
-                  },
-                  roundness: 10,
-                }}
+          <View style={style.container}>
+            <IconButton
+              icon="arrow-left"
+              size={30}
+              onPress={() => router.back()}
+              iconColor="white"
+              style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+            />
+            <View style={style.firstPierce}>
+              <Image
+                source={require("../../../assets/LogoBranca.png")}
+                style={style.logo}
               />
             </View>
-            
-            <View style={style.viewButton2}>
-              <TouchableOpacity
-                activeOpacity={0.6}
-                style={style.layoutButton2}
-                onPress={Database}
-              >
-                <Text style={style.buttonText2}>Cadastrar</Text>
-              </TouchableOpacity>
-            </View>
 
-            <View style={style.container2}>
-              <View style={style.dividerContainer}>
-                <View style={style.line} />
-                <Text style={style.dividerText}>Conectar usando</Text>
-                <View style={style.line} />
-              </View>
-              <View style={style.viewContainerIcon}>
-                <View style={style.containerIconButton}>
-                  <IconButton
-                    icon="google"
-                    size={24}
-                    style={style.iconButton}
-                    iconColor="white"
+            <View style={style.secondPierce}>
+              <View style={style.contentContainer}>
+                <Text style={style.text}>Cadastre uma conta</Text>
+
+                <View>
+                  <TextInput
+                    style={style.inputText}
+                    onChangeText={(Text) => setUser(Text)}
+                    label={"Usuário"}
+                    mode="outlined"
+                    underlineColorAndroid="transparent"
+                    right={
+                      <TextInput.Icon
+                        icon={({ size, color }) => (
+                          <MaterialCommunityIcons
+                            name={"account-circle"}
+                            size={size}
+                            color="#006765"
+                          />
+                        )}
+                      />
+                    }
+                    value={user}
+                    theme={{
+                      colors: {
+                        outline: "#D3D3D3",
+                        background: "white",
+                        primary: "#006765",
+                      },
+                      roundness: 10,
+                    }}
+                  />
+                  <TextInput
+                    style={style.inputText}
+                    onChangeText={(Text) => setEmail(Text)}
+                    value={email}
+                    label={"E-mail"}
+                    mode="outlined"
+                    underlineColorAndroid="transparent"
+                    right={
+                      <TextInput.Icon
+                        icon={({ size, color }) => (
+                          <MaterialCommunityIcons
+                            name={"email"}
+                            size={size}
+                            color="#006765"
+                          />
+                        )}
+                      />
+                    }
+                    theme={{
+                      colors: {
+                        outline: "#D3D3D3",
+                        background: "white",
+                        primary: "#006765",
+                      },
+                      roundness: 10,
+                    }}
+                  />
+                  <TextInput
+                    style={style.inputText}
+                    label={"Senha"}
+                    onChangeText={(Text) => setPassword(Text)}
+                    mode="outlined"
+                    underlineColorAndroid="transparent"
+                    right={
+                      <TextInput.Icon
+                        icon={({ size, color }) => (
+                          <MaterialCommunityIcons
+                            name={passwordVisible ? "eye-off" : "eye"}
+                            size={size}
+                            color="#006765"
+                            onPress={PressIcon}
+                          />
+                        )}
+                      />
+                    }
+                    value={password}
+                    secureTextEntry={passwordVisible}
+                    theme={{
+                      colors: {
+                        outline: "#D3D3D3",
+                        background: "white",
+                        primary: "#006765",
+                      },
+                      roundness: 10,
+                    }}
+                  />
+                  <TextInput
+                    style={style.inputText}
+                    label={"Confirme sua senha"}
+                    onChangeText={(Text) => setConfirm(Text)}
+                    mode="outlined"
+                    underlineColorAndroid="transparent"
+                    right={
+                      <TextInput.Icon
+                        icon={({ size, color }) => (
+                          <MaterialCommunityIcons
+                            name={
+                              confirmPassword
+                                ? "check-circle"
+                                : "check-circle-outline"
+                            }
+                            onPress={PressIconConfirm}
+                            size={size}
+                            color="#006765"
+                          />
+                        )}
+                      />
+                    }
+                    value={confirm}
+                    secureTextEntry={confirmPassword}
+                    theme={{
+                      colors: {
+                        outline: "#D3D3D3",
+                        background: "white",
+                        primary: "#006765",
+                      },
+                      roundness: 10,
+                    }}
                   />
                 </View>
-                <View style={style.containerIconButton}>
-                  <IconButton
-                    icon="facebook"
-                    size={24}
-                    style={style.iconButton}
-                    iconColor="white"
-                  />
+
+                <View style={style.viewButton2}>
+                  <TouchableOpacity
+                    activeOpacity={0.6}
+                    style={style.layoutButton2}
+                    onPress={Database}
+                  >
+                    <Text style={style.buttonText2}>Cadastrar</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={style.container2}>
+                  <View style={style.dividerContainer}>
+                    <View style={style.line} />
+                    <Text style={style.dividerText}>Conectar usando</Text>
+                    <View style={style.line} />
+                  </View>
+                  <View style={style.viewContainerIcon}>
+                    <View style={style.containerIconButton}>
+                      <IconButton
+                        icon="google"
+                        size={24}
+                        style={style.iconButton}
+                        iconColor="white"
+                        onPress={() => alert("Ainda em processo de desenvolvimento")}
+                      />
+                    </View>
+                    <View style={style.containerIconButton}>
+                      <IconButton
+                        icon="facebook"
+                        size={24}
+                        style={style.iconButton}
+                        iconColor="white"
+                        onPress={() => alert("Ainda em processo de desenvolvimento")}
+                      />
+                    </View>
+                  </View>
                 </View>
               </View>
             </View>
           </View>
-        </ImageBackground>
-      </View>
-    </View>
+        </ScrollView>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -222,7 +259,6 @@ const style = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#13D8B0",
   },
   firstPierce: {
     width: "100%",
@@ -233,13 +269,18 @@ const style = StyleSheet.create({
   },
   secondPierce: {
     width: "100%",
-    height: "85%",
+    height: "77%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   imageBackground: {
     width: "100%",
     height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  logo: {
+    width: width * 0.3,
+    height: height * 0.3,
+    resizeMode: "contain",
   },
   contentContainer: {
     justifyContent: "center",
@@ -249,7 +290,7 @@ const style = StyleSheet.create({
   text: {
     color: "#13C1CA",
     fontWeight: "bold",
-    fontSize: height * 0.02,
+    fontSize: Platform.OS == "web" ? height * 0.023 : RFValue(20),
   },
   inputText: {
     width: width * 0.65,
@@ -257,30 +298,27 @@ const style = StyleSheet.create({
     marginTop: 10,
   },
   layoutButton2: {
-    width: width * 0.7,
-    height: height * 0.08,
+    width: width * 0.65,
+    height: height * 0.07, 
     borderRadius: 10,
-    borderColor: "#07C3C3",
-    borderWidth: 2,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#07C3C3",
   },
   buttonText2: {
-    fontSize: 20,
-    color: "#07C3C3",
+    fontSize: RFValue(16),
+    color: "white",
     fontWeight: "bold",
   },
-  
   viewButton2: {
-    width: width * 0.7,
-    height: height * 0.08,
-    justifyContent: "center",
-    marginTop: 40,
+    marginTop: height * 0.03, 
+    width: "100%",
+    alignItems: "center",
   },
   container2: {
     paddingHorizontal: 20,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: height * 0.03, 
   },
   dividerContainer: {
     flexDirection: "row",
@@ -312,5 +350,11 @@ const style = StyleSheet.create({
     height: 25,
     justifyContent: "center",
     alignItems: "center",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: height * 0.02,
   },
 });

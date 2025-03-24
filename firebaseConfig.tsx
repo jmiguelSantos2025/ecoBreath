@@ -1,8 +1,9 @@
 
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import {getAuth} from 'firebase/auth';
+import {getAuth, GoogleAuthProvider} from 'firebase/auth';
 import { getDatabase, ref, onValue, get } from "firebase/database";
+import {getFirestore} from 'firebase/firestore';
 const firebaseConfig = {
   apiKey: "AIzaSyDhKNpY7T9ks51iqF1JRizq0x92G2bkgsU",
   authDomain: "ecobreathdatabase.firebaseapp.com",
@@ -14,7 +15,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
+const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const database = getDatabase(app);
-export {auth, database};
+const firestore = getFirestore(app);
+const provider = new GoogleAuthProvider();
+export {auth, database, firestore,provider};

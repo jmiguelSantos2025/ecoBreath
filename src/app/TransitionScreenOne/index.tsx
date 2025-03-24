@@ -10,7 +10,7 @@ export default function TransitionScreenOne() {
     const router = useRouter();
 
     useEffect(() => {
-        scale.value = withTiming(10, { duration: 2000 });
+        scale.value = withTiming(10, { duration: 2500 });
 
         const timeout = setTimeout(() => {
             router.push('/TransitionScreenThird');
