@@ -51,7 +51,8 @@ export default function MainScreen() {
                 <View style={styles.secondPierce}>
                     <View style={styles.contentContainer}>
                         <Text style={styles.text}>
-                            Bem-vindo: {userName}!
+                            Bem-vindo:{" "}
+                            <Text>{userName}!</Text>
                         </Text>
 
                         <View style={styles.mainViewButton}>
@@ -65,7 +66,7 @@ export default function MainScreen() {
                                     />
                                     <Text style={styles.buttonText}>Monitoramento</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("PowerScreen")}>
                                     <MaterialCommunityIcons
                                         name="power"
                                         size={width * 0.14}
@@ -77,7 +78,7 @@ export default function MainScreen() {
 
                             {/* Card 2 */}
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("CallUsScreen")}>
                                     <MaterialCommunityIcons
                                         name="phone"
                                         size={width * 0.16}
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 25, 
         marginBottom: height * 0.02,
+        
     },
     mainViewButton: {
         width: "100%",

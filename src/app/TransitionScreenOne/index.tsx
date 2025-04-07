@@ -33,7 +33,7 @@ export default function TransitionScreenOne() {
     return (
         <View style={style.fullScreen}>
             <Animated.View style={[style.container, animatedContainerStyle]}>
-                <Image source={require('../../../assets/LogoBranca.png')} style={style.image} />
+                <Image source={require('../../../assets/LogoBrancaSplash.png')} style={style.image} />
             </Animated.View>
         </View>
     );

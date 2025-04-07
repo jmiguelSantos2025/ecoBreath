@@ -1,117 +1,153 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import React , {useState} from 'react';
+import { View, Image, StyleSheet, Text, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
+import { RFValue } from 'react-native-responsive-fontsize';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import CustomModal, { CustomConfirmModal } from '../../Components/CustomModal';
+import { IconButton } from 'react-native-paper';
+import { router } from 'expo-router';
+import { ref, set } from 'firebase/database';
+import { database } from '../../../firebaseConfig';
 
-const { width, height } = Dimensions.get("window");
-
+const {height, width} = Dimensions.get("window");
 export default function PowerScreen() {
-    return (
-        <View style={style.container}>
-            <View style={style.firstPierce}>
-                <Image source={require("../../../assets/LogoBranca.png")} />
-            </View>
-            <View style={style.secondPierce}>
-                <View style={style.viewIcon}>
-                    <MaterialCommunityIcons name='power' color={"white"} size={width*0.25}
-                    />
-                </View>
-                <View style={style.viewTitleText}>
-                    <Text style={style.titleText}>Deseja Desligar/Ligar?</Text>
-                </View>
-                <View style={style.viewText}>
-                    <Text style={style.text}>Clique em <Text style={{fontWeight:"bold"}}>SIM </Text> caso deseje desligar/ligar a máquina.</Text>
-                </View>
-                <View style={style.viewButton}>
-                    <TouchableOpacity style={style.button} >
-                        <Text style={{fontWeight:"bold", fontSize:width*0.05, color:"white"}}>Sim</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+    const [modalIsVisible,setModalIsVisible] =useState(false);
+    const [isPower,setIsPower] = useState(false);
+    function handleButton(){
+        setModalIsVisible(!modalIsVisible);
+        
+    }
+    function handleConfirm(){
+        const newPowerState = !isPower;
+        setIsPower(newPowerState);
+        const dbRef = ref(database, "conexão/Ligado");
+        set( dbRef, newPowerState).then(()=>{
+        console.log("Valor atualizado");}).catch((error)=>{
+            console.error("Error", error);
+        });
 
+
+        setModalIsVisible(false);
+    }
+    function handleCancel(){
+        setModalIsVisible(false);
+    }
+  return (
+    <SafeAreaView style={styles.container}>
+        <IconButton
+                            icon="arrow-left"
+                            size={30}
+                            onPress={() => router.back()}
+                            iconColor="white"
+                            style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+                        />
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../../../assets/LogoBranca.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      
+      <View style={styles.card}>
+        
+        <View style={styles.iconWrapper}>
+          <MaterialCommunityIcons name="power" size={70} color="white" />
         </View>
-    );
+
+        <Text style={styles.title}>Deseja Desligar/Ligar?</Text>
+
+
+        <Text style={styles.description}>
+          Clique em <Text style={styles.bold}>SIM</Text> caso deseje desligar/ligar a máquina.
+        </Text>
+
+        
+        <TouchableOpacity style={styles.button} onPress={handleButton}>
+          <Text style={styles.buttonText}>Sim</Text>
+        </TouchableOpacity>
+        <CustomConfirmModal
+          visible={modalIsVisible}
+          title="Confirmar ação"
+          message="Você tem certeza que deseja desligar/ligar a máquina?"
+          icon="alert-outline"
+          color="#006462"
+          onConfirm={handleConfirm}
+          onClose={handleCancel}
+        />
+      </View>
+    </SafeAreaView>
+  );
 }
 
-const style = StyleSheet.create({
-    container: {
-        width: width,
-        height: height,
-        backgroundColor: "#13D8B0",
-        overflow: "hidden",
-        
-    },
-    firstPierce: {
-        width: width,
-        height: "27%",
-        justifyContent: "center",
-        alignItems: "center",
-        paddingTop: height * 0.03,
-    },
-    secondPierce: {
-        width: "100%",
-        height: "80%",
-        backgroundColor: "white",
-        borderTopEndRadius: 30,
-        borderTopStartRadius: 30,
-        justifyContent:"center",
-        alignItems:"center",
-        overflow:"hidden"
-
-
-    },
-    viewIcon:{
-        backgroundColor: "#13D8B0",
-        borderRadius: width * 0.2,
-        width: width * 0.3, 
-        height: width * 0.3, 
-        justifyContent: "center", 
-        alignItems: "center", 
-        marginBottom: height * 0.06, 
-
-
-
-        
-    },
-    viewTitleText:{
-        marginBottom:height*0.03,
-
-    },
-    titleText:{
-        fontSize: width*0.05,
-        color:"#13C1CA",
-        fontWeight:"bold",
-
-
-    },
-    viewText:{
-        marginBottom:40,
-        flexDirection:"row",
-        textAlign:"center"
-    },
-    text:{
-        fontSize:width*0.032,
-        color:"#0E9693",
-
-    },
-    viewButton:{
-        overflow:"hidden",
-        marginBottom:height*0.1,
-
-        
-
-    },
-    button:{
-        borderWidth:2,
-        borderColor:"#08C5C1",
-        paddingVertical: height*0.028,
-        paddingHorizontal: width*0.32,
-        borderRadius: width*0.05,
-        justifyContent:"center",
-        alignItems:"center",
-        backgroundColor:"#08C5C1"
-
-
-    }
-
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#13D8B0',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    paddingVertical: "12%",
+    backgroundColor: '#13D8B0',
+  },
+  logo: {
+    width: '60%',
+    height: undefined,
+    aspectRatio: 2.5,
+  },
+  card: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 30,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: 30,
+    
+  },
+  iconWrapper: {
+    backgroundColor: '#13D8B0',
+    borderRadius: 500,
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: height*0.1,
+  },
+  title: {
+    fontSize: 20,
+    color: '#13C1CA',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 14,
+    color: '#0E9693',
+    textAlign: 'center',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  button: {
+    // backgroundColor: '#08C5C1',
+    // paddingVertical: 15,
+    // width:"70%",
+    // borderRadius: 15,
+    // borderWidth: 2,
+    // borderColor: '#08C5C1',
+    // justifyContent:"center",
+    // alignItems:"center"
+    width: "80%",
+    height: "12%",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#07C3C3",
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: RFValue(15),
+    fontWeight: 'bold',
+  },
 });

@@ -1,14 +1,84 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { getAuth, updatePassword } from 'firebase/auth';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { firestore, auth } from '../../../../firebaseConfig'; 
 
 const { width, height } = Dimensions.get('window');
 
 export default function EditarUserScreen() {
+    const [userData, setUserData] = useState({
+        username: '',
+        email: '',
+        password: '',
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadUserData = async () => {
+            const user = auth.currentUser;  
+            if (user) {
+                try {
+                    const userRef = doc(firestore, 'usuarios', user.uid); 
+                    const docSnap = await getDoc(userRef);
+
+                    if (docSnap.exists()) {
+                        setUserData({
+                            username: docSnap.data().username || '',
+                            email: docSnap.data().email || '',
+                            password: '',  
+                        });
+                    } else {
+                        console.log('Usuário não encontrado no Firestore!');
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar dados do usuário:', error);
+                }
+            }
+            setLoading(false);
+        };
+
+        loadUserData();
+    }, []);
+
+    const handleSave = async () => {
+        const user = auth.currentUser;
+        if (user) {
+            const userRef = doc(firestore, 'usuarios', user.uid);  
+
+            try {
+                
+                await updateDoc(userRef, {
+                    username: userData.username,
+                    email: userData.email,
+                });
+
+                
+                if (userData.password) {
+                    await updatePassword(user, userData.password);
+                    console.log('Senha atualizada com sucesso!');
+                }
+
+                console.log('Perfil atualizado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao atualizar perfil:', error);
+            }
+        }
+    };
+
+    const handleCancel = () => {
+        
+        setUserData({
+            username: '',
+            email: '',
+            password: '',
+        });
+    };
+
     return (
         <View style={style.container}>
-            
             <View style={style.firstPierce}>
                 <Text style={style.title}>Editar Perfil</Text>
                 <View style={style.viewIcon}>
@@ -20,9 +90,7 @@ export default function EditarUserScreen() {
                 </View>
             </View>
 
-            
             <View style={style.secondPierce}>
-                
                 <View style={style.photoSection}>
                     <Image
                         source={require("../../../../assets/UserProfileIcon.png")}
@@ -31,114 +99,126 @@ export default function EditarUserScreen() {
                     <Text style={style.editPhotoText}>Editar foto de usuário</Text>
                 </View>
 
-                
-                <TextInput
-                    style={style.inputText}
-                    label="Usuário"
-                    mode="outlined"
-                    right={
-                        <TextInput.Icon
-                            icon={({ size }) => (
-                                <MaterialCommunityIcons
-                                    name="close-circle-outline"
-                                    size={size}
-                                    color="#006765"
+                {loading ? (
+                    <Text>Carregando...</Text>
+                ) : (
+                    <>
+                        <TextInput
+                            style={style.inputText}
+                            label="Usuário"
+                            mode="outlined"
+                            value={userData.username}  
+                            onChangeText={(text) => setUserData({ ...userData, username: text })}
+                            right={
+                                <TextInput.Icon
+                                    icon={({ size }) => (
+                                        <MaterialCommunityIcons
+                                            name="close-circle-outline"
+                                            size={size}
+                                            color="#006765"
+                                        />
+                                    )}
                                 />
-                            )}
+                            }
+                            theme={{
+                                colors: {
+                                    outline: '#D3D3D3',
+                                    background: 'white',
+                                    primary: '#006765',
+                                },
+                                roundness: 10,
+                            }}
                         />
-                    }
-                    theme={{
-                        colors: {
-                            outline: '#D3D3D3',
-                            background: 'white',
-                            primary: '#006765',
-                        },
-                        roundness: 10,
-                    }}
-                />
-                <TextInput
-                    style={style.inputText}
-                    label="E-mail"
-                    mode="outlined"
-                    right={
-                        <TextInput.Icon
-                            icon={({ size }) => (
-                                <MaterialCommunityIcons
-                                    name="close-circle-outline"
-                                    size={size}
-                                    color="#006765"
+                        <TextInput
+                            style={style.inputText}
+                            label="E-mail"
+                            mode="outlined"
+                            value={userData.email}  
+                            onChangeText={(text) => setUserData({ ...userData, email: text })}
+                            right={
+                                <TextInput.Icon
+                                    icon={({ size }) => (
+                                        <MaterialCommunityIcons
+                                            name="close-circle-outline"
+                                            size={size}
+                                            color="#006765"
+                                        />
+                                    )}
                                 />
-                            )}
+                            }
+                            theme={{
+                                colors: {
+                                    outline: '#D3D3D3',
+                                    background: 'white',
+                                    primary: '#006765',
+                                },
+                                roundness: 10,
+                            }}
                         />
-                    }
-                    theme={{
-                        colors: {
-                            outline: '#D3D3D3',
-                            background: 'white',
-                            primary: '#006765',
-                        },
-                        roundness: 10,
-                    }}
-                />
-                <TextInput
-                    style={style.inputText}
-                    label="Senha"
-                    mode="outlined"
-                    secureTextEntry={true}
-                    right={
-                        <TextInput.Icon
-                            icon={({ size }) => (
-                                <MaterialCommunityIcons
-                                    name="close-circle-outline"
-                                    size={size}
-                                    color="#006765"
+                        <TextInput
+                            style={style.inputText}
+                            label="Senha"
+                            mode="outlined"
+                            secureTextEntry={true}
+                            value={userData.password}
+                            onChangeText={(text) => setUserData({ ...userData, password: text })}
+                            right={
+                                <TextInput.Icon
+                                    icon={({ size }) => (
+                                        <MaterialCommunityIcons
+                                            name="close-circle-outline"
+                                            size={size}
+                                            color="#006765"
+                                        />
+                                    )}
                                 />
-                            )}
+                            }
+                            theme={{
+                                colors: {
+                                    outline: '#D3D3D3',
+                                    background: 'white',
+                                    primary: '#006765',
+                                },
+                                roundness: 10,
+                            }}
                         />
-                    }
-                    theme={{
-                        colors: {
-                            outline: '#D3D3D3',
-                            background: 'white',
-                            primary: '#006765',
-                        },
-                        roundness: 10,
-                    }}
-                />
-                <TextInput
-                    style={style.inputText}
-                    label="Confirme sua senha"
-                    mode="outlined"
-                    secureTextEntry={true}
-                    right={
-                        <TextInput.Icon
-                            icon={({ size }) => (
-                                <MaterialCommunityIcons
-                                    name="close-circle-outline"
-                                    size={size}
-                                    color="#006765"
+                        <TextInput
+                            style={style.inputText}
+                            label="Confirme sua senha"
+                            mode="outlined"
+                            secureTextEntry={true}
+                            value={userData.password}
+                            onChangeText={(text) => setUserData({ ...userData, password: text })}
+                            right={
+                                <TextInput.Icon
+                                    icon={({ size }) => (
+                                        <MaterialCommunityIcons
+                                            name="close-circle-outline"
+                                            size={size}
+                                            color="#006765"
+                                        />
+                                    )}
                                 />
-                            )}
+                            }
+                            theme={{
+                                colors: {
+                                    outline: '#D3D3D3',
+                                    background: 'white',
+                                    primary: '#006765',
+                                },
+                                roundness: 10,
+                            }}
                         />
-                    }
-                    theme={{
-                        colors: {
-                            outline: '#D3D3D3',
-                            background: 'white',
-                            primary: '#006765',
-                        },
-                        roundness: 10,
-                    }}
-                />
+                    </>
+                )}
             </View>
 
-            
             <View style={style.thirdPierce}>
                 <View style={style.buttonContainer}>
-                    <TouchableOpacity style={style.saveButton}>
+                    <TouchableOpacity style={style.saveButton} /*onPress={handleSave}*/ onPress={()=>alert("Ainda em desenvolvimento")}>
                         <Text style={style.saveButtonText}>Salvar</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={style.cancelButton}>
+                    <TouchableOpacity style={style.cancelButton} /*onPress={handleCancel}*/ onPress={()=>alert("Ainda em Desenvolvimento")}>
                         <Text style={style.cancelButtonText}>Cancelar</Text>
                     </TouchableOpacity>
                 </View>
@@ -179,7 +259,6 @@ const style = StyleSheet.create({
         paddingHorizontal: width * 0.1,
         justifyContent: 'center',
         alignItems: 'center',
-        
     },
     photoSection: {
         alignItems: 'center',

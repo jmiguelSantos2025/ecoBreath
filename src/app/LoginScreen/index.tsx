@@ -4,17 +4,18 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { RFValue } from "react-native-responsive-fontsize";
-import * as Google from 'expo-auth-session/providers/google';
 import { signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
 import { auth, provider } from "../../../firebaseConfig"; 
-
+import CustomModal from '../../Components/CustomModal'
+import { set } from "firebase/database";
 const { width, height } = Dimensions.get("window");
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isVisible, setIsVisible] = useState(true);
-
+  const [modalIsVisible,setModalIsVisible] = useState(false);
+  const [modal2lIsVisible,setModal2IsVisible] = useState(false);
   const handleSignIn = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -22,13 +23,13 @@ export default function LoginScreen() {
       setPassword("");
       router.push("/MainScreen");
     } catch (error) {
-      alert("Erro ao fazer login: " + error);
+      setModal2IsVisible(!modal2lIsVisible);
     }
   };
 
   const Database = async () => {
     if (!email || !password) {
-      alert("Preencha os campos antes de prosseguir");
+      setModalIsVisible(!modalIsVisible);
       return;
     } else {
       await handleSignIn();
@@ -143,6 +144,7 @@ export default function LoginScreen() {
 
                 <View style={style.viewButton}>
                   <TouchableOpacity
+                  delayPressIn={0}
                     activeOpacity={0.6}
                     style={style.layoutButton1}
                     onPress={Database}
@@ -181,14 +183,31 @@ export default function LoginScreen() {
                         size={24}
                         style={style.iconButton}
                         iconColor="white"
-                        onPress={()=>alert("")}
+                        onPress={()=>alert("Ainda em processo de desenvolvimento ")}
                       />
                     </View>
+      
                   </View>
                 </View>
               </View>
             </ScrollView>
           </View>
+          <CustomModal
+          visible={modalIsVisible}
+          title="Campos obrigatórios"
+          message="Por favor, preencha todos os campos para continuar."
+          onClose={() => setModalIsVisible(false)}
+          icon={"alert-outline"}
+          color={"#006462"}
+        />
+        <CustomModal
+          visible={modal2lIsVisible}
+          title="Login ou usuário incorreto"
+          message="Por favor, preencha os campos de acordo com o usuário cadastrado!"
+          onClose={() => setModal2IsVisible(false)}
+          icon={"alert-outline"}
+          color={"#006462"}
+        />
         </View>
       </ImageBackground>
     </KeyboardAvoidingView>

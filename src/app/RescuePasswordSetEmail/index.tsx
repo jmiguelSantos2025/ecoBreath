@@ -1,40 +1,62 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
+import {
+  View,
+  Image,
+  StyleSheet,
+  Dimensions,
+  Text,
+  ImageBackground,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import { TextInput, IconButton } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { useState, useEffect } from "react";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import { RFValue } from "react-native-responsive-fontsize";
+import CustomModal from "../../Components/CustomModal";
 
 const { width, height } = Dimensions.get("window");
 const auth = getAuth();
 
 export default function RescuePasswordSetEmail() {
   const [email, setEmail] = useState("");
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [modal2IsVisible, setModal2IsVisible] = useState(false);
+  const [modal3IsVisible, setModal3IsVisible] = useState(false);
 
   const PressRescueEmail = async (email: string) => {
-    const resetLink = "https://ecobreathdatabase.firebaseapp.com/reset-password";
-    try {
-      await sendPasswordResetEmail(auth, email, {
-        url: resetLink,
-      });
-      alert("Um email de redefinição de senha foi enviado para " + email);
-      setEmail("");
-    } catch (error) {
-      alert("Erro na redefinição de senha: " + error);
+    if (email) {
+      const resetLink =
+        "https://ecobreathdatabase.firebaseapp.com/reset-password";
+      try {
+        await sendPasswordResetEmail(auth, email, {
+          url: resetLink,
+        });
+        setModalIsVisible(!modalIsVisible);
+        setEmail("");
+      } catch (error) {
+        setModal2IsVisible(!modal2IsVisible);
+        const Error = error;
+      }
+    } else {
+      setModal3IsVisible(!modal3IsVisible);
     }
   };
 
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
       const { url } = event;
-      if (url.includes('reset-password')) {
-        router.push('ForgotPassword');
+      if (url.includes("reset-password")) {
+        router.push("ForgotPassword");
       }
     };
 
-    const subscription = Linking.addEventListener('url', handleDeepLink);
+    const subscription = Linking.addEventListener("url", handleDeepLink);
     return () => {
       subscription.remove();
     };
@@ -61,7 +83,13 @@ export default function RescuePasswordSetEmail() {
               size={30}
               onPress={() => router.back()}
               iconColor="white"
-              style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+              style={{
+                position: "absolute",
+                top: 20,
+                left: 20,
+                zIndex: 10,
+                backgroundColor: "#428F77",
+              }}
             />
             <View style={style.firstPierce}>
               <Image
@@ -74,9 +102,16 @@ export default function RescuePasswordSetEmail() {
               <View style={style.contentContainer}>
                 <Text style={style.text}>Esqueceu a senha?</Text>
 
-                <View style={{ flexDirection: "row", marginBottom: 10, width: "90%" }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginBottom: 10,
+                    width: "90%",
+                  }}
+                >
                   <Text style={style.text2}>
-                    Enviamos um e-mail para que você confirme a recuperação de senha
+                    Enviamos um e-mail para que você confirme a recuperação de
+                    senha
                   </Text>
                 </View>
 
@@ -120,6 +155,34 @@ export default function RescuePasswordSetEmail() {
                 </View>
               </View>
             </View>
+            <CustomModal
+              visible={modalIsVisible}
+              title="Email Enviando!"
+              message="Por favor, verifique seu email para recuperar sua senha."
+              onClose={() => setModalIsVisible(false)}
+              icon={"email-check"}
+              color={"#006462"}
+            />
+            <CustomModal
+              visible={modal2IsVisible}
+              title="Algo deu errado :("
+              message={
+                "Tente novamente mais tarde!"
+              }
+              onClose={() => setModal2IsVisible(false)}
+              icon={"error"}
+              color={"#006462"}
+            />
+            <CustomModal
+              visible={modal3IsVisible}
+              title="Campos obrigatórios"
+              message={
+                "Por favor, preencha todos os campos para continuar."
+              }
+              onClose={() => setModal3IsVisible(false)}
+              icon={"alert-outline"}
+              color={"#006462"}
+            />
           </View>
         </ScrollView>
       </ImageBackground>
@@ -189,7 +252,7 @@ const style = StyleSheet.create({
     fontWeight: "bold",
   },
   viewButton2: {
-    marginTop:40,
+    marginTop: 40,
     width: width * 0.7,
     height: height * 0.18,
     justifyContent: "space-between",

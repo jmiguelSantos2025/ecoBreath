@@ -4,14 +4,14 @@
     "slug": "ecoBreath",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/LogoAzul.png",
+    "icon": "./assets/LogoBrancaSplash.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme":"ecoBreath",
     "splash": {
       "image": "./assets/LogoAzul.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#13D8B0"
     },
     "ios": {
       "supportsTablet": true,
@@ -29,15 +29,16 @@
         "category":["BROWSABLE", "DEFAULT"]
       },
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/LogoAzul.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/LogoAzul.png"
     },
     "plugins": [
       "expo-router"
+      
     ]
   }
 }

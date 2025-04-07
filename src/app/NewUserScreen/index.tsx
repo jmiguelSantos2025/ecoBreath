@@ -5,6 +5,7 @@ import { useState } from "react";
 import { signUp } from "../../Components/authenticator";
 import { router } from "expo-router";
 import { RFValue } from "react-native-responsive-fontsize";
+import CustomModal from "../../Components/CustomModal";
 
 
 const { width, height } = Dimensions.get("window");
@@ -16,7 +17,9 @@ export default function NewUserScreen() {
   const [confirm, setConfirm] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [confirmPassword, setConfirmPassword] = useState(true);
-
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [modal2IsVisible, setModal2IsVisible] = useState(false);
+  const [modal3IsVisible, setModal3IsVisible] = useState(false);
   const PressIcon = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -33,7 +36,7 @@ export default function NewUserScreen() {
         setConfirm("");
         setPassword("");
         setUser("");
-        router.push("LoginScreen");
+        setModal3IsVisible(!modal3IsVisible);
       } else {
         setEmail("");
         setConfirm("");
@@ -43,13 +46,13 @@ export default function NewUserScreen() {
         
       }
     } else {
-      alert("Você deve colocar senhas iguais");
+      setModal2IsVisible(!modal2IsVisible)
     }
   };
 
   const Database = async () => {
-    if (!email || !password) {
-      alert("Preencha os campos antes de prosseguir");
+    if (!email || !password ||!user||!confirm) {
+      setModalIsVisible(!modalIsVisible);
       return;
     } else {
       await handleSignUp();
@@ -248,6 +251,30 @@ export default function NewUserScreen() {
                 </View>
               </View>
             </View>
+            <CustomModal
+                      visible={modalIsVisible}
+                      title="Campos obrigatórios"
+                      message="Por favor, preencha todos os campos para continuar."
+                      onClose={() => setModalIsVisible(false)}
+                      icon={"alert-outline"}
+                      color={"#006462"}
+                    />
+                    <CustomModal
+                      visible={modal2IsVisible}
+                      title="Senhas Diferentes"
+                      message="Você deve colocar senhas iguais!"
+                      onClose={() => setModal2IsVisible(false)}
+                      icon={"lock-off"}
+                      color={"#006462"}
+                    />
+                    <CustomModal
+                      visible={modal3IsVisible}
+                      title="Cadastro Realizado com Sucesso!"
+                      message="Você realizou o cadastro com sucesso!"
+                      onClose={() =>{ setModal3IsVisible(false); router.push('LoginScreen')}}
+                      icon={"account-circle"}
+                      color={"#006462"}
+                    />
           </View>
         </ScrollView>
       </ImageBackground>

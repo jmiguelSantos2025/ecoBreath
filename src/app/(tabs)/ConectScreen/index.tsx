@@ -1,155 +1,118 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
+import { View, Image, StyleSheet, Text } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-const { width, height } = Dimensions.get("window");
+import { useWindowDimensions } from 'react-native';
 
 export default function ConectScreen() {
+    const { width, height } = useWindowDimensions();
+    
     return (
         <View style={style.container}>
             <View style={style.firstPierce}>
-                <Image source={require("../../../../assets/LogoBranca.png")} style={{resizeMode:"contain", width:110,}} />
+                <Image source={require("../../../../assets/LogoBranca.png")} style={style.logo} />
             </View>
             <View style={style.secondPierce}>
-                <View style={style.viewIcon}>
-                    <MaterialCommunityIcons name='wifi' color={"white"} size={width * 0.21}
-                    />
+                <View style={[style.viewIcon, { width: width * 0.25, height: width * 0.25, borderRadius: width * 0.05 }]}> 
+                    <MaterialCommunityIcons name='wifi' color={'white'} size={width * 0.21} />
                 </View>
-                <View style={style.viewTitleText}>
-                    <Text style={style.titleText}>Configurações de Conexão</Text>
+                <Text style={style.titleText}>Configurações de Conexão</Text>
+                <View style={style.stepsContainer}>
+                    {["Ligue a máquina", "Aceite as permissões na tela do produto e do aplicativo", "Ative o Bluetooth da máquina e do aparelho"].map((text, index) => (
+                        <View key={index} style={style.stepItem}>
+                            <View style={style.viewIconRight}>
+                                <Text style={style.iconRight}>{index + 1}</Text>
+                            </View>
+                            <Text style={style.text}>{text}</Text>
+                        </View>
+                    ))}
                 </View>
-
-                <View style={{justifyContent:"center",padding:1
-                }}>
-
-                    <View style={style.viewText}>
-                        <View style={style.viewIconRight}>
-                            <Text style={style.iconRight}>1</Text>
-                        </View>
-                        <View >
-                            <Text style={style.text}><Text style={{ fontWeight: "bold" }}>Ligue a maquina</Text></Text>
-                        </View>
-                    </View>
-                    <View style={style.viewText}>
-                        <View style={style.viewIconRight}>
-                            <Text style={style.iconRight}>2</Text>
-                        </View>
-                        <View>
-                            <Text style={style.text}>Aceite as permissões na tela do produto e do aplicativo</Text>
-                        </View>
-                    </View>
-                    <View style={style.viewText}>
-                        <View style={style.viewIconRight}>
-                            <Text style={style.iconRight}>3</Text>
-                        </View>
-                        <View>
-                            <Text style={style.text}>Ative o <Text style={{ fontWeight: "bold" }}>Bluetooth </Text>da máquina e do aparelho</Text>
-                        </View>
-                    </View>
-
-                </View>
-
-                <View style={style.viewButton}>
-                    <TouchableOpacity style={style.button} >
-                        <Text style={{ fontWeight: "bold", fontSize: width * 0.05, color: "white" }}>Sim</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity activeOpacity={0.6} style={style.layoutButton1} onPress={()=>alert('Ainda em Desenvolvimento')}>
+                    <Text style={style.buttonText1}>Continuar</Text>
+                </TouchableOpacity>
             </View>
-
         </View>
     );
 }
 
 const style = StyleSheet.create({
     container: {
-        width: "100%",
-        height: "100%",
+        flex: 1,
         backgroundColor: "#13D8B0",
-        overflow: "hidden",
-
     },
     firstPierce: {
-        width: "100%",
-        height: "23%",
+        flex: 0.23,
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: height * 0.01,
+    },
+    logo: {
+        resizeMode: "contain",
+        width: 110,
     },
     secondPierce: {
-        width: "100%",
-        height: "85%",
+        flex: 0.77,
         backgroundColor: "white",
         borderTopEndRadius: 30,
         borderTopStartRadius: 30,
         justifyContent: "center",
         alignItems: "center",
-        overflow: "hidden"
-
-
+        paddingHorizontal: 20,
     },
     viewIcon: {
         backgroundColor: "#13D8B0",
-        borderRadius: width * 0.05,
-        width: width * 0.25,
-        height: width * 0.25,
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: height * 0.06,
-
-
-
-
-    },
-    viewTitleText: {
-        marginBottom: height * 0.03,
-
+        marginBottom: 30,
     },
     titleText: {
-        fontSize: width * 0.05,
+        fontSize: 18,
         color: "#13C1CA",
         fontWeight: "bold",
-
-
-    },
-    viewText: {
-        marginBottom: 30,
-        flexDirection: "row",
         textAlign: "center",
-        justifyContent:"flex-start",
+        marginBottom: 20,
+    },
+    stepsContainer: {
+        width: "100%",
+    },
+    stepItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 15,
     },
     text: {
-        fontSize: width * 0.032,
+        fontSize: 14,
         color: "#0E9693",
-        flexShrink:1,
+        flexShrink: 1,
     },
-    viewIconRight:{
-        marginRight:width*0.03,
-        marginLeft:width*0.05,
+    viewIconRight: {
+        marginRight: 10,
+        backgroundColor: "#13C1CA",
+        borderRadius: 50,
+        width: 24,
+        height: 24,
+        justifyContent: "center",
+        alignItems: "center",
     },
-    iconRight:{
-        width:width*0.05,
-        backgroundColor:"#13C1CA",
-        color:"#fff",
-        textAlign:"center",
-        borderRadius:width*0.04,
-        fontWeight:"bold",
+    iconRight: {
+        color: "#fff",
+        fontWeight: "bold",
     },
-    viewButton: {
-        overflow: "hidden",
-        marginBottom: height * 0.1,
-    },
-    button: {
-        borderWidth: 2,
-        borderColor: "#08C5C1",
-        paddingVertical: height * 0.023,
-        paddingHorizontal: width * 0.30,
+    layoutButton1: {
+        width: "80%",
+        height: 70,
         borderRadius: 10,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#08C5C1"
-
-
-    }
-
-
+        backgroundColor: "#07C3C3",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        marginTop: 20,
+    },
+    buttonText1: {
+        fontSize: 20,
+        color: "white",
+        fontWeight: "bold",
+    },
 });
