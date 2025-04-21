@@ -23,6 +23,7 @@ export default function CallUsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      
       <IconButton
         icon="arrow-left"
         size={RFValue(26)}
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: RFPercentage(1.8),
+    marginBottom: RFPercentage(2),
     width: '100%',
   },
   infoText: {
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     width: '100%',
-    height: RFPercentage(25),
+    height: RFPercentage(30),
     borderRadius: RFValue(10),
     borderWidth: 2,
     borderColor: '#006765',

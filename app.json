@@ -18,6 +18,7 @@
       "budleIdentifier": "com.ecoBreath.ecoBreathApp"
     },
     "android": {
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "INTERNET","NOTIFICATIONS"],
       "intentFilters":{
         "action": "VIEW",
         "data":[
@@ -37,7 +38,14 @@
       "favicon": "./assets/LogoAzul.png"
     },
     "plugins": [
-      "expo-router"
+     "expo-router",
+     [
+      "expo-notifications",
+      {
+        "icon": "./assets/notification-icon.png",
+        "color": "#13D8B0"
+      }
+     ]
       
     ]
   }
