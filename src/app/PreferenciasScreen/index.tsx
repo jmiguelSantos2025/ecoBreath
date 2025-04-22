@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, Switch, Alert } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { RFValue } from 'react-native-responsive-fontsize';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import * as Notifications from 'expo-notifications';
+import { IconButton } from 'react-native-paper';
+import { router } from 'expo-router';
 
 const { width, height } = Dimensions.get("window");
-
+                      
 export default function PreferenciasScreen() {
   const [isEnable, setIsEnable] = useState(false);
 
@@ -34,6 +36,13 @@ export default function PreferenciasScreen() {
 
   return (
     <View style={style.container}>
+      <IconButton
+        icon="arrow-left"
+        size={RFValue(26)}
+        onPress={() => router.back()}
+        iconColor="white"
+        style={style.backButton}
+      />
       <View style={style.firstPierce}>
         <Image
           source={require("../../../assets/LogoAzul.png")}
@@ -61,7 +70,7 @@ export default function PreferenciasScreen() {
             </View>
             <Switch
               trackColor={{ false: '#84857E', true: '#13D8B0' }}
-              thumbColor={isEnable ? "white" : "#595A55"}
+              thumbColor={isEnable ? "white" : "white"}
               onValueChange={touchSwitch}
               value={isEnable}
             />
@@ -75,6 +84,7 @@ export default function PreferenciasScreen() {
               <Text style={style.titleButton}>Limpar Armazenamento</Text>
               <Text style={style.textButton}>Libere espaço removendo dados desnecessários</Text>
             </View>
+            {/* Em revisão */}
             <TouchableOpacity>
               <View style={style.iconContainer}>
                 <MaterialCommunityIcons name='trash-can' size={RFValue(24)} color='#13D8B0' />
@@ -91,6 +101,13 @@ const style = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  backButton: {
+    position: 'absolute',
+    top: RFPercentage(3),
+    left: RFPercentage(2),
+    zIndex: 10,
+    backgroundColor: '#428F77',
   },
   firstPierce: {
     flex: 0.23,

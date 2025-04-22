@@ -20,6 +20,7 @@
     "expo-application": "~6.0.2",
     "expo-auth-session": "~6.0.3",
     "expo-constants": "^17.0.7",
+    "expo-image-picker": "~16.0.6",
     "expo-linking": "~7.0.5",
     "expo-notifications": "~0.29.14",
     "expo-router": "^4.0.20",
@@ -46,8 +47,8 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
     "react-native-web-maps": "^0.3.0",
-    "victory-native": "^37.3.6",
-    "expo-image-picker": "~16.0.6"
+    "victory": "^37.3.6",
+    "victory-native": "^37.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

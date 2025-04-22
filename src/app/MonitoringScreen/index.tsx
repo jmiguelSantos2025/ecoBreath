@@ -97,7 +97,7 @@ export default function MonitoringScreen() {
                         <View style={styles.mainViewButton}>
                             {/* Card 1,2 */}
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("GraphicsScreen")}>
                                     <MaterialCommunityIcons
                                         name="weather-windy-variant"
                                         size={width * 0.14}
