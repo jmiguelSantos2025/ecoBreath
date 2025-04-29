@@ -13,7 +13,7 @@ const { width, height } = Dimensions.get("window");
 export default function MonitoringScreen() {
     const DioxidoDecarbono = (valor: number) => {
         if (valor !== 0) {
-            return (valor / 4096).toFixed(1) + "%";
+            return (valor*100 / 1000000).toFixed(1) + "%";
         } else {
             return "0.0%";
         }
@@ -22,7 +22,7 @@ export default function MonitoringScreen() {
     const GasesVolateis = (valor1: number,valor2:number,valor3:number) => {
         if (valor1 !== 0 ||valor2 !==0 ||valor3 !==0) {
             return (
-                (valor1+valor2+valor3)/4096).toFixed(1) + "%";
+                (valor1+valor2+valor3)*100/1000000).toFixed(1) + "%";
         } else {
             return "0.0%";
         }
