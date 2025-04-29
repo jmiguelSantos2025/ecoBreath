@@ -1,10 +1,31 @@
 import { useRouter } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, Text, Dimensions, ImageBackground, TouchableOpacity } from 'react-native';
+import { auth } from '../../../firebaseConfig';
 
 const { width, height } = Dimensions.get("window");
 
 export default function TransitionScreenThird() {
   const router = useRouter();
+  const [loading,setLoading] = useState(true);
+  useEffect(()=>{
+    const userLogado = onAuthStateChanged(auth,(user)=>{
+      if(user){
+        router.replace("MainScreen")
+      }else{
+        router.replace("LoginScreen");
+      }
+      setLoading(false);
+    });
+    return userLogado;
+  },[]);
+  if(loading){
+    return null;
+  }
+  
+
+
 
   return (
     <View style={style.container}>

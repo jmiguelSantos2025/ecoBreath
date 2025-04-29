@@ -44,6 +44,38 @@ export default function MonitoringScreen() {
                 return "Desconhecido";
         }
     };
+    const AirQualityColor = (valor: number) => {
+      switch (true) {
+          case valor > 5000:
+              return "#FF0000";
+          case valor <= 5000 && valor >= 2000:
+              return "#FF8C00";
+          case valor <= 2000 && valor >= 1000:
+              return "#FFD700";
+          case valor <= 1000 && valor >= 400:
+              return "#008000";
+          case valor < 400:
+              return "#0000FF";
+          default:
+              return "#0000";
+      }
+  };
+const Temperatura = (valor:number) =>{
+  switch(true){
+    case valor < 0:
+      return "#00BFFF";
+    case valor>=0 && valor<10:
+      return "#1E90FF";
+    case valor>=10 && valor<20:
+      return "#32CD32";
+    case valor>=20 && valor<30:
+      return "#FFA500";
+    case valor >= 30:
+      return "#FF4500";
+
+
+  }
+}
 
     const [valorSensores1, setValorSensores1] = useState<number>(0);
     const [valorSensores2, setValorSensores2] = useState<number>(0);
@@ -104,7 +136,7 @@ export default function MonitoringScreen() {
                                         color="#07C3C3"
                                         style={{ marginBottom: height * 0.02 }}
                                     />
-                                    <Text style={styles.dataText}>{AirQuality(valorSensores3)}</Text>
+                                    <Text style={[styles.dataText, {color:AirQualityColor(valorSensores3)}]}>{AirQuality(valorSensores3)}</Text>
                                     <Text style={styles.buttonText}>Qualidade do ar</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.button} activeOpacity={0.7}>
@@ -117,7 +149,9 @@ export default function MonitoringScreen() {
                                     >
                                         <Path d="M620-520q-25 0-42.5-17.5T560-580q0-17 9.5-34.5t20.5-32q11-14.5 20.5-24l9.5-9.5 9.5 9.5q9.5 9.5 20.5 24t20.5 32Q680-597 680-580q0 25-17.5 42.5T620-520Zm160-120q-25 0-42.5-17.5T720-700q0-17 9.5-34.5t20.5-32q11-14.5 20.5-24l9.5-9.5 9.5 9.5q9.5 9.5 20.5 24t20.5 32Q840-717 840-700q0 25-17.5 42.5T780-640Zm0 240q-25 0-42.5-17.5T720-460q0-17 9.5-34.5t20.5-32q11-14.5 20.5-24l9.5-9.5 9.5 9.5q9.5 9.5 20.5 24t20.5 32Q840-477 840-460q0 25-17.5 42.5T780-400ZM360-120q-83 0-141.5-58.5T160-320q0-48 21-89.5t59-70.5v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q38 29 59 70.5t21 89.5q0 83-58.5 141.5T360-120ZM240-320h240q0-29-12.5-54T432-416l-32-24v-280q0-17-11.5-28.5T360-760q-17 0-28.5 11.5T320-720v280l-32 24q-23 17-35.5 42T240-320Z" />
                                     </Svg>
-                                    <Text style={styles.dataText}>
+                                    <Text style={[styles.dataText,{color:Temperatura(valorSensores1
+
+                                    )}]}>
                                         {valorSensores1.toFixed(0) + "ºC"}
                                     </Text>
                                     <Text style={styles.buttonText}>Temperatura</Text>
