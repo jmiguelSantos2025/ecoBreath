@@ -129,7 +129,7 @@ const Temperatura = (valor:number) =>{
                         <View style={styles.mainViewButton}>
                             {/* Card 1,2 */}
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("GraphicsScreen")}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("AirQualityScreen")}>
                                     <MaterialCommunityIcons
                                         name="weather-windy-variant"
                                         size={width * 0.14}
@@ -139,7 +139,7 @@ const Temperatura = (valor:number) =>{
                                     <Text style={[styles.dataText, {color:AirQualityColor(valorSensores3)}]}>{AirQuality(valorSensores3)}</Text>
                                     <Text style={styles.buttonText}>Qualidade do ar</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("TemperaturaScreen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"
@@ -160,7 +160,7 @@ const Temperatura = (valor:number) =>{
 
                             {/* Card 3,4 */}
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("Co2Screen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"
@@ -173,7 +173,7 @@ const Temperatura = (valor:number) =>{
                                     <Text style={styles.dataText}>{DioxidoDecarbono(valorSensores3)}</Text>
                                     <Text style={styles.buttonText}>Níveis de CO2 (%)</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push("VolatilScreen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"

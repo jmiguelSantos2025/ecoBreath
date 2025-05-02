@@ -5,7 +5,6 @@ import {
   Text,
   ImageBackground,
   Image,
-  useWindowDimensions,
   ScrollView,
   Dimensions
 } from "react-native";
@@ -14,50 +13,43 @@ import {
   VictoryArea,
   VictoryAxis,
   VictoryChart,
-  VictoryPie,
   VictoryTheme,
   VictoryLine,
   VictoryLabel,
+  VictoryPie
 } from "victory-native";
 import { onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 import { Defs, LinearGradient, Stop } from "react-native-svg";
-const {width,height} = Dimensions.get("window");
-export default function Co2GraphicsScreen() {
-  const { width, height } = useWindowDimensions();
-  const [co2PPM, setCo2PPM] = useState<number>(400);
-  const [co2History, setCo2History] = useState<{ x: number; y: number }[]>([]);
-  // Em estudo
-  const convertToPPM = (sensorValue: number) => {
-    const R0 = 76.63;
-    const RS = ((4095 - sensorValue) * 10) / sensorValue;
-    const ratio = RS / R0;
-    const ppm = 116.602068 * Math.pow(ratio, -2.769034857);
-    return Math.max(400, Math.min(ppm, 5000));
+
+const { width, height } = Dimensions.get("window");
+
+export default function TemperaturaScreen() {
+  const [temp, setTemp] = useState<number>(0);
+  const [tempHistory, setTempHistory] = useState<{ x: number; y: number }[]>([]);
+
+  const getTempColor = (temp: number) => {
+    if (temp < 20) return "#00BFFF";
+    else if (temp < 23) return "#1E90FF";
+    else if (temp < 26) return "#32CD32";
+    else if (temp < 28) return "#FFD700";
+    else if (temp < 30) return "#FF6347";
+    else return "#FF4500";
   };
-  // Feito
-  const getCO2Color = (ppm: number) => {
-    if (ppm < 800) return "#4CAF50";
-    if (ppm < 1200) return "#FFC107";
-    if (ppm < 2000) return "#FF9800";
-    return "#F44336";
+
+  const AirQuality = (temp: number) => {
+    if (temp < 20) return "FRIO";
+    else if (temp < 23) return "FRESCO";
+    else if (temp < 26) return "AMENO";
+    else if (temp < 28) return "MORNO";
+    else if (temp < 30) return "QUENTE";
+    else return "MUITO QUENTE";
   };
-  // Feito
-  const AirQuality = (ppm: number) => {
-    if (ppm < 800) return "EXCELENTE";
-    if (ppm < 1200) return "BOA";
-    if (ppm < 2000) return "MODERADA";
-    if (ppm < 5000) return "RUIM";
-    return "PÉSSIMA";
-  };
-  // Feito
+
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return `${date.getHours()}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
+    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
   useEffect(() => {
@@ -65,13 +57,11 @@ export default function Co2GraphicsScreen() {
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const sensorValue = data.MQ135OUT || 0;
-        const ppm = convertToPPM(sensorValue);
-        setCo2PPM(ppm);
-
+        const sensorValue = data.BME280T || 0;
+        setTemp(sensorValue);
         const now = Date.now();
-        setCo2History((prev) => {
-          const updated = [...prev, { x: now, y: ppm }];
+        setTempHistory((prev) => {
+          const updated = [...prev, { x: now, y: sensorValue }];
           const thirtyMinutesAgo = now - 30 * 60 * 1000;
           return updated.filter((item) => item.x >= thirtyMinutesAgo);
         });
@@ -104,7 +94,7 @@ export default function Co2GraphicsScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.title}>Monitor de CO₂</Text>
+          <Text style={styles.title}>Temperatura Ambiente</Text>
         </View>
 
         <ScrollView
@@ -116,16 +106,16 @@ export default function Co2GraphicsScreen() {
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
-                { x: "CO₂(ppm)", y: co2PPM },
-                { x: "Ar limpo", y: Math.max(0, 5000 - co2PPM) },
+                { x: "", y: temp },
+                { x: "", y: Math.max(0, 50 - temp) },
               ]}
               labels={({ datum }) => datum.x}
-              labelRadius={pieSize*0.25 +70}
-              innerRadius={pieSize*0.35}
+              labelRadius={pieSize * 0.25 + 70}
+              innerRadius={pieSize * 0.35}
               padAngle={2}
               cornerRadius={8}
               animate={{ duration: 1000 }}
-              colorScale={[getCO2Color(co2PPM), "rgba(255,255,255,0.2)"]}
+              colorScale={[getTempColor(temp), "rgba(6, 126, 60, 0.2)"]}
               style={{
                 labels: {
                   fontSize: 12,
@@ -133,16 +123,16 @@ export default function Co2GraphicsScreen() {
                   fontWeight: "bold",
                 },
               }}
-              width={pieSize+100}
-              height={pieSize+100}
+              width={pieSize + 100}
+              height={pieSize + 100}
             />
             <View style={styles.pieCenter}>
-              <Text
-                style={[styles.qualityText, { color: getCO2Color(co2PPM) }]}
-              >
-                {AirQuality(co2PPM)}
+              <Text style={[styles.qualityText, { color: getTempColor(temp) }]}>
+                {AirQuality(temp)}
               </Text>
-              <Text style={styles.ppmText}>{co2PPM.toFixed(0)} ppm</Text>
+              <Text style={styles.ppmText}>
+                {temp.toFixed(1)} °C
+              </Text>
             </View>
           </View>
 
@@ -153,7 +143,7 @@ export default function Co2GraphicsScreen() {
               width={width * 0.9}
               height={chartSize}
               padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
-              domainPadding={{ y: 10 }}
+              domainPadding={{ y: 5 }}
               theme={VictoryTheme.material}
             >
               <VictoryAxis
@@ -170,19 +160,17 @@ export default function Co2GraphicsScreen() {
               />
               <VictoryAxis
                 dependentAxis
-                label="CO₂ (ppm)"
+                label="Temperatura (°C)"
                 axisLabelComponent={
                   <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
-                  
                 }
-                tickValues={[500,1000,1500,2000,2500,3000]}
-                tickFormat={(y) => y === 2000 ? "2000\n(perigo)": `${y}`}
+                tickValues={[0, 20, 40, 60, 80, 100]}
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
                   tickLabels: {
                     fontSize: 10,
                     fill: "#fff",
-                    textAnchor:"middle"
+                    textAnchor: "middle",
                   },
                   grid: {
                     stroke: "rgba(255,255,255,0.1)",
@@ -191,7 +179,7 @@ export default function Co2GraphicsScreen() {
                 }}
               />
               <VictoryArea
-                data={co2History}
+                data={tempHistory}
                 interpolation="natural"
                 style={{
                   data: {
@@ -202,22 +190,6 @@ export default function Co2GraphicsScreen() {
                   },
                 }}
                 animate={{ duration: 1000 }}
-              />
-              <VictoryLine
-                data={[
-                  { x: co2History[0]?.x || 0, y: 2000 },
-                  { x: co2History[co2History.length - 1]?.x || 0, y: 2000 },
-                ]}
-                style={{
-                  data: {
-                    stroke: "#FF5722",
-                    strokeWidth: 2,
-                    strokeDasharray: "5,5",
-                    opacity: 0.8,
-                  },
-                }}
-                
-                
               />
               <Defs>
                 <LinearGradient
@@ -236,13 +208,15 @@ export default function Co2GraphicsScreen() {
 
           {/* Legenda */}
           <View style={styles.legendContainer}>
-            <Text style={styles.legendTitle}>Legenda de Qualidade do Ar</Text>
+            <Text style={styles.legendTitle}>Faixas de Temperatura</Text>
             <View style={styles.legendGrid}>
               {[
-                { color: "#4CAF50", label: "Excelente", range: "0-800 ppm" },
-                { color: "#FFC107", label: "Boa", range: "801-1200 ppm" },
-                { color: "#FF9800", label: "Moderada", range: "1201-2000 ppm" },
-                { color: "#F44336", label: "Ruim/Péssima", range: "2000+ ppm" },
+                { color: "#00BFFF", label: "Frio", range: "< 20 °C" },
+                { color: "#1E90FF", label: "Fresco", range: "20 - 22.9 °C" },
+                { color: "#32CD32", label: "Ameno", range: "23 - 25.9 °C" },
+                { color: "#FFD700", label: "Morno", range: "26 - 27.9 °C" },
+                { color: "#FF6347", label: "Quente", range: "28 - 29.9 °C" },
+                { color: "#FF4500", label: "Muito Quente", range: "≥ 30 °C" },
               ].map((item, index) => (
                 <View key={index} style={styles.legendItem}>
                   <View
@@ -261,7 +235,6 @@ export default function Co2GraphicsScreen() {
     </ImageBackground>
   );
 }
-
 const styles = StyleSheet.create({
   imageBackground: {
     flex: 1,
@@ -412,3 +385,4 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
 });
+
