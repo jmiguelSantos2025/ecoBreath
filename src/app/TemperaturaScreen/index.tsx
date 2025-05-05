@@ -53,7 +53,7 @@ export default function TemperaturaScreen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "Sensores");
+    const dbRef = ref(database, "SensoresPPM");
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();

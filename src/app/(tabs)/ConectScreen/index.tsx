@@ -2,6 +2,7 @@ import { View, Image, StyleSheet, Text } from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useWindowDimensions } from 'react-native';
+import { router } from 'expo-router';
 
 export default function ConectScreen() {
     const { width, height } = useWindowDimensions();
@@ -17,7 +18,7 @@ export default function ConectScreen() {
                 </View>
                 <Text style={style.titleText}>Configurações de Conexão</Text>
                 <View style={style.stepsContainer}>
-                    {["Ligue a máquina", "Aceite as permissões na tela do produto e do aplicativo", "Ative o Bluetooth da máquina e do aparelho"].map((text, index) => (
+                    {["Ligue a máquina", "Aceite as permissões na tela do produto e do aplicativo", "Ative o Wifi da máquina e do aparelho"].map((text, index) => (
                         <View key={index} style={style.stepItem}>
                             <View style={style.viewIconRight}>
                                 <Text style={style.iconRight}>{index + 1}</Text>
@@ -26,7 +27,7 @@ export default function ConectScreen() {
                         </View>
                     ))}
                 </View>
-                <TouchableOpacity activeOpacity={0.6} style={style.layoutButton1} onPress={()=>alert('Ainda em Desenvolvimento')}>
+                <TouchableOpacity activeOpacity={0.6} style={style.layoutButton1} onPress={()=>router.push("PowerScreen")}>
                     <Text style={style.buttonText1}>Continuar</Text>
                 </TouchableOpacity>
             </View>

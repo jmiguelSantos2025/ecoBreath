@@ -23,21 +23,20 @@ import { onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 import { Defs, LinearGradient, Stop } from "react-native-svg";
-const {width,height} = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 export default function Co2Screen() {
   const { width, height } = useWindowDimensions();
   const [co2PPM, setCo2PPM] = useState<number>(400);
   const [co2History, setCo2History] = useState<{ x: number; y: number }[]>([]);
 
-  // Feito
   const getCO2Color = (ppm: number) => {
     if (ppm < 800) return "#4CAF50";
     if (ppm < 1200) return "#FFC107";
     if (ppm < 2000) return "#FF9800";
     return "#F44336";
   };
-  // Feito
+
   const AirQuality = (ppm: number) => {
     if (ppm < 800) return "EXCELENTE";
     if (ppm < 1200) return "BOA";
@@ -45,7 +44,7 @@ export default function Co2Screen() {
     if (ppm < 5000) return "RUIM";
     return "PÉSSIMA";
   };
-  // Feito
+
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return `${date.getHours()}:${date
@@ -55,12 +54,10 @@ export default function Co2Screen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "Sensores");
+    const dbRef = ref(database, "SensoresPPM/CO2In");
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
-        const data = snapshot.val();
-        
-        const ppm = data.MQ135OUT || 0;
+        const ppm = snapshot.val() || 0;
         setCo2PPM(ppm);
 
         const now = Date.now();
@@ -106,7 +103,6 @@ export default function Co2Screen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Gráfico Redondo */}
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
@@ -114,8 +110,8 @@ export default function Co2Screen() {
                 { x: "Ar limpo", y: Math.max(0, 5000 - co2PPM) },
               ]}
               labels={({ datum }) => datum.x}
-              labelRadius={pieSize*0.25 +70}
-              innerRadius={pieSize*0.35}
+              labelRadius={pieSize * 0.25 + 70}
+              innerRadius={pieSize * 0.35}
               padAngle={2}
               cornerRadius={8}
               animate={{ duration: 1000 }}
@@ -127,20 +123,17 @@ export default function Co2Screen() {
                   fontWeight: "bold",
                 },
               }}
-              width={pieSize+100}
-              height={pieSize+100}
+              width={pieSize + 100}
+              height={pieSize + 100}
             />
             <View style={styles.pieCenter}>
-              <Text
-                style={[styles.qualityText, { color: getCO2Color(co2PPM) }]}
-              >
+              <Text style={[styles.qualityText, { color: getCO2Color(co2PPM) }]}>
                 {AirQuality(co2PPM)}
               </Text>
               <Text style={styles.ppmText}>{co2PPM.toFixed(0)} ppm</Text>
             </View>
           </View>
 
-          {/* Gráfico Quadrado */}
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>Variação Temporal</Text>
             <VictoryChart
@@ -167,16 +160,17 @@ export default function Co2Screen() {
                 label="CO₂ (ppm)"
                 axisLabelComponent={
                   <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
-                  
                 }
-                tickValues={[500,1000,1500,2000,2500,3000]}
-                tickFormat={(y) => y === 2000 ? "2000\n(perigo)": `${y}`}
+                tickValues={[500, 1000, 1500, 2000, 2500, 3000]}
+                tickFormat={(y) =>
+                  y === 2000 ? "2000\n(perigo)" : `${y}`
+                }
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
                   tickLabels: {
                     fontSize: 10,
                     fill: "#fff",
-                    textAnchor:"middle"
+                    textAnchor: "middle",
                   },
                   grid: {
                     stroke: "rgba(255,255,255,0.1)",
@@ -210,8 +204,6 @@ export default function Co2Screen() {
                     opacity: 0.8,
                   },
                 }}
-                
-                
               />
               <Defs>
                 <LinearGradient
@@ -228,7 +220,6 @@ export default function Co2Screen() {
             </VictoryChart>
           </View>
 
-          {/* Legenda */}
           <View style={styles.legendContainer}>
             <Text style={styles.legendTitle}>Legenda de Qualidade do Ar</Text>
             <View style={styles.legendGrid}>

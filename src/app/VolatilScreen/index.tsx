@@ -7,7 +7,7 @@ import {
   Image,
   useWindowDimensions,
   ScrollView,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import {
@@ -28,9 +28,8 @@ const { width, height } = Dimensions.get("window");
 
 export default function VolatilScreen() {
   const { width, height } = useWindowDimensions();
-  const [gasPPM, setGasPPM] = useState<number>(400); // Valor padrão de gás volátil
+  const [gasPPM, setGasPPM] = useState<number>(400);
   const [gasHistory, setGasHistory] = useState<{ x: number; y: number }[]>([]);
-
 
   const getGasColor = (ppm: number) => {
     if (ppm < 800) return "#4CAF50";
@@ -39,7 +38,6 @@ export default function VolatilScreen() {
     return "#F44336";
   };
 
-
   const AirQuality = (ppm: number) => {
     if (ppm < 800) return "EXCELENTE";
     if (ppm < 1200) return "BOA";
@@ -47,7 +45,6 @@ export default function VolatilScreen() {
     if (ppm < 5000) return "RUIM";
     return "PÉSSIMA";
   };
-
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -58,16 +55,18 @@ export default function VolatilScreen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "Sensores");
+    const dbRef = ref(database, "SensoresPPM");
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const mq2PPM = data.MQ2 || 0;
-        const mq7PPM = data.MQ7 || 0;
-        const mq8PPM = data.MQ8 || 0;
+        const c2h50h = data.C2H50H || 0;
+        const ch4 = data.CH4 || 0;
+        const co = data.CO || 0;
+        const h2 = data.H2 || 0;
+        const hn3 = data.HN3 || 0;
+        const no2 = data.NO2 || 0;
 
-        
-        const averagePPM = (mq2PPM + mq7PPM + mq8PPM) / 3;
+        const averagePPM = (c2h50h + ch4 + co + h2 + hn3 + no2) / 6;
         setGasPPM(averagePPM);
 
         const now = Date.now();
@@ -113,7 +112,6 @@ export default function VolatilScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Gráfico Redondo */}
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
@@ -147,7 +145,6 @@ export default function VolatilScreen() {
             </View>
           </View>
 
-          {/* Gráfico Quadrado */}
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>Variação Temporal</Text>
             <VictoryChart
@@ -176,7 +173,7 @@ export default function VolatilScreen() {
                   <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
                 }
                 tickValues={[500, 1000, 1500, 2000, 2500, 3000]}
-                tickFormat={(y) => y === 2000 ? "2000\n(perigo)" : `${y}`}
+                tickFormat={(y) => (y === 2000 ? "2000\n(perigo)" : `${y}`)}
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
                   tickLabels: {
@@ -232,16 +229,14 @@ export default function VolatilScreen() {
             </VictoryChart>
           </View>
 
-          {/* Legenda */}
           <View style={styles.legendContainer}>
             <Text style={styles.legendTitle}>Legenda de Qualidade do Ar</Text>
             <View style={styles.legendGrid}>
-              {[  
+              {[
                 { color: "#4CAF50", label: "Excelente", range: "0-800 ppm" },
                 { color: "#FFC107", label: "Boa", range: "801-1200 ppm" },
                 { color: "#FF9800", label: "Moderada", range: "1201-2000 ppm" },
                 { color: "#F44336", label: "Ruim/Péssima", range: "2000+ ppm" },
-                
               ].map((item, index) => (
                 <View key={index} style={styles.legendItem}>
                   <View
@@ -262,7 +257,6 @@ export default function VolatilScreen() {
 }
 
 const styles = StyleSheet.create({
- 
   imageBackground: {
     flex: 1,
     width: "100%",

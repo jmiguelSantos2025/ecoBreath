@@ -11,22 +11,20 @@ import {
 } from "react-native";
 import { IconButton } from "react-native-paper";
 import {
-  VictoryArea,
-  VictoryAxis,
-  VictoryChart,
   VictoryPie,
-  VictoryTheme,
+  VictoryChart,
+  VictoryAxis,
   VictoryLine,
   VictoryLabel,
+  VictoryTheme
 } from "victory-native";
 import { onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
-import { Defs, LinearGradient, Stop } from "react-native-svg";
+
 const { width, height } = Dimensions.get("window");
 
 export default function AirQualityScreen() {
-  const { width, height } = useWindowDimensions();
   const [co2PPM, setCo2PPM] = useState<number>(400);
   const [volatilePPM, setVolatilePPM] = useState<number>(200);
   const [history, setHistory] = useState<{
@@ -34,6 +32,8 @@ export default function AirQualityScreen() {
     volatiles: { x: number; y: number }[];
     cleanAir: { x: number; y: number }[];
   }>({ co2: [], volatiles: [], cleanAir: [] });
+
+  const { width, height } = useWindowDimensions();
 
   const getAirColor = (totalPPM: number) => {
     if (totalPPM < 800) return "#4CAF50";
@@ -52,20 +52,18 @@ export default function AirQualityScreen() {
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return `${date.getHours()}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
+    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "Sensores");
+    const dbRef = ref(database, "SensoresPPM");
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const co2 = data.MQ135OUT || 0;
-        const volatiles = ((data.MQ2 || 0) + (data.MQ7 || 0) + (data.MQ8 || 0))/3;
-        const totalGases = (co2+volatiles)/2;
+        const co2 = data.CO2In || 0;
+        const volatiles = ((data.C2H50H || 0) + (data.CH4 || 0) + (data.CO || 0) + (data.H2 || 0) + (data.HN3 || 0) + (data.NO2 || 0)) / 6;
+
+        const totalGases = (co2 + volatiles) / 2;
         const now = Date.now();
         const cleanAir = Math.max(0, 5000 - totalGases);
 
@@ -90,7 +88,7 @@ export default function AirQualityScreen() {
     return () => unsubscribe();
   }, []);
 
-  const totalPPM = (co2PPM + volatilePPM)/2;
+  const totalPPM = (co2PPM + volatilePPM) / 2;
   const chartSize = Math.min(width * 0.9, height * 0.4);
   const pieSize = Math.min(width * 0.55, height * 0.4);
 
@@ -122,7 +120,6 @@ export default function AirQualityScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Gráfico Redondo */}
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
@@ -136,11 +133,7 @@ export default function AirQualityScreen() {
               padAngle={2}
               cornerRadius={8}
               animate={{ duration: 1000 }}
-              colorScale={[
-                "#03A9F4", 
-                "#FF9800", 
-                "rgba(6, 126, 60, 0.2)", 
-              ]}
+              colorScale={["#03A9F4", "#FF9800", "rgba(6, 126, 60, 0.2)"]}
               style={{
                 labels: {
                   fontSize: 12,
@@ -159,7 +152,6 @@ export default function AirQualityScreen() {
             </View>
           </View>
 
-          {/* Grafico Quadrado */}
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>Histórico de CO₂ e Gases Voláteis</Text>
             <VictoryChart
@@ -173,26 +165,18 @@ export default function AirQualityScreen() {
                 tickFormat={formatTime}
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
-                  tickLabels: {
-                    fontSize: 10,
-                    fill: "#fff",
-                    angle: -45,
-                  },
+                  tickLabels: { fontSize: 10, fill: "#fff", angle: -45 },
                   grid: { stroke: "rgba(255,255,255,0.1)" },
                 }}
               />
               <VictoryAxis
                 dependentAxis
-                label="Concentração (co2+gases volateis em ppm)"
+                label="Concentração (co2+gases voláteis em ppm)"
                 axisLabelComponent={<VictoryLabel dy={-30} style={{ fill: "#fff" }} />}
                 tickFormat={(y) => y}
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
-                  tickLabels: {
-                    fontSize: 10,
-                    fill: "#fff",
-                    textAnchor: "middle",
-                  },
+                  tickLabels: { fontSize: 10, fill: "#fff" },
                   grid: {
                     stroke: "rgba(255,255,255,0.1)",
                     strokeDasharray: "4,4",
@@ -202,28 +186,21 @@ export default function AirQualityScreen() {
               <VictoryLine
                 data={history.co2}
                 interpolation="natural"
-                style={{
-                  data: { stroke: "#03A9F4", strokeWidth: 2 },
-                }}
+                style={{ data: { stroke: "#03A9F4", strokeWidth: 2 } }}
               />
               <VictoryLine
                 data={history.volatiles}
                 interpolation="natural"
-                style={{
-                  data: { stroke: "#FF9800", strokeWidth: 2 },
-                }}
+                style={{ data: { stroke: "#FF9800", strokeWidth: 2 } }}
               />
               <VictoryLine
                 data={history.cleanAir}
                 interpolation="natural"
-                style={{
-                  data: { stroke: "#4CAF50", strokeWidth: 2 },
-                }}
+                style={{ data: { stroke: "#4CAF50", strokeWidth: 2 } }}
               />
             </VictoryChart>
           </View>
 
-          {/* Legenda */}
           <View style={styles.legendContainer}>
             <Text style={styles.legendTitle}>Legenda de Qualidade do Ar (CO₂ + Gases Voláteis)</Text>
             <View style={styles.legendGrid}>
@@ -250,14 +227,8 @@ export default function AirQualityScreen() {
 }
 
 const styles = StyleSheet.create({
-  imageBackground: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  container: {
-    flex: 1,
-  },
+  imageBackground: { flex: 1, width: "100%", height: "100%" },
+  container: { flex: 1 },
   header: {
     height: 180,
     width: "100%",
@@ -274,11 +245,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(66, 143, 119, 0.8)",
     borderRadius: 10,
   },
-  logo: {
-    width: 120,
-    height: 80,
-    marginBottom: 10,
-  },
+  logo: { width: 120, height: 80, marginBottom: 10 },
   title: {
     color: "#fff",
     fontSize: 22,
@@ -287,11 +254,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
-  scrollView: {
-    flex: 1,
-    width: "100%",
-    marginTop: height * 0.1,
-  },
+  scrollView: { flex: 1, width: "100%", marginTop: height * 0.1 },
   scrollContent: {
     alignItems: "center",
     paddingTop: 10,
@@ -380,9 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginRight: 10,
   },
-  legendTextContainer: {
-    flex: 1,
-  },
+  legendTextContainer: { flex: 1 },
   legendLabel: {
     color: "#fff",
     fontSize: 14,
