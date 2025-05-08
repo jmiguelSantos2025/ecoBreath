@@ -75,22 +75,6 @@ export default function PreferenciasScreen() {
               value={isEnable}
             />
           </View>
-
-          <View style={style.button}>
-            <View style={style.viewIconButton}>
-              <MaterialCommunityIcons name='bell' size={RFValue(20)} color='#fff' />
-            </View>
-            <View style={style.viewTitleButton}>
-              <Text style={style.titleButton}>Limpar Armazenamento</Text>
-              <Text style={style.textButton}>Libere espaço removendo dados desnecessários</Text>
-            </View>
-            {/* Em revisão */}
-            <TouchableOpacity>
-              <View style={style.iconContainer}>
-                <MaterialCommunityIcons name='trash-can' size={RFValue(24)} color='#13D8B0' />
-              </View>
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
     </View>
