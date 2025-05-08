@@ -63,7 +63,7 @@ export default function AirQualityScreen() {
         const co2 = data.CO2In || 0;
         const volatiles = ((data.C2H50H || 0) + (data.CH4 || 0) + (data.CO || 0) + (data.H2 || 0) + (data.HN3 || 0) + (data.NO2 || 0)) / 6;
 
-        const totalGases = (co2 + volatiles) / 2;
+        const totalGases = co2 + volatiles;
         const now = Date.now();
         const cleanAir = Math.max(0, 5000 - totalGases);
 
@@ -88,7 +88,7 @@ export default function AirQualityScreen() {
     return () => unsubscribe();
   }, []);
 
-  const totalPPM = (co2PPM + volatilePPM) / 2;
+  const totalPPM = (co2PPM + volatilePPM);
   const chartSize = Math.min(width * 0.9, height * 0.4);
   const pieSize = Math.min(width * 0.55, height * 0.4);
 

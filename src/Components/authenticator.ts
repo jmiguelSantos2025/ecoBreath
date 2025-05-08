@@ -1,5 +1,5 @@
 import {auth} from '../../firebaseConfig';
-import {createUserWithEmailAndPassword,signInWithEmailAndPassword,AuthError, signOut,UserCredential, signInWithPopup, GoogleAuthProvider,signInWithCredential, updateProfile } from 'firebase/auth'
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword,AuthError, signOut,UserCredential,signInWithCredential, updateProfile, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth'
 import { firestore } from '../../firebaseConfig';
 import { doc,setDoc } from 'firebase/firestore';
 import { provider } from '../../firebaseConfig';
@@ -20,7 +20,7 @@ export const signUp = async(email:string,password:string,username:string)=>{
         return {sucess:true, message:"Usuários cadastrados!" ,user: userCredential.user};
 
     }catch(error:any){
-        return{sucess:false,message: error.message};
+        return{sucess:false,error: error.mensagem||error.code};
 
     }
 
@@ -47,3 +47,18 @@ export const logOut = async()=>{
     }
 
 }
+// export const reauthenticator = async(email:string, password:string)=>{
+//     const user = auth.currentUser;
+//     if(!user){
+//         return false;
+//     }
+//     const credential = EmailAuthProvider.credential(email, password);
+//     try{
+//         await reauthenticateWithCredential(user,credential);
+//         return true;
+//     }catch(error){
+//         console.error("Erro ao autenticar", error);
+//         alert("Faça Login Novamente , erro de autenticação");
+//         return false;
+//     }
+// }

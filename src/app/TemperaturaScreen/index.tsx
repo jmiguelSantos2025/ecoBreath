@@ -53,15 +53,15 @@ export default function TemperaturaScreen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "SensoresPPM");
+    const dbRef = ref(database, "TempeUmid");
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const sensorValue = data.BME280T || 0;
+        const sensorValue = data.Temperatura || 0;
         setTemp(sensorValue);
         const now = Date.now();
         setTempHistory((prev) => {
-          const updated = [...prev, { x: now, y: sensorValue }];
+          const updated = [...prev, { x: now, y: temp }];
           const thirtyMinutesAgo = now - 30 * 60 * 1000;
           return updated.filter((item) => item.x >= thirtyMinutesAgo);
         });
@@ -102,12 +102,12 @@ export default function TemperaturaScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Gráfico Redondo */}
+         
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
                 { x: "", y: temp },
-                { x: "", y: Math.max(0, 50 - temp) },
+                { x: "", y: Math.max(0, 100 - temp) },
               ]}
               labels={({ datum }) => datum.x}
               labelRadius={pieSize * 0.25 + 70}
@@ -136,9 +136,9 @@ export default function TemperaturaScreen() {
             </View>
           </View>
 
-          {/* Gráfico Quadrado */}
+          
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>Variação Temporal</Text>
+            <Text style={styles.chartTitle}>Variação Temperatura x Tempo</Text>
             <VictoryChart
               width={width * 0.9}
               height={chartSize}
@@ -189,7 +189,7 @@ export default function TemperaturaScreen() {
                     fillOpacity: 0.7,
                   },
                 }}
-                animate={{ duration: 1000 }}
+                animate={{ duration: 100 }}
               />
               <Defs>
                 <LinearGradient
@@ -206,7 +206,7 @@ export default function TemperaturaScreen() {
             </VictoryChart>
           </View>
 
-          {/* Legenda */}
+          
           <View style={styles.legendContainer}>
             <Text style={styles.legendTitle}>Faixas de Temperatura</Text>
             <View style={styles.legendGrid}>

@@ -3,13 +3,12 @@ import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, ActivityIn
 import { TextInput } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updatePassword } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { firestore, auth } from '../../../../firebaseConfig';
 import CustomModal, { CustomConfirmModal } from '../../../Components/CustomModal';
 import { router } from 'expo-router';
-
+import { reauthenticator} from '../../../Components/authenticator';
 const { width, height } = Dimensions.get('window');
 
 export default function EditarUserScreen() {
@@ -21,6 +20,7 @@ export default function EditarUserScreen() {
   const [modal2IsVisible, setModal2IsVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
   
 
   useEffect(() => {
@@ -73,8 +73,8 @@ export default function EditarUserScreen() {
       const userRef = doc(firestore, 'usuarios', user.uid);
       await updateDoc(userRef, { photoURL: uri });
       setUserData(prev => ({ ...prev, photoURL: uri }));
-    } catch (err) {
-      console.error('Erro ao salvar imagem:', err);
+    } catch (error) {
+      console.error('Erro ao salvar imagem:', error);
       alert('Não foi possível salvar a imagem.');
     } finally {
       setUploading(false);
@@ -84,20 +84,37 @@ export default function EditarUserScreen() {
   const handleSave = async () => {
     const user = auth.currentUser;
     if (!user) return;
+  
     if (userData.password && userData.password !== confirmPassword) {
       alert('As senhas não coincidem!');
       return;
     }
-    const userRef = doc(firestore, 'usuarios', user.uid);
-    try {
-      await updateDoc(userRef, { username: userData.username, email: userData.email });
-      if (userData.password) {
+
+    if (userData.password) {
+      const success = await reauthenticator(userData.email, confirmPassword); 
+      if (!success) return;
+  
+      try {
         await updatePassword(user, userData.password);
+      } catch (error) {
+        console.error('Erro ao atualizar senha:', error);
+        alert('Erro ao salvar dados. Tente novamente.');
+        return;
       }
+    }
+  
+    try {
+      const userRef = doc(firestore, 'usuarios', user.uid);
+      await updateDoc(userRef, {
+        username: userData.username,
+        email: userData.email,
+      });
+  
       setModalIsVisible(true);
+      router.push("MainScreen");
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      alert('Erro ao salvar dados. Tente novamente.');
+      console.error('Erro ao atualizar dados no Firestore:', error);
+      alert('Erro ao salvar dados no Firestore.');
     }
   };
 
@@ -242,8 +259,8 @@ export default function EditarUserScreen() {
       />
       <CustomConfirmModal
         visible={modal2IsVisible}
-        title="Informações Editadas"
-        message="Suas informações foram editadas com sucesso!"
+        title="Deseja Cancelar?"
+        message="Suas alterações serão descartadas!"
         onClose={() => setModal2IsVisible(false)}
         icon={"bookmark-check"}
         color={"#006462"}

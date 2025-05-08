@@ -1,36 +1,49 @@
-import React , {useState} from 'react';
+import React , {useEffect, useState} from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal, { CustomConfirmModal } from '../../Components/CustomModal';
 import { IconButton } from 'react-native-paper';
 import { router } from 'expo-router';
-import { ref, set } from 'firebase/database';
+import { get, onValue, ref, set } from 'firebase/database';
 import { database } from '../../../firebaseConfig';
 
 const {height, width} = Dimensions.get("window");
 export default function PowerScreen() {
     const [modalIsVisible,setModalIsVisible] =useState(false);
     const [isPower,setIsPower] = useState(false);
+    const [Power,setPower] = useState(false);
     function handleButton(){
         setModalIsVisible(!modalIsVisible);
         
     }
     function handleConfirm(){
-        const newPowerState = !isPower;
-        setIsPower(newPowerState);
-        const dbRef = ref(database, "conexão/Ligado");
-        set( dbRef, newPowerState).then(()=>{
-        console.log("Valor atualizado");}).catch((error)=>{
+
+      const newPowerValue = !Power;
+      const dbRef = ref(database, "conexão/Ligado");
+        set( dbRef, newPowerValue  ).then(()=>{
+        console.log("Valor atualizado");
+        setPower(newPowerValue);
+        setModalIsVisible(false);
+        router.replace("MainScreen");
+      }).catch((error)=>{
             console.error("Error", error);
         });
-
-
-        setModalIsVisible(false);
+        
     }
     function handleCancel(){
         setModalIsVisible(false);
     }
+
+    useEffect(()=>{
+       const dbRef = ref(database, "conexão/Ligado");
+       const power = onValue(dbRef,(snapshot)=>{
+        const value = snapshot.val();
+        setPower(value);
+
+       });
+       return ()=>power();
+    },[]);
   return (
     <SafeAreaView style={styles.container}>
         <IconButton
@@ -55,11 +68,11 @@ export default function PowerScreen() {
           <MaterialCommunityIcons name="power" size={70} color="white" />
         </View>
 
-        <Text style={styles.title}>Deseja Desligar/Ligar?</Text>
+        <Text style={styles.title}>Deseja {Power? "Desligar" : "Ligar"} a Maquina?</Text>
 
 
         <Text style={styles.description}>
-          Clique em <Text style={styles.bold}>SIM</Text> caso deseje desligar/ligar a máquina.
+          Clique em <Text style={styles.bold}>SIM</Text> caso deseje {Power? "desligar" : "ligar"} a máquina.
         </Text>
 
         
@@ -69,7 +82,7 @@ export default function PowerScreen() {
         <CustomConfirmModal
           visible={modalIsVisible}
           title="Confirmar ação"
-          message="Você tem certeza que deseja desligar/ligar a máquina?"
+          message={ `Você tem certeza que deseja ${Power? "desligar":"ligar"} a maquina`}
           icon="alert-outline"
           color="#006462"
           onConfirm={handleConfirm}
@@ -130,17 +143,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
-    // backgroundColor: '#08C5C1',
-    // paddingVertical: 15,
-    // width:"70%",
-    // borderRadius: 15,
-    // borderWidth: 2,
-    // borderColor: '#08C5C1',
-    // justifyContent:"center",
-    // alignItems:"center"
     width: "80%",
     height: "12%",
-    borderRadius: 10,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#07C3C3",

@@ -3,12 +3,26 @@ import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
+import { IconButton } from 'react-native-paper';
 
 export default function ConectScreen() {
     const { width, height } = useWindowDimensions();
     
     return (
         <View style={style.container}>
+            <IconButton
+                          icon="arrow-left"
+                          size={30}
+                          onPress={() => router.back()}
+                          iconColor="white"
+                          style={{
+                            position: "absolute",
+                            top: 20,
+                            left: 20,
+                            zIndex: 10,
+                            backgroundColor: "#428F77",
+                          }}
+                        />
             <View style={style.firstPierce}>
                 <Image source={require("../../../../assets/LogoBranca.png")} style={style.logo} />
             </View>
@@ -100,7 +114,7 @@ const style = StyleSheet.create({
     layoutButton1: {
         width: "80%",
         height: 70,
-        borderRadius: 10,
+        borderRadius: 8,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#07C3C3",

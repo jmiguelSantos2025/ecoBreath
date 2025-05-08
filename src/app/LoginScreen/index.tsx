@@ -1,28 +1,44 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
+import {
+  View,
+  Image,
+  StyleSheet,
+  Dimensions,
+  Text,
+  ImageBackground,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import { TextInput, IconButton } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { RFValue } from "react-native-responsive-fontsize";
-import { signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
-import { auth, provider } from "../../../firebaseConfig"; 
-import CustomModal from '../../Components/CustomModal'
-import { set } from "firebase/database";
+import {signInWithEmailAndPassword} from "firebase/auth";
+import { auth} from "../../../firebaseConfig";
+import CustomModal from "../../Components/CustomModal";
+
 const { width, height } = Dimensions.get("window");
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isVisible, setIsVisible] = useState(true);
-  const [modalIsVisible,setModalIsVisible] = useState(false);
-  const [modal2lIsVisible,setModal2IsVisible] = useState(false);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [modal2lIsVisible, setModal2IsVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  
   const handleSignIn = async () => {
     try {
+      setModalLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
       setEmail("");
       setPassword("");
+      setModalLoading(false);
       router.push("/MainScreen");
     } catch (error) {
+      setModalLoading(false);
       setModal2IsVisible(!modal2lIsVisible);
     }
   };
@@ -54,9 +70,15 @@ export default function LoginScreen() {
           <IconButton
             icon="arrow-left"
             size={30}
-            onPress={() => router.back()}
+            onPress={() => router.replace("TransitionScreenThird")}
             iconColor="white"
-            style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+            style={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+              zIndex: 10,
+              backgroundColor: "#428F77",
+            }}
           />
           <View style={style.firstPierce}>
             <Image
@@ -144,7 +166,7 @@ export default function LoginScreen() {
 
                 <View style={style.viewButton}>
                   <TouchableOpacity
-                  delayPressIn={0}
+                    delayPressIn={0}
                     activeOpacity={0.6}
                     style={style.layoutButton1}
                     onPress={Database}
@@ -160,54 +182,35 @@ export default function LoginScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View style={style.container2}>
-                  <View style={style.dividerContainer}>
-                    <View style={style.line} />
-                    <Text style={style.dividerText}>Conectar usando</Text>
-                    <View style={style.line} />
-                  </View>
-
-                  <View style={style.viewContainerIcon}>
-                    <View style={style.containerIconButton}>
-                      <IconButton
-                        onPress={() => alert('Ainda em processo de desenvolvimento')}
-                        icon="google"
-                        size={24}
-                        style={style.iconButton}
-                        iconColor="white"
-                      />
-                    </View>
-                    <View style={style.containerIconButton}>
-                      <IconButton
-                        icon="facebook"
-                        size={24}
-                        style={style.iconButton}
-                        iconColor="white"
-                        onPress={()=>alert("Ainda em processo de desenvolvimento ")}
-                      />
-                    </View>
-      
-                  </View>
-                </View>
+                <View style={style.container2}></View>
               </View>
             </ScrollView>
           </View>
           <CustomModal
-          visible={modalIsVisible}
-          title="Campos obrigatórios"
-          message="Por favor, preencha todos os campos para continuar."
-          onClose={() => setModalIsVisible(false)}
-          icon={"alert-outline"}
-          color={"#006462"}
-        />
-        <CustomModal
-          visible={modal2lIsVisible}
-          title="Login ou usuário incorreto"
-          message="Por favor, preencha os campos de acordo com o usuário cadastrado!"
-          onClose={() => setModal2IsVisible(false)}
-          icon={"alert-outline"}
-          color={"#006462"}
-        />
+            visible={modalIsVisible}
+            title="Campos obrigatórios"
+            message="Por favor, preencha todos os campos para continuar."
+            onClose={() => setModalIsVisible(false)}
+            icon={"alert-outline"}
+            color={"#006462"}
+          />
+          <CustomModal
+            visible={modal2lIsVisible}
+            title="Login ou usuário incorreto"
+            message="Por favor, preencha os campos de acordo com o usuário cadastrado!"
+            onClose={() => setModal2IsVisible(false)}
+            icon={"alert-outline"}
+            color={"#006462"}
+          />
+          <CustomModal
+            visible={modalLoading}
+            title="Carregando....."
+            message="Por favor, aguarde enquanto entramos com seu usuário"
+            onClose={() => setModalLoading(false)}
+            icon={"loading"}
+            color={"#006462"}
+          />
+          
         </View>
       </ImageBackground>
     </KeyboardAvoidingView>
@@ -299,33 +302,6 @@ const style = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 20,
-  },
-  line: {
-    flex: 0.32,
-    height: 1,
-    backgroundColor: "#20524E",
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: "#006765",
-    fontWeight: "bold",
-  },
-  iconButton: {
-    borderRadius: 25,
-    width: 25,
-    height: 25,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  containerIconButton: {
-    backgroundColor: "#006765",
-    borderRadius: 50,
-    padding: 5,
-  },
-  viewContainerIcon: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: height * 0.01,
   },
   scrollViewContent: {
     flexGrow: 1,

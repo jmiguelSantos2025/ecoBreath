@@ -116,11 +116,10 @@ export default function MonitoringScreen() {
 
     useEffect(() => {
         const dbRef = ref(database, 'SensoresPPM');
+        const tempRef = ref(database, 'TempeUmid');
         const unsubscribe = onValue(dbRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                setTemperatura(data.BME280T || 0);
-                setUmidade(data.BME280U || 0);
                 setCo2In(data.CO2In || 0);
                 setC2h5oh(data.C2H50H || 0);
                 setCh4(data.CH4 || 0);
@@ -132,7 +131,16 @@ export default function MonitoringScreen() {
                 console.log("Sem dados disponíveis");
             }
         });
-        return () => unsubscribe();
+        const unsubscribeTemp = onValue(tempRef,(snapshot)=>{
+            if(snapshot.exists()){
+                const data = snapshot.val();
+                setTemperatura(data.Temperatura);
+            }
+        });
+        return () => {
+            unsubscribe();
+            unsubscribeTemp();
+        }
     }, []);
 
     return (

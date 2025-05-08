@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 6,
     alignItems: "center",
   },
   cancelButton: {

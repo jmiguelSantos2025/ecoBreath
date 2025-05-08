@@ -1,4 +1,15 @@
-import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
+import {
+  View,
+  Image,
+  StyleSheet,
+  Dimensions,
+  Text,
+  ImageBackground,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import { TextInput, IconButton } from "react-native-paper";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useState } from "react";
@@ -6,8 +17,6 @@ import { signUp } from "../../Components/authenticator";
 import { router } from "expo-router";
 import { RFValue } from "react-native-responsive-fontsize";
 import CustomModal from "../../Components/CustomModal";
-
-
 const { width, height } = Dimensions.get("window");
 
 export default function NewUserScreen() {
@@ -20,6 +29,10 @@ export default function NewUserScreen() {
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [modal2IsVisible, setModal2IsVisible] = useState(false);
   const [modal3IsVisible, setModal3IsVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalPasswordSmall, setModalPasswordSmall] = useState(false);
+  const [modalEmailIncorrect, setModalEmailIncorrect] = useState(false);
+  const [modalError, setModalError] = useState(false);
   const PressIcon = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -29,33 +42,57 @@ export default function NewUserScreen() {
 
   const handleSignUp = async () => {
     if (password == confirm) {
+      setModalLoading(true);
+
+      
       const result = await signUp(email, password, user);
-      if (result.message) {
-        
+      setModalLoading(false);
+      const error = result.error;
+      if (result.sucess) {
         setEmail("");
         setConfirm("");
         setPassword("");
         setUser("");
+        
         setModal3IsVisible(!modal3IsVisible);
+        // Aqui é de sucesso
       } else {
         setEmail("");
         setConfirm("");
         setPassword("");
         setUser("");
-        router.push("LoginScreen");
-        
+        setModalLoading(false);
+        console.log(error);
+        if(error === "auth/invalid-email"){
+          setModalEmailIncorrect(true);
+
+        }else{
+          console.log("Error: "+ error);
+          setModalError(true);
+        // Aqui é de error
+
+
+        }
       }
-    } else {
-      setModal2IsVisible(!modal2IsVisible)
+
+
+      setModalLoading(false);
+      }else {
+      setModal2IsVisible(!modal2IsVisible);
     }
-  };
+  }
+
 
   const Database = async () => {
-    if (!email || !password ||!user||!confirm) {
+    if (!email || !password || !user || !confirm) {
       setModalIsVisible(!modalIsVisible);
       return;
     } else {
-      await handleSignUp();
+      if (password.length >= 6) {
+          await handleSignUp();
+      } else {
+        setModalPasswordSmall(true);
+      }
     }
   };
 
@@ -80,7 +117,13 @@ export default function NewUserScreen() {
               size={30}
               onPress={() => router.back()}
               iconColor="white"
-              style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+              style={{
+                position: "absolute",
+                top: 20,
+                left: 20,
+                zIndex: 10,
+                backgroundColor: "#428F77",
+              }}
             />
             <View style={style.firstPierce}>
               <Image
@@ -221,60 +264,70 @@ export default function NewUserScreen() {
                     <Text style={style.buttonText2}>Cadastrar</Text>
                   </TouchableOpacity>
                 </View>
-
-                <View style={style.container2}>
-                  <View style={style.dividerContainer}>
-                    <View style={style.line} />
-                    <Text style={style.dividerText}>Conectar usando</Text>
-                    <View style={style.line} />
-                  </View>
-                  <View style={style.viewContainerIcon}>
-                    <View style={style.containerIconButton}>
-                      <IconButton
-                        icon="google"
-                        size={24}
-                        style={style.iconButton}
-                        iconColor="white"
-                        onPress={() => alert("Ainda em processo de desenvolvimento")}
-                      />
-                    </View>
-                    <View style={style.containerIconButton}>
-                      <IconButton
-                        icon="facebook"
-                        size={24}
-                        style={style.iconButton}
-                        iconColor="white"
-                        onPress={() => alert("Ainda em processo de desenvolvimento")}
-                      />
-                    </View>
-                  </View>
-                </View>
               </View>
             </View>
             <CustomModal
-                      visible={modalIsVisible}
-                      title="Campos obrigatórios"
-                      message="Por favor, preencha todos os campos para continuar."
-                      onClose={() => setModalIsVisible(false)}
-                      icon={"alert-outline"}
-                      color={"#006462"}
-                    />
-                    <CustomModal
-                      visible={modal2IsVisible}
-                      title="Senhas Diferentes"
-                      message="Você deve colocar senhas iguais!"
-                      onClose={() => setModal2IsVisible(false)}
-                      icon={"lock-off"}
-                      color={"#006462"}
-                    />
-                    <CustomModal
-                      visible={modal3IsVisible}
-                      title="Cadastro Realizado com Sucesso!"
-                      message="Você realizou o cadastro com sucesso!"
-                      onClose={() =>{ setModal3IsVisible(false); router.push('LoginScreen')}}
-                      icon={"account-circle"}
-                      color={"#006462"}
-                    />
+              visible={modalIsVisible}
+              title="Campos obrigatórios"
+              message="Por favor, preencha todos os campos para continuar."
+              onClose={() => setModalIsVisible(false)}
+              icon={"alert-outline"}
+              color={"#006462"}
+            />
+            <CustomModal
+              visible={modal2IsVisible}
+              title="Senhas Diferentes"
+              message="Você deve colocar senhas iguais!"
+              onClose={() => setModal2IsVisible(false)}
+              icon={"lock-off"}
+              color={"#006462"}
+            />
+            <CustomModal
+              visible={modal3IsVisible}
+              title="Cadastro Realizado com Sucesso!"
+              message="Você realizou o cadastro com sucesso!"
+              onClose={() => {
+                setModal3IsVisible(false);
+                router.push("LoginScreen");
+              }}
+              icon={"account-circle"}
+              color={"#006462"}
+            />
+            <CustomModal
+              visible={modalLoading}
+              title="Carregando....."
+              message="Por favor, aguarde enquanto criamos seu usuário"
+              onClose={() => null}
+              icon={"loading"}
+              color={"#006462"}
+            />
+            <CustomModal
+              visible={modalPasswordSmall}
+              title="Senha menor que 6 digitos"
+              message="Por favor, digite sua senha com mais de 6 digitos"
+              onClose={() => setModalPasswordSmall(false)}
+              icon={"close-thick"}
+              color={"#006462"}
+              
+            />
+            <CustomModal
+              visible={modalEmailIncorrect}
+              title="Digite um Email Válido"
+              message="Por favor, digite um email válido"
+              onClose={() => setModalEmailIncorrect(false)}
+              icon={"comment-account-outline"}
+              color={"#006462"}
+              
+            />
+            <CustomModal
+              visible={modalError}
+              title="Error"
+              message="Por favor, Estamos com problemas no momento , tente novamente!"
+              onClose={() => setModalError(false)}
+              icon={"cloud-alert"}
+              color={"#006462"}
+              
+            />
           </View>
         </ScrollView>
       </ImageBackground>
@@ -326,7 +379,7 @@ const style = StyleSheet.create({
   },
   layoutButton2: {
     width: width * 0.65,
-    height: height * 0.07, 
+    height: height * 0.07,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -338,14 +391,14 @@ const style = StyleSheet.create({
     fontWeight: "bold",
   },
   viewButton2: {
-    marginTop: height * 0.03, 
+    marginTop: height * 0.03,
     width: "100%",
     alignItems: "center",
   },
   container2: {
     paddingHorizontal: 20,
     alignItems: "center",
-    marginTop: height * 0.03, 
+    marginTop: height * 0.03,
   },
   dividerContainer: {
     flexDirection: "row",

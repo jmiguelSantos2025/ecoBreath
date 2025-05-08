@@ -13,8 +13,6 @@ export default function TransitionScreenThird() {
     const userLogado = onAuthStateChanged(auth,(user)=>{
       if(user){
         router.replace("MainScreen")
-      }else{
-        router.replace("LoginScreen");
       }
       setLoading(false);
     });
