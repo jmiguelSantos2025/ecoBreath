@@ -23,6 +23,7 @@ import { onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 import { Defs, LinearGradient, Stop } from "react-native-svg";
+
 const { width, height } = Dimensions.get("window");
 
 export default function Co2Screen() {
@@ -47,10 +48,7 @@ export default function Co2Screen() {
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return `${date.getHours()}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
+    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
   useEffect(() => {
@@ -95,7 +93,7 @@ export default function Co2Screen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.title}>Niveis de CO2</Text>
+          <Text style={styles.title}>Níveis de CO₂</Text>
         </View>
 
         <ScrollView
@@ -135,14 +133,31 @@ export default function Co2Screen() {
           </View>
 
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>Variação Temporal</Text>
+            <Text style={styles.chartTitle}>Variação Temporal de CO₂</Text>
             <VictoryChart
               width={width * 0.9}
               height={chartSize}
               padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
               domainPadding={{ y: 10 }}
+              domain={{ y: [0, 3000] }} 
               theme={VictoryTheme.material}
             >
+              <Defs>
+                <LinearGradient
+                  id="co2Gradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <Stop offset="0%" stopColor="#4CAF50" stopOpacity={0.8} />
+                  <Stop offset="26.6%" stopColor="#FFC107" stopOpacity={0.7} />
+                  <Stop offset="53.3%" stopColor="#FF9800" stopOpacity={0.6} />
+                  <Stop offset="80%" stopColor="#F44336" stopOpacity={0.5} />
+                  <Stop offset="100%" stopColor="#D32F2F" stopOpacity={0.4} />
+                </LinearGradient>
+              </Defs>
+              
               <VictoryAxis
                 tickFormat={formatTime}
                 style={{
@@ -155,16 +170,20 @@ export default function Co2Screen() {
                   grid: { stroke: "rgba(255,255,255,0.1)" },
                 }}
               />
+              
               <VictoryAxis
                 dependentAxis
                 label="CO₂ (ppm)"
                 axisLabelComponent={
                   <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
                 }
-                tickValues={[500, 1000, 1500, 2000, 2500, 3000]}
-                tickFormat={(y) =>
-                  y === 2000 ? "2000\n(perigo)" : `${y}`
-                }
+                tickValues={[0, 800, 1200, 2000, 3000]}
+                tickFormat={(y) => {
+                  if (y === 800) return "800\n(excelente)";
+                  if (y === 1200) return "1200\n(boa)";
+                  if (y === 2000) return "2000\n(limite)";
+                  return `${y}`;
+                }}
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
                   tickLabels: {
@@ -178,19 +197,32 @@ export default function Co2Screen() {
                   },
                 }}
               />
+              
               <VictoryArea
                 data={co2History}
                 interpolation="natural"
                 style={{
                   data: {
-                    fill: "url(#areaGradient)",
-                    stroke: "#fff",
-                    strokeWidth: 3,
+                    fill: "url(#co2Gradient)",
+                    stroke: "transparent",
                     fillOpacity: 0.7,
                   },
                 }}
-                animate={{ duration: 1000 }}
               />
+              
+              <VictoryLine
+                data={co2History}
+                interpolation="natural"
+                style={{
+                  data: {
+                    stroke: "#fff",
+                    strokeWidth: 3,
+                    strokeLinecap: "round"
+                  }
+                }}
+              />
+              
+             
               <VictoryLine
                 data={[
                   { x: co2History[0]?.x || 0, y: 2000 },
@@ -205,23 +237,11 @@ export default function Co2Screen() {
                   },
                 }}
               />
-              <Defs>
-                <LinearGradient
-                  id="areaGradient"
-                  x1="0%"
-                  y1="40%"
-                  x2="0%"
-                  y2="100%"
-                >
-                  <Stop offset="0%" stopColor="rgba(0,150,136,0.8)" />
-                  <Stop offset="100%" stopColor="rgba(77,182,172,0.2)" />
-                </LinearGradient>
-              </Defs>
             </VictoryChart>
           </View>
 
           <View style={styles.legendContainer}>
-            <Text style={styles.legendTitle}>Legenda de Qualidade do Ar</Text>
+            <Text style={styles.legendTitle}>Legenda de Qualidade do Ar (CO₂)</Text>
             <View style={styles.legendGrid}>
               {[
                 { color: "#4CAF50", label: "Excelente", range: "0-800 ppm" },

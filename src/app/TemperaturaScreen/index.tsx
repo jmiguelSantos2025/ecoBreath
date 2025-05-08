@@ -61,10 +61,10 @@ export default function TemperaturaScreen() {
         setTemp(sensorValue);
         const now = Date.now();
         setTempHistory((prev) => {
-          const updated = [...prev, { x: now, y: temp }];
+          const updated = [...prev, { x: now, y: sensorValue }]
           const thirtyMinutesAgo = now - 30 * 60 * 1000;
           return updated.filter((item) => item.x >= thirtyMinutesAgo);
-        });
+        });; 
       }
     });
 
@@ -102,7 +102,6 @@ export default function TemperaturaScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-         
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
@@ -136,7 +135,6 @@ export default function TemperaturaScreen() {
             </View>
           </View>
 
-          
           <View style={styles.chartContainer}>
             <Text style={styles.chartTitle}>Variação Temperatura x Tempo</Text>
             <VictoryChart
@@ -144,8 +142,26 @@ export default function TemperaturaScreen() {
               height={chartSize}
               padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
               domainPadding={{ y: 5 }}
+              domain={{ y: [0, 100] }} 
               theme={VictoryTheme.material}
             >
+              <Defs>
+                <LinearGradient
+                  id="tempGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <Stop offset="0%" stopColor="#00BFFF" stopOpacity={0.8} />
+                  <Stop offset="20%" stopColor="#1E90FF" stopOpacity={0.7} />
+                  <Stop offset="40%" stopColor="#32CD32" stopOpacity={0.6} />
+                  <Stop offset="60%" stopColor="#FFD700" stopOpacity={0.5} />
+                  <Stop offset="80%" stopColor="#FF6347" stopOpacity={0.4} />
+                  <Stop offset="100%" stopColor="#FF4500" stopOpacity={0.3} />
+                </LinearGradient>
+              </Defs>
+              
               <VictoryAxis
                 tickFormat={formatTime}
                 style={{
@@ -178,35 +194,33 @@ export default function TemperaturaScreen() {
                   },
                 }}
               />
+              
               <VictoryArea
                 data={tempHistory}
                 interpolation="natural"
                 style={{
                   data: {
-                    fill: "url(#areaGradient)",
-                    stroke: "#fff",
-                    strokeWidth: 3,
+                    fill: "url(#tempGradient)",
+                    stroke: "transparent",
                     fillOpacity: 0.7,
                   },
                 }}
-                animate={{ duration: 100 }}
               />
-              <Defs>
-                <LinearGradient
-                  id="areaGradient"
-                  x1="0%"
-                  y1="40%"
-                  x2="0%"
-                  y2="100%"
-                >
-                  <Stop offset="0%" stopColor="rgba(0,150,136,0.8)" />
-                  <Stop offset="100%" stopColor="rgba(77,182,172,0.2)" />
-                </LinearGradient>
-              </Defs>
+              
+              <VictoryLine
+                data={tempHistory}
+                interpolation="natural"
+                style={{
+                  data: {
+                    stroke: "#fff",
+                    strokeWidth: 3,
+                    strokeLinecap: "round"
+                  }
+                }}
+              />
             </VictoryChart>
           </View>
 
-          
           <View style={styles.legendContainer}>
             <Text style={styles.legendTitle}>Faixas de Temperatura</Text>
             <View style={styles.legendGrid}>
@@ -235,6 +249,7 @@ export default function TemperaturaScreen() {
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
   imageBackground: {
     flex: 1,
@@ -385,4 +400,3 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
 });
-

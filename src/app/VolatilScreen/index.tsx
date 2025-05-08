@@ -28,16 +28,18 @@ const { width, height } = Dimensions.get("window");
 
 export default function VolatilScreen() {
   const { width, height } = useWindowDimensions();
-  const [gasPPM, setGasPPM] = useState<number>(400);
+  const [gasPPM, setGasPPM] = useState<number>(0);
   const [gasHistory, setGasHistory] = useState<{ x: number; y: number }[]>([]);
 
+  // Cores baseadas nos níveis de gás
   const getGasColor = (ppm: number) => {
-    if (ppm < 800) return "#4CAF50";
-    if (ppm < 1200) return "#FFC107";
-    if (ppm < 2000) return "#FF9800";
-    return "#F44336";
+    if (ppm < 800) return "#4CAF50";    // Verde
+    if (ppm < 1200) return "#FFC107";   // Amarelo
+    if (ppm < 2000) return "#FF9800";   // Laranja
+    return "#F44336";                   // Vermelho
   };
 
+  // Classificação da qualidade do ar
   const AirQuality = (ppm: number) => {
     if (ppm < 800) return "EXCELENTE";
     if (ppm < 1200) return "BOA";
@@ -46,12 +48,10 @@ export default function VolatilScreen() {
     return "PÉSSIMA";
   };
 
+  // Formata o tempo para HH:MM
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
-    return `${date.getHours()}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
+    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
   useEffect(() => {
@@ -59,19 +59,20 @@ export default function VolatilScreen() {
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const c2h50h = data.C2H50H || 0;
-        const ch4 = data.CH4 || 0;
-        const co = data.CO || 0;
-        const h2 = data.H2 || 0;
-        const hn3 = data.HN3 || 0;
-        const no2 = data.NO2 || 0;
-
-        const averagePPM = (c2h50h + ch4 + co + h2 + hn3 + no2) / 6;
-        setGasPPM(averagePPM);
+        // Soma todos os gases voláteis
+        const totalVolatiles = 
+          (data.C2H50H || 0) + 
+          (data.CH4 || 0) + 
+          (data.CO || 0) + 
+          (data.H2 || 0) + 
+          (data.HN3 || 0) + 
+          (data.NO2 || 0);
+        
+        setGasPPM(totalVolatiles);
 
         const now = Date.now();
         setGasHistory((prev) => {
-          const updated = [...prev, { x: now, y: averagePPM }];
+          const updated = [...prev, { x: now, y: totalVolatiles }];
           const thirtyMinutesAgo = now - 30 * 60 * 1000;
           return updated.filter((item) => item.x >= thirtyMinutesAgo);
         });
@@ -104,7 +105,7 @@ export default function VolatilScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.title}>Gases Volateis</Text>
+          <Text style={styles.title}>Gases Voláteis</Text>
         </View>
 
         <ScrollView
@@ -112,19 +113,20 @@ export default function VolatilScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Gráfico de Pizza */}
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
-                { x: "Gás Volátil", y: gasPPM },
+                { x: "Gases", y: gasPPM },
                 { x: "Ar limpo", y: Math.max(0, 5000 - gasPPM) },
               ]}
-              labels={({ datum }) => datum.x}
-              labelRadius={pieSize * 0.25 + 70}
+              labels={({ datum }) => `${datum.x}\n${datum.y.toFixed(0)}ppm`}
+              labelRadius={pieSize * 0.25}
               innerRadius={pieSize * 0.35}
               padAngle={2}
               cornerRadius={8}
               animate={{ duration: 1000 }}
-              colorScale={[getGasColor(gasPPM), "rgba(6, 126, 60, 0.2)"]}
+              colorScale={[getGasColor(gasPPM), "rgba(255, 255, 255, 0.2)"]}
               style={{
                 labels: {
                   fontSize: 12,
@@ -136,24 +138,40 @@ export default function VolatilScreen() {
               height={pieSize + 100}
             />
             <View style={styles.pieCenter}>
-              <Text
-                style={[styles.qualityText, { color: getGasColor(gasPPM) }]}
-              >
+              <Text style={[styles.qualityText, { color: getGasColor(gasPPM) }]}>
                 {AirQuality(gasPPM)}
               </Text>
               <Text style={styles.ppmText}>{gasPPM.toFixed(0)} ppm</Text>
             </View>
           </View>
 
+          {/* Gráfico de Linha com Área */}
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>Variação Temporal</Text>
+            <Text style={styles.chartTitle}>Variação de Gases Voláteis (últimos 30 minutos)</Text>
             <VictoryChart
               width={width * 0.9}
               height={chartSize}
               padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
               domainPadding={{ y: 10 }}
+              domain={{ y: [0, 3000] }}
               theme={VictoryTheme.material}
             >
+              <Defs>
+                <LinearGradient
+                  id="gasGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <Stop offset="0%" stopColor="#4CAF50" stopOpacity={0.8} />
+                  <Stop offset="26.6%" stopColor="#FFC107" stopOpacity={0.7} />
+                  <Stop offset="53.3%" stopColor="#FF9800" stopOpacity={0.6} />
+                  <Stop offset="80%" stopColor="#F44336" stopOpacity={0.5} />
+                  <Stop offset="100%" stopColor="#D32F2F" stopOpacity={0.4} />
+                </LinearGradient>
+              </Defs>
+              
               <VictoryAxis
                 tickFormat={formatTime}
                 style={{
@@ -166,14 +184,20 @@ export default function VolatilScreen() {
                   grid: { stroke: "rgba(255,255,255,0.1)" },
                 }}
               />
+              
               <VictoryAxis
                 dependentAxis
-                label="Gás Volátil (ppm)"
+                label="Concentração (ppm)"
                 axisLabelComponent={
                   <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
                 }
-                tickValues={[500, 1000, 1500, 2000, 2500, 3000]}
-                tickFormat={(y) => (y === 2000 ? "2000\n(perigo)" : `${y}`)}
+                tickValues={[0, 800, 1200, 2000, 3000]}
+                tickFormat={(y) => {
+                  if (y === 800) return "800\n(ótimo)";
+                  if (y === 1200) return "1200\n(aceitável)";
+                  if (y === 2000) return "2000\n(limite)";
+                  return `${y}`;
+                }}
                 style={{
                   axis: { stroke: "#fff", strokeWidth: 2 },
                   tickLabels: {
@@ -187,18 +211,59 @@ export default function VolatilScreen() {
                   },
                 }}
               />
+              
               <VictoryArea
                 data={gasHistory}
                 interpolation="natural"
                 style={{
                   data: {
-                    fill: "url(#areaGradient)",
-                    stroke: "#fff",
-                    strokeWidth: 3,
+                    fill: "url(#gasGradient)",
+                    stroke: "transparent",
                     fillOpacity: 0.7,
                   },
                 }}
-                animate={{ duration: 1000 }}
+              />
+              
+              <VictoryLine
+                data={gasHistory}
+                interpolation="natural"
+                style={{
+                  data: {
+                    stroke: "#fff",
+                    strokeWidth: 3,
+                    strokeLinecap: "round"
+                  }
+                }}
+              />
+              
+              {/* Linhas de referência */}
+              <VictoryLine
+                data={[
+                  { x: gasHistory[0]?.x || 0, y: 800 },
+                  { x: gasHistory[gasHistory.length - 1]?.x || 0, y: 800 },
+                ]}
+                style={{
+                  data: {
+                    stroke: "#4CAF50",
+                    strokeWidth: 1,
+                    strokeDasharray: "2,2",
+                    opacity: 0.6,
+                  },
+                }}
+              />
+              <VictoryLine
+                data={[
+                  { x: gasHistory[0]?.x || 0, y: 1200 },
+                  { x: gasHistory[gasHistory.length - 1]?.x || 0, y: 1200 },
+                ]}
+                style={{
+                  data: {
+                    stroke: "#FFC107",
+                    strokeWidth: 1,
+                    strokeDasharray: "2,2",
+                    opacity: 0.6,
+                  },
+                }}
               />
               <VictoryLine
                 data={[
@@ -207,44 +272,33 @@ export default function VolatilScreen() {
                 ]}
                 style={{
                   data: {
-                    stroke: "#FF5722",
-                    strokeWidth: 2,
-                    strokeDasharray: "5,5",
+                    stroke: "#F44336",
+                    strokeWidth: 1.5,
+                    strokeDasharray: "4,4",
                     opacity: 0.8,
                   },
                 }}
               />
-              <Defs>
-                <LinearGradient
-                  id="areaGradient"
-                  x1="0%"
-                  y1="40%"
-                  x2="0%"
-                  y2="100%"
-                >
-                  <Stop offset="0%" stopColor="rgba(0,150,136,0.8)" />
-                  <Stop offset="100%" stopColor="rgba(77,182,172,0.2)" />
-                </LinearGradient>
-              </Defs>
             </VictoryChart>
           </View>
 
+          {/* Legenda */}
           <View style={styles.legendContainer}>
-            <Text style={styles.legendTitle}>Legenda de Qualidade do Ar</Text>
+            <Text style={styles.legendTitle}>Classificação da Qualidade do Ar</Text>
             <View style={styles.legendGrid}>
               {[
-                { color: "#4CAF50", label: "Excelente", range: "0-800 ppm" },
-                { color: "#FFC107", label: "Boa", range: "801-1200 ppm" },
-                { color: "#FF9800", label: "Moderada", range: "1201-2000 ppm" },
-                { color: "#F44336", label: "Ruim/Péssima", range: "2000+ ppm" },
+                { color: "#4CAF50", label: "Excelente", range: "0-800 ppm", description: "Nível seguro" },
+                { color: "#FFC107", label: "Boa", range: "801-1200 ppm", description: "Atenção recomendada" },
+                { color: "#FF9800", label: "Moderada", range: "1201-2000 ppm", description: "Ventilar o ambiente" },
+                { color: "#F44336", label: "Ruim/Péssima", range: "2000+ ppm", description: "Risco à saúde" },
               ].map((item, index) => (
                 <View key={index} style={styles.legendItem}>
                   <View
                     style={[styles.legendDot, { backgroundColor: item.color }]}
                   />
                   <View style={styles.legendTextContainer}>
-                    <Text style={styles.legendLabel}>{item.label}</Text>
-                    <Text style={styles.legendRange}>{item.range}</Text>
+                    <Text style={styles.legendLabel}>{item.label} ({item.range})</Text>
+                    <Text style={styles.legendDescription}>{item.description}</Text>
                   </View>
                 </View>
               ))}
@@ -318,7 +372,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   qualityText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5,
@@ -328,7 +382,7 @@ const styles = StyleSheet.create({
   },
   ppmText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
     textShadowColor: "rgba(0,0,0,0.8)",
@@ -340,6 +394,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     marginBottom: 30,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 15,
+    paddingVertical: 15,
   },
   chartTitle: {
     color: "#fff",
@@ -371,21 +428,18 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   legendGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: "column",
   },
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    width: "48%",
     marginBottom: 12,
   },
   legendDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 10,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 12,
   },
   legendTextContainer: {
     flex: 1,
@@ -394,13 +448,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
+    marginBottom: 2,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  legendRange: {
-    color: "#fff",
+  legendDescription: {
+    color: "rgba(255,255,255,0.8)",
     fontSize: 12,
-    fontWeight: "300",
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
