@@ -299,12 +299,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   pieContainer: {
-    width: "100%",
+    width: "80%",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
     marginTop: 20,
     marginBottom: 30,
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:40,
   },
   pieCenter: {
     position: "absolute",
@@ -330,10 +332,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   chartContainer: {
-    width: "100%",
+    width: "80%",
     alignItems: "center",
     paddingHorizontal: 10,
     marginBottom: 30,
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:40,
   },
   chartTitle: {
     color: "#fff",
@@ -347,12 +351,13 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     width: "90%",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 20,
+    
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:20,
   },
   legendTitle: {
     color: "#fff",

@@ -20,11 +20,11 @@ export default function PowerScreen() {
     function handleConfirm(){
 
       const newPowerValue = !Power;
-      const dbRef = ref(database, "conexão/Ligado");
+      const dbRef = ref(database, "conexao/Ligado");
         set( dbRef, newPowerValue  ).then(()=>{
         console.log("Valor atualizado");
         setPower(newPowerValue);
-        setModalIsVisible(false);
+        setModalIsVisible(!modalIsVisible);
         router.replace("MainScreen");
       }).catch((error)=>{
             console.error("Error", error);
@@ -36,7 +36,7 @@ export default function PowerScreen() {
     }
 
     useEffect(()=>{
-       const dbRef = ref(database, "conexão/Ligado");
+       const dbRef = ref(database, "conexao/Ligado");
        const power = onValue(dbRef,(snapshot)=>{
         const value = snapshot.val();
         setPower(value);

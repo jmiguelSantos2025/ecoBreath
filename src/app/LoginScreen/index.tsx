@@ -35,8 +35,7 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth, email, password);
       setEmail("");
       setPassword("");
-      setModalLoading(false);
-      router.push("/MainScreen");
+      
     } catch (error) {
       setModalLoading(false);
       setModal2IsVisible(!modal2lIsVisible);
@@ -206,7 +205,10 @@ export default function LoginScreen() {
             visible={modalLoading}
             title="Carregando....."
             message="Por favor, aguarde enquanto entramos com seu usuário"
-            onClose={() => setModalLoading(false)}
+            onClose={() =>{ setModalLoading(false)
+              router.push("MainScreen");
+            }
+          }
             icon={"loading"}
             color={"#006462"}
           />

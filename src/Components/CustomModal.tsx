@@ -82,6 +82,33 @@ export default function CustomModal({
     </Modal>
   );
 }
+export function CustomModalLogin({
+  visible,
+  title,
+  message,
+  icon,
+  color,
+  onClose,
+}: CustomModalProps) {
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Icon
+            name={icon}
+            size={70}
+            color={color}
+            style={[styles.icon, { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }]}
+          />
+          <Text style={styles.modalTitle}>{title}</Text>
+          <Text style={styles.modalMessage}>{message}</Text>
+
+          
+        </View>
+      </View>
+    </Modal>
+  );
+}
 
 const styles = StyleSheet.create({
   modalOverlay: {

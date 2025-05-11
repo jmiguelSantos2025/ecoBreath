@@ -28,33 +28,30 @@ import { router } from "expo-router";
 const { width, height } = Dimensions.get("window");
 
 export default function AirQualityScreen() {
-  const [co2PPM, setCo2PPM] = useState<number>(400);
+  
   const [volatilePPM, setVolatilePPM] = useState<number>(200);
   const [history, setHistory] = useState<{
-    co2: { x: number; y: number }[];
     volatiles: { x: number; y: number }[];
     cleanAir: { x: number; y: number }[];
-    totalGases: { x: number; y: number }[];
-  }>({ co2: [], volatiles: [], cleanAir: [], totalGases: [] });
-  const [totalGases, setTotalGases] = useState<number>(0);
+  }>({ volatiles: [], cleanAir: [] });
   const { width, height } = useWindowDimensions();
 
-  // Feito
-  const getAirColor = (totalPPM: number) => {
-    if (totalPPM < 800) return "#4CAF50";
-    if (totalPPM < 1200) return "#FFC107";
-    if (totalPPM < 2000) return "#FF9800";
+  const getAirColor = (total: number) => {
+    if (total < 50) return "#4CAF50"; 
+    if (total < 100) return "#FFC107"; 
+    if (total < 200) return "#FF9800"; 
+    if (total < 500) return "#FF5722"; 
     return "#F44336";
   };
-  // Feito
-  const AirQuality = (totalPPM: number) => {
-    if (totalPPM < 800) return "EXCELENTE";
-    if (totalPPM < 1200) return "BOA";
-    if (totalPPM < 2000) return "MODERADA";
-    if (totalPPM < 5000) return "RUIM";
-    return "PÉSSIMA";
+
+  const AirQuality = (total: number) => {
+    if (total < 50) return "Excelente";
+    if (total < 100) return "Boa";
+    if (total < 200) return "Moderada";
+    if (total < 500) return "Ruim";
+    return "Péssima";
   };
-  // Feito
+
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return `${date.getHours()}:${date
@@ -64,39 +61,26 @@ export default function AirQualityScreen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "SensoresPPM");
+    const dbRef = ref(database, "OutrosParametros");
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const co2 = data.CO2In || 0;
-        const volatiles =
-          (data.C2H50H || 0) +
-          (data.CH4 || 0) +
-          (data.CO || 0) +
-          (data.H2 || 0) +
-          (data.HN3 || 0) +
-          (data.NO2 || 0);
-
-        const totalGases = co2 + volatiles;
+        
+        const volatiles = (data.CCOV);
+        
         const now = Date.now();
-        const cleanAir = Math.max(0, 5000 - totalGases);
+        const cleanAir = Math.max(0, 300 - volatiles);
 
-        setCo2PPM(co2);
         setVolatilePPM(volatiles);
-        setTotalGases(totalGases);
-
+        
         setHistory((prev) => {
-          const co2H = [...prev.co2, { x: now, y: co2 }];
-          const volH = [...prev.volatiles, { x: now, y: volatiles }];
+          const volH = [...prev.volatiles, { x: now, y: volatilePPM }];
           const cleanH = [...prev.cleanAir, { x: now, y: cleanAir }];
-          const totalGasesH = [...prev.totalGases, { x: now, y: totalGases }];
           const cutoff = now - 30 * 60 * 1000;
 
           return {
-            co2: co2H.filter((item) => item.x >= cutoff),
             volatiles: volH.filter((item) => item.x >= cutoff),
             cleanAir: cleanH.filter((item) => item.x >= cutoff),
-            totalGases: totalGasesH.filter((item) => item.x >= cutoff),
           };
         });
       }
@@ -105,7 +89,7 @@ export default function AirQualityScreen() {
     return () => unsubscribe();
   }, []);
 
-  const totalPPM = co2PPM + volatilePPM;
+  const totalPPM = volatilePPM;
   const chartSize = Math.min(width * 0.9, height * 0.4);
   const pieSize = Math.min(width * 0.55, height * 0.4);
 
@@ -140,9 +124,8 @@ export default function AirQualityScreen() {
           <View style={styles.pieContainer}>
             <VictoryPie
               data={[
-                { x: "CO₂", y: co2PPM },
                 { x: "Gases", y: volatilePPM },
-                { x: "Ar puro", y: Math.max(0, 5000 - totalPPM) },
+                { x: "Ar puro", y: Math.max(0, 300 - totalPPM) },
               ]}
               labels={({ datum }) => datum.x}
               labelRadius={pieSize * 0.25 + 70}
@@ -150,7 +133,7 @@ export default function AirQualityScreen() {
               padAngle={2}
               cornerRadius={8}
               animate={{ duration: 1000 }}
-              colorScale={["#03A9F4", "#FF9800", "rgba(6, 126, 60, 0.2)"]}
+              colorScale={["#03A9F4", "rgba(13, 162, 182, 0.5)"]}
               style={{
                 labels: {
                   fontSize: 12,
@@ -167,106 +150,98 @@ export default function AirQualityScreen() {
               >
                 {AirQuality(totalPPM)}
               </Text>
-              <Text style={styles.ppmText}>{totalPPM.toFixed(0)} ppm</Text>
+              <Text style={styles.ppmText}>{totalPPM.toFixed(0)} ppb</Text>
             </View>
           </View>
 
           <View style={styles.chartContainer}>
-  <Text style={styles.chartTitle}>
-    Histórico de CO₂ e Gases Voláteis
-  </Text>
-  <VictoryChart
-    width={width * 0.9}
-    height={chartSize}
-    padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
-    domainPadding={{ y: 5 }}
-    domain={{y: [0, 5000]}}
-    theme={VictoryTheme.material}
-  >
-    <Defs>
-      <LinearGradient
-        id="lineGradient"
-        x1="0%"
-        y1="0%"
-        x2="100%"
-        y2="0%"
-      >
-        <Stop offset="0%" stopColor="#03A9F4" />
-        <Stop offset="100%" stopColor="#4CAF50" />
-      </LinearGradient>
-    </Defs>
-    
-    <VictoryAxis
-      tickFormat={formatTime}
-      style={{
-        axis: { stroke: "#fff", strokeWidth: 2 },
-        tickLabels: { fontSize: 10, fill: "#fff", angle: -45 },
-        grid: { stroke: "rgba(255,255,255,0.1)" },
-      }}
-    />
-    <VictoryAxis
-      dependentAxis
-      label="Concentração (co2+gases voláteis em ppm)"
-      axisLabelComponent={
-        <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
-      }
-      tickFormat={(y) => y}
-      style={{
-        axis: { stroke: "#fff", strokeWidth: 2 },
-        tickLabels: { fontSize: 10, fill: "#fff" },
-        grid: {
-          stroke: "rgba(255,255,255,0.1)",
-          strokeDasharray: "4,4",
-        },
-      }}
-    />
-    
-    {/* Adicionando área com gradiente */}
-    <VictoryArea
-      data={history.totalGases}
-      interpolation="natural"
-      style={{
-        data: {
-          fill: "url(#lineGradient)",
-          opacity: 0.3,
-          stroke: "transparent"
-        }
-      }}
-    />
-    
-    {/* Linha principal com gradiente */}
-    <VictoryLine
-      data={history.totalGases}
-      interpolation="natural"
-      style={{ 
-        data: { 
-          stroke: "url(#lineGradient)",
-          strokeWidth: 3,
-          strokeLinecap: "round"
-        } 
-      }}
-    />
-  </VictoryChart>
-</View>
+            <Text style={styles.chartTitle}>
+              Histórico de Gases Voláteis
+            </Text>
+            
+            <VictoryChart
+              width={width * 0.9}
+              height={chartSize}
+              padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
+              domainPadding={{ y: 5 }}
+              domain={{y: [0,300]}}
+              theme={VictoryTheme.material}
+            >
+              <Defs>
+                <LinearGradient
+                  id="lineGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <Stop offset="0%" stopColor="#03A9F4" />
+                  <Stop offset="100%" stopColor="#4CAF50" />
+                </LinearGradient>
+              </Defs>
+              
+              <VictoryAxis
+                tickFormat={formatTime}
+                style={{
+                  axis: { stroke: "#fff", strokeWidth: 2 },
+                  tickLabels: { fontSize: 10, fill: "#fff", angle: -45 },
+                  grid: { stroke: "rgba(255,255,255,0.1)" },
+                }}
+              />
+              <VictoryAxis
+                dependentAxis
+                label="Concentração (gases voláteis em ppb)"
+                axisLabelComponent={
+                  <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
+                }
+                tickFormat={(y) => y}
+                style={{
+                  axis: { stroke: "#fff", strokeWidth: 2 },
+                  tickLabels: { fontSize: 10, fill: "#fff" },
+                  grid: {
+                    stroke: "rgba(255,255,255,0.1)",
+                    strokeDasharray: "4,4",
+                  },
+                }}
+              />
+              
+              <VictoryArea
+                data={history.volatiles}
+                interpolation="natural"
+                style={{
+                  data: {
+                    fill: "url(#lineGradient)",
+                    opacity: 0.3,
+                    stroke: "transparent"
+                  }
+                }}
+              />
+              
+              <VictoryLine
+                data={history.volatiles}
+                interpolation="natural"
+                style={{ 
+                  data: { 
+                    stroke: "url(#lineGradient)",
+                    strokeWidth: 3,
+                    strokeLinecap: "round"
+                  } 
+                }}
+              />
+            </VictoryChart>
+          </View>
 
           <View style={styles.legendContainer}>
             <Text style={styles.legendTitle}>
-              Legenda de Qualidade do Ar (CO₂ + Gases Voláteis)
+              Legenda de Qualidade do Ar (Gases Voláteis)
             </Text>
             <View style={styles.legendGrid}>
               {[
-                { color: "#4CAF50", label: "Excelente", range: "0 - 800 ppm" },
-                { color: "#FFC107", label: "Boa", range: "801 - 1200 ppm" },
-                {
-                  color: "#FF9800",
-                  label: "Moderada",
-                  range: "1201 - 2000 ppm",
-                },
-                {
-                  color: "#F44336",
-                  label: "Ruim / Péssima",
-                  range: "2001+ ppm",
-                },
+                { color: "#4CAF50", label: "Excelente", range: "0 - 50 ppb" },
+                { color: "#FFC107", label: "Boa", range: "51 - 100 ppb" },
+                { color: "#FF9800", label: "Moderada", range: "101 - 200 ppb" },
+                { color: "#FF5722", label: "Ruim", range: "201 - 500 ppb" },
+                { color: "#F44336", label: "Péssima", range: "501+ ppb" },
               ].map((item, index) => (
                 <View key={index} style={styles.legendItem}>
                   <View
@@ -321,12 +296,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   pieContainer: {
-    width: "100%",
+    width: "80%",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
     marginTop: 20,
     marginBottom: 30,
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:40,
   },
   pieCenter: {
     position: "absolute",
@@ -338,7 +315,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5,
-    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowColor: "rgba(144, 138, 138, 0.8)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
@@ -352,10 +329,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   chartContainer: {
-    width: "100%",
+    width: "80%",
     alignItems: "center",
     paddingHorizontal: 10,
     marginBottom: 30,
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:40,
   },
   chartTitle: {
     color: "#fff",
@@ -369,12 +348,13 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     width: "90%",
-    backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    
   },
   legendTitle: {
     color: "#fff",

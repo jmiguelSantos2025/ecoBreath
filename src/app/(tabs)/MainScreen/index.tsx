@@ -2,18 +2,23 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { auth, firestore } from '../../../../firebaseConfig';
+import { auth, database, firestore } from '../../../../firebaseConfig';
 import { IconButton } from 'react-native-paper';
 import { doc, getDoc } from 'firebase/firestore';
+import { onValue, ref } from 'firebase/database';
+import CustomModal from '../../../Components/CustomModal';
 
 const { width, height } = Dimensions.get("window");
 
 export default function MainScreen() {
   const [userName, setUserName] = useState('Usuário');
   const [loadingName, setLoadingName] = useState(true);
+  const [statusMachine, setStatusMachine] = useState(true);
+  const [authMachine, setAuthMachine] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
+
       if (user) {
         (async () => {
           try {
@@ -35,7 +40,19 @@ export default function MainScreen() {
         setUserName('Usuário');
         setLoadingName(false);
       }
-    });
+      
+    }
+    
+  );
+  const statusRef = ref(database, 'conexao/Ligado');
+  const statusMachine = onValue(statusRef,(snapshot)=>{
+    const statusMachine = snapshot.val();
+    
+    setStatusMachine(statusMachine);
+    
+
+  })
+
 
     return () => unsubscribe();
   }, []);
@@ -79,8 +96,17 @@ export default function MainScreen() {
                 <TouchableOpacity
                   style={styles.button}
                   activeOpacity={0.7}
-                  onPress={() => router.push('/MonitoringScreen')}
-                >
+                  onPress={() => {
+                    if(statusMachine){
+                      router.push('/MonitoringScreen')
+                    }else{
+                      setAuthMachine(!authMachine);
+                    }
+                    
+                  }
+                    
+                    
+               } >
                   <MaterialCommunityIcons
                     name="weather-windy"
                     size={width * 0.14}
@@ -102,7 +128,7 @@ export default function MainScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Card 2 */}
+             
               <View style={styles.viewButton}>
                 <TouchableOpacity
                   style={styles.button}
@@ -128,6 +154,17 @@ export default function MainScreen() {
             </View>
           </View>
         </View>
+        <CustomModal
+                    visible={authMachine}
+                    title="Ligue a Maquina antes de continuar"
+                    message="Não é possivel visualizar os dados quando a maquina estiver desligada!"
+                    onClose={() =>{ setAuthMachine(false)
+                      router.push("PowerScreen");
+                    }
+                  }
+                    icon={"power"}
+                    color={"#006462"}
+                  />
       </View>
     </ImageBackground>
   );

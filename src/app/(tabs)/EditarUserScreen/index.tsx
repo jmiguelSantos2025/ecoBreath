@@ -8,7 +8,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { firestore, auth } from '../../../../firebaseConfig';
 import CustomModal, { CustomConfirmModal } from '../../../Components/CustomModal';
 import { router } from 'expo-router';
-import { reauthenticator} from '../../../Components/authenticator';
+// import { reauthenticator} from '../../../Components/authenticator';
 const { width, height } = Dimensions.get('window');
 
 export default function EditarUserScreen() {

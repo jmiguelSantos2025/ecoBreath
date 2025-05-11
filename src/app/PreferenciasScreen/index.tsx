@@ -30,7 +30,9 @@ export default function PreferenciasScreen() {
       Alert.alert(
         'Notificações desativadas',
         'O app não pode remover permissões já concedidas. Para revogar totalmente, vá até as configurações do sistema.'
+        
       );
+      setIsEnable(true);
     }
   };
 
@@ -41,7 +43,7 @@ export default function PreferenciasScreen() {
         size={RFValue(26)}
         onPress={() => router.back()}
         iconColor="white"
-        style={style.backButton}
+        style={style.backButton} 
       />
       <View style={style.firstPierce}>
         <Image
@@ -121,7 +123,7 @@ const style = StyleSheet.create({
     textAlign: "center",
   },
   viewImage: {
-    marginBottom: height * 0.04,
+    marginBottom: height * 0.2,
   },
   image: {
     width: RFValue(100),

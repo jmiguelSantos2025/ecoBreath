@@ -177,7 +177,7 @@ export default function Co2Screen() {
                 axisLabelComponent={
                   <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
                 }
-                tickValues={[0, 800, 1200, 2000, 3000]}
+                tickValues={[0, 400, 1000,1200, 2000]}
                 tickFormat={(y) => {
                   if (y === 800) return "800\n(excelente)";
                   if (y === 1200) return "1200\n(boa)";
@@ -316,12 +316,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   pieContainer: {
-    width: "100%",
+    width: "80%",
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
     marginTop: 20,
     marginBottom: 30,
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:40,
   },
   pieCenter: {
     position: "absolute",
@@ -347,10 +349,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   chartContainer: {
-    width: "100%",
+    width: "80%",
     alignItems: "center",
     paddingHorizontal: 10,
     marginBottom: 30,
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    borderRadius:40,
   },
   chartTitle: {
     color: "#fff",
@@ -364,12 +368,13 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     width: "90%",
-    backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: 'rgba(0, 40, 60, 0.5)',
+    
   },
   legendTitle: {
     color: "#fff",
