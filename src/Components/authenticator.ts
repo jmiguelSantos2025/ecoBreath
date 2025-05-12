@@ -47,18 +47,3 @@ export const logOut = async()=>{
     }
 
 }
-// export const reauthenticator = async(email:string, password:string)=>{
-//     const user = auth.currentUser;
-//     if(!user){
-//         return false;
-//     }
-//     const credential = EmailAuthProvider.credential(email, password);
-//     try{
-//         await reauthenticateWithCredential(user,credential);
-//         return true;
-//     }catch(error){
-//         console.error("Erro ao autenticar", error);
-//         alert("Faça Login Novamente , erro de autenticação");
-//         return false;
-//     }
-// }

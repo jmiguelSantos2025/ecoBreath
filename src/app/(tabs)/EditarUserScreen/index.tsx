@@ -3,25 +3,25 @@ import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, ActivityIn
 import { TextInput } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
-import { updatePassword } from 'firebase/auth';
+import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { firestore, auth } from '../../../../firebaseConfig';
 import CustomModal, { CustomConfirmModal } from '../../../Components/CustomModal';
 import { router } from 'expo-router';
-// import { reauthenticator} from '../../../Components/authenticator';
 const { width, height } = Dimensions.get('window');
 
 export default function EditarUserScreen() {
   const [userData, setUserData] = useState({ username: '', email: '', password: '', photoURL: '' });
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [modal2IsVisible, setModal2IsVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -82,44 +82,63 @@ export default function EditarUserScreen() {
   };
   
   const handleSave = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-  
-    if (userData.password && userData.password !== confirmPassword) {
-      alert('As senhas não coincidem!');
+  const user = auth.currentUser;
+  if (!user) return;
+
+
+  const isChangingPassword = userData.password || confirmPassword || currentPassword;
+
+  if (isChangingPassword) {
+    
+    if (!userData.password || !confirmPassword || !currentPassword) {
+      alert('Para alterar a senha, preencha todos os campos de senha.');
       return;
     }
 
-    if (userData.password) {
-      const success = await reauthenticator(userData.email, confirmPassword); 
-      if (!success) return;
-  
-      try {
-        await updatePassword(user, userData.password);
-      } catch (error) {
-        console.error('Erro ao atualizar senha:', error);
-        alert('Erro ao salvar dados. Tente novamente.');
-        return;
-      }
+    if (userData.password !== confirmPassword) {
+      alert('As novas senhas não coincidem!');
+      return;
     }
-  
-    try {
-      const userRef = doc(firestore, 'usuarios', user.uid);
-      await updateDoc(userRef, {
-        username: userData.username,
-        email: userData.email,
-      });
-  
-      setModalIsVisible(true);
-      router.push("MainScreen");
-    } catch (error) {
-      console.error('Erro ao atualizar dados no Firestore:', error);
-      alert('Erro ao salvar dados no Firestore.');
+  }
+
+  try {
+    setModalLoading(true);
+    
+    if (isChangingPassword) {
+      const credential = EmailAuthProvider.credential(
+        user.email || '',
+        currentPassword
+      );
+      
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, userData.password);
     }
-  };
+
+    const userRef = doc(firestore, 'usuarios', user.uid);
+    await updateDoc(userRef, {
+      username: userData.username,
+      email: userData.email,
+    });
+
+    setModalIsVisible(true);
+    setTimeout(() => {
+      router.push('MainScreen');
+    }, 1500);
+  } catch (error: any) {
+    console.error('Erro ao salvar dados:', error);
+    if (error.code === 'auth/wrong-password') {
+      alert('Senha atual incorreta. Por favor, tente novamente.');
+    } else if (error.code === 'auth/requires-recent-login') {
+      alert('Por segurança, faça login novamente para alterar sua senha.');
+    } else {
+      alert('Erro ao salvar dados. Tente novamente.');
+    }
+  } finally {
+    setModalLoading(false);
+  }
+};
 
   const handleCancel = () => {
-    setUserData(prev => ({ username: '', email: '', password: '', photoURL: prev.photoURL }));
     setModal2IsVisible(true);
   };
 
@@ -133,31 +152,31 @@ export default function EditarUserScreen() {
 
   return (
     <View style={style.container}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={style.firstPierce}>
-  <Text style={style.title}>Editar Perfil</Text>
-  <View style={style.viewIcon}>
-    {userData.photoURL ? (
-      <Image
-        source={{ uri: userData.photoURL }}
-        style={{
-          width: height * 0.04,
-          height: height * 0.04,
-          borderRadius: (height * 0.04) / 2,
-        }}
-      />
-    ) : (
-      <Image
-        source={require("../../../../assets/UserProfileIcon.png")}
-        style={{
-          width: height * 0.04,
-          height: height * 0.04,
-          borderRadius: (height * 0.04) / 2,
-        }}
-      />
-    )}
-  </View>
-</View>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: height * 0.15 }}>
+        <View style={style.firstPierce}>
+          <Text style={style.title}>Editar Perfil</Text>
+          <View style={style.viewIcon}>
+            {userData.photoURL ? (
+              <Image
+                source={{ uri: userData.photoURL }}
+                style={{
+                  width: height * 0.04,
+                  height: height * 0.04,
+                  borderRadius: (height * 0.04) / 2,
+                }}
+              />
+            ) : (
+              <Image
+                source={require("../../../../assets/UserProfileIcon.png")}
+                style={{
+                  width: height * 0.04,
+                  height: height * 0.04,
+                  borderRadius: (height * 0.04) / 2,
+                }}
+              />
+            )}
+          </View>
+        </View>
 
         <View style={style.secondPierce}>
           <TouchableOpacity style={style.photoSection} onPress={pickAndUploadImage} activeOpacity={0.7}>
@@ -205,7 +224,24 @@ export default function EditarUserScreen() {
 
           <TextInput
             style={style.inputText}
-            label="Senha"
+            label="Senha atual (para alterar senha)"
+            mode="outlined"
+            secureTextEntry={!currentPasswordVisible}
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            right={
+              <TextInput.Icon
+                icon={currentPasswordVisible ? 'eye-off' : 'eye'}
+                onPress={() => setCurrentPasswordVisible(!currentPasswordVisible)}
+                color="#006765"
+              />
+            }
+            theme={inputTheme}
+          />
+
+          <TextInput
+            style={style.inputText}
+            label="Nova senha"
             mode="outlined"
             secureTextEntry={!passwordVisible}
             value={userData.password}
@@ -222,7 +258,7 @@ export default function EditarUserScreen() {
 
           <TextInput
             style={style.inputText}
-            label="Confirme sua senha"
+            label="Confirme nova senha"
             mode="outlined"
             secureTextEntry={!confirmPasswordVisible}
             value={confirmPassword}
@@ -237,14 +273,17 @@ export default function EditarUserScreen() {
             theme={inputTheme}
           />
         </View>
-
       </ScrollView>
 
       <View style={style.buttonContainer}>
-        <TouchableOpacity style={style.saveButton} onPress={handleSave}>
-          <Text style={style.saveButtonText}>Salvar</Text>
+        <TouchableOpacity style={style.saveButton} onPress={handleSave} disabled={modalLoading}>
+          {modalLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={style.saveButtonText}>Salvar</Text>
+          )}
         </TouchableOpacity>
-        <TouchableOpacity style={style.cancelButton} onPress={handleCancel}>
+        <TouchableOpacity style={style.cancelButton} onPress={handleCancel} disabled={modalLoading}>
           <Text style={style.cancelButtonText}>Cancelar</Text>
         </TouchableOpacity>
       </View>
@@ -261,11 +300,12 @@ export default function EditarUserScreen() {
         visible={modal2IsVisible}
         title="Deseja Cancelar?"
         message="Suas alterações serão descartadas!"
-        onClose={() => setModal2IsVisible(false)}
+        onClose={() => setModal2IsVisible(!modal2IsVisible)}
         icon={"bookmark-check"}
         color={"#006462"}
-        onConfirm={()=>router.push('MainScreen')}
-        
+        onConfirm={() => {
+          setModal2IsVisible(!modal2IsVisible)
+          router.push('MainScreen')}}
       />
     </View>
   );
@@ -347,6 +387,7 @@ const style = StyleSheet.create({
     paddingVertical: height * 0.015,
     borderRadius: height * 0.01,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   saveButtonText: {
     fontSize: height * 0.02,
@@ -361,6 +402,7 @@ const style = StyleSheet.create({
     paddingVertical: height * 0.015,
     borderRadius: height * 0.01,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelButtonText: {
     fontSize: height * 0.02,
