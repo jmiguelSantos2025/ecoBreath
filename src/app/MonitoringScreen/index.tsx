@@ -128,7 +128,7 @@ export default function MonitoringScreen() {
     const compostosVolateis = onValue(volateis,(snapshot)=>{
             if(snapshot.exists()){
                 const data = snapshot.val();
-                setCompostosVolateis(data.CCOV2);
+                setCompostosVolateis(data.CCOV);
             }
         }
     );

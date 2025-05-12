@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   chartContainer: {
-    width: "80%",
+    width: "85%",
     alignItems: "center",
     paddingHorizontal: 10,
     marginBottom: 30,

@@ -28,7 +28,6 @@ import { router } from "expo-router";
 const { width, height } = Dimensions.get("window");
 
 export default function AirQualityScreen() {
-  
   const [volatilePPM, setVolatilePPM] = useState<number>(200);
   const [history, setHistory] = useState<{
     volatiles: { x: number; y: number }[];
@@ -37,18 +36,18 @@ export default function AirQualityScreen() {
   const { width, height } = useWindowDimensions();
 
   const getAirColor = (total: number) => {
-    if (total < 50) return "#4CAF50"; 
-    if (total < 100) return "#FFC107"; 
-    if (total < 200) return "#FF9800"; 
-    if (total < 500) return "#FF5722"; 
-    return "#F44336";
+    if (total <= 800) return "#4CAF50";
+    if (total <= 1200) return "#FFC107";
+    if (total <= 2000) return "#FF9800";
+    if (total <= 5000) return "#FF5722";
+    return "#B71C1C";
   };
 
   const AirQuality = (total: number) => {
-    if (total < 50) return "Excelente";
-    if (total < 100) return "Boa";
-    if (total < 200) return "Moderada";
-    if (total < 500) return "Ruim";
+    if (total <= 800) return "Excelente";
+    if (total <= 1200) return "Boa";
+    if (total <= 2000) return "Moderada";
+    if (total <= 5000) return "Ruim";
     return "Péssima";
   };
 
@@ -65,19 +64,14 @@ export default function AirQualityScreen() {
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        
-        const volatiles = (data.CCOV);
-        
+        const volatiles = data.CCOV;
         const now = Date.now();
-        const cleanAir = Math.max(0, 300 - volatiles);
-
+        const cleanAir = Math.max(0, 6000 - volatiles);
         setVolatilePPM(volatiles);
-        
         setHistory((prev) => {
-          const volH = [...prev.volatiles, { x: now, y: volatilePPM }];
+          const volH = [...prev.volatiles, { x: now, y: volatiles }];
           const cleanH = [...prev.cleanAir, { x: now, y: cleanAir }];
           const cutoff = now - 30 * 60 * 1000;
-
           return {
             volatiles: volH.filter((item) => item.x >= cutoff),
             cleanAir: cleanH.filter((item) => item.x >= cutoff),
@@ -125,7 +119,7 @@ export default function AirQualityScreen() {
             <VictoryPie
               data={[
                 { x: "Gases", y: volatilePPM },
-                { x: "Ar puro", y: Math.max(0, 300 - totalPPM) },
+                { x: "Ar puro", y: Math.max(0, 6000 - totalPPM) },
               ]}
               labels={({ datum }) => datum.x}
               labelRadius={pieSize * 0.25 + 70}
@@ -155,16 +149,14 @@ export default function AirQualityScreen() {
           </View>
 
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>
-              Histórico de Gases Voláteis
-            </Text>
-            
+            <Text style={styles.chartTitle}>Histórico de Gases Voláteis</Text>
+
             <VictoryChart
               width={width * 0.9}
               height={chartSize}
               padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
               domainPadding={{ y: 5 }}
-              domain={{y: [0,300]}}
+              domain={{ y: [0, 6000] }}
               theme={VictoryTheme.material}
             >
               <Defs>
@@ -179,7 +171,7 @@ export default function AirQualityScreen() {
                   <Stop offset="100%" stopColor="#4CAF50" />
                 </LinearGradient>
               </Defs>
-              
+
               <VictoryAxis
                 tickFormat={formatTime}
                 style={{
@@ -204,7 +196,7 @@ export default function AirQualityScreen() {
                   },
                 }}
               />
-              
+
               <VictoryArea
                 data={history.volatiles}
                 interpolation="natural"
@@ -212,20 +204,20 @@ export default function AirQualityScreen() {
                   data: {
                     fill: "url(#lineGradient)",
                     opacity: 0.3,
-                    stroke: "transparent"
-                  }
+                    stroke: "transparent",
+                  },
                 }}
               />
-              
+
               <VictoryLine
                 data={history.volatiles}
                 interpolation="natural"
-                style={{ 
-                  data: { 
+                style={{
+                  data: {
                     stroke: "url(#lineGradient)",
                     strokeWidth: 3,
-                    strokeLinecap: "round"
-                  } 
+                    strokeLinecap: "round",
+                  },
                 }}
               />
             </VictoryChart>
@@ -237,11 +229,11 @@ export default function AirQualityScreen() {
             </Text>
             <View style={styles.legendGrid}>
               {[
-                { color: "#4CAF50", label: "Excelente", range: "0 - 50 ppb" },
-                { color: "#FFC107", label: "Boa", range: "51 - 100 ppb" },
-                { color: "#FF9800", label: "Moderada", range: "101 - 200 ppb" },
-                { color: "#FF5722", label: "Ruim", range: "201 - 500 ppb" },
-                { color: "#F44336", label: "Péssima", range: "501+ ppb" },
+                { color: "#4CAF50", label: "Excelente", range: "0 - 800 ppb" },
+                { color: "#FFC107", label: "Boa", range: "801 - 1200 ppb" },
+                { color: "#FF9800", label: "Moderada", range: "1201 - 2000 ppb" },
+                { color: "#FF5722", label: "Ruim", range: "2001 - 5000 ppb" },
+                { color: "#B71C1C", label: "Péssima", range: "5001+ ppb" },
               ].map((item, index) => (
                 <View key={index} style={styles.legendItem}>
                   <View
@@ -302,8 +294,8 @@ const styles = StyleSheet.create({
     position: "relative",
     marginTop: 20,
     marginBottom: 30,
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:40,
+    backgroundColor: "rgba(0, 40, 60, 0.5)",
+    borderRadius: 40,
   },
   pieCenter: {
     position: "absolute",
@@ -329,12 +321,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   chartContainer: {
-    width: "80%",
+    width: "85%",
     alignItems: "center",
     paddingHorizontal: 10,
     marginBottom: 30,
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:40,
+    backgroundColor: "rgba(0, 40, 60, 0.5)",
+    borderRadius: 40,
   },
   chartTitle: {
     color: "#fff",
@@ -353,8 +345,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    
+    backgroundColor: "rgba(0, 40, 60, 0.5)",
   },
   legendTitle: {
     color: "#fff",
