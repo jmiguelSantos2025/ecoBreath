@@ -1,17 +1,23 @@
 import { View, Image, StyleSheet, Dimensions, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { onValue, ref } from 'firebase/database';
 import { database } from '../../../firebaseConfig';
-import React, { useState } from 'react';
 import { IconButton } from 'react-native-paper';
 import { router } from 'expo-router';
 
 const { width, height } = Dimensions.get("window");
 
 export default function MonitoringScreen() {
-    
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    const handleNavigate = (route: string) => {
+        if (isNavigating) return;
+        setIsNavigating(true);
+        router.push(route);
+        setTimeout(() => setIsNavigating(false), 1000);
+    };
 
     const AirQuality = (valor: number) => {
         switch (true) {
@@ -61,45 +67,44 @@ export default function MonitoringScreen() {
                 return "#FF4500";
         }
     };
+
     const CompostosVolateisColor = (valor: number) => {
-    switch (true) {
-        case valor < 0:
-            return "#00BFFF"; 
-        case valor >= 0 && valor <= 65:
-            return "#2E8B57"; 
-        case valor > 65 && valor <= 220:
-            return "#32CD32"; 
-        case valor > 220 && valor <= 660:
-            return "#FFD700"; 
-        case valor > 660 && valor <= 2200:
-            return "#FFA500"; 
-        case valor > 2200 && valor <= 5500:
-            return "#FF4500"; 
-        case valor > 5500:
-            return "#8B0000"; 
-        default:
-            return "#808080"; 
-    }
-};
+        switch (true) {
+            case valor < 0:
+                return "#00BFFF";
+            case valor >= 0 && valor <= 65:
+                return "#2E8B57";
+            case valor > 65 && valor <= 220:
+                return "#32CD32";
+            case valor > 220 && valor <= 660:
+                return "#FFD700";
+            case valor > 660 && valor <= 2200:
+                return "#FFA500";
+            case valor > 2200 && valor <= 5500:
+                return "#FF4500";
+            case valor > 5500:
+                return "#8B0000";
+            default:
+                return "#808080";
+        }
+    };
+
     const Co2Color = (valor: number) => {
         switch (true) {
             case valor > 5000:
-                return "#FF0000"; 
+                return "#FF0000";
             case valor > 2000:
-                return "#FF8C00"; 
+                return "#FF8C00";
             case valor > 1000:
-                return "#FFD700"; 
+                return "#FFD700";
             case valor > 400:
-                return "#008000"; 
+                return "#008000";
             case valor >= 0:
-                return "#0000FF"; 
+                return "#0000FF";
             default:
-                return "#000000"; 
+                return "#000000";
         }
     };
-    
-    
-
 
     const [temperatura, setTemperatura] = useState<number>(0);
     const [co2In, setCo2In] = useState<number>(0);
@@ -109,33 +114,33 @@ export default function MonitoringScreen() {
         const dbRef = ref(database, 'SensoresPPM');
         const tempRef = ref(database, 'TempeUmid');
         const volateis = ref(database, "OutrosParametros");
+
         const unsubscribe = onValue(dbRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 setCo2In(data.CO2In || 0);
-                
-            } else {
-                console.log("Sem dados disponíveis");
             }
         });
-        const unsubscribeTemp = onValue(tempRef,(snapshot)=>{
-            if(snapshot.exists()){
+
+        const unsubscribeTemp = onValue(tempRef, (snapshot) => {
+            if (snapshot.exists()) {
                 const data = snapshot.val();
                 setTemperatura(data.Temperatura);
             }
-        }
-    );
-    const compostosVolateis = onValue(volateis,(snapshot)=>{
-            if(snapshot.exists()){
+        });
+
+        const unsubscribeVolateis = onValue(volateis, (snapshot) => {
+            if (snapshot.exists()) {
                 const data = snapshot.val();
                 setCompostosVolateis(data.CCOV);
             }
-        }
-    );
+        });
+
         return () => {
             unsubscribe();
             unsubscribeTemp();
-        }
+            unsubscribeVolateis();
+        };
     }, []);
 
     return (
@@ -164,7 +169,7 @@ export default function MonitoringScreen() {
                     <View style={styles.contentContainer}>
                         <View style={styles.mainViewButton}>
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => router.push("AirQualityScreen")}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("AirQualityScreen")}>
                                     <MaterialCommunityIcons
                                         name="weather-windy-variant"
                                         size={width * 0.14}
@@ -174,7 +179,7 @@ export default function MonitoringScreen() {
                                     <Text style={[styles.dataText, { color: AirQualityColor(co2In) }]}>{AirQuality(co2In)}</Text>
                                     <Text style={styles.buttonText}>Qualidade do ar</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => router.push("TemperaturaScreen")}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("TemperaturaScreen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"
@@ -192,7 +197,7 @@ export default function MonitoringScreen() {
                             </View>
 
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => router.push("Co2Screen")}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("Co2Screen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"
@@ -202,10 +207,10 @@ export default function MonitoringScreen() {
                                     >
                                         <Path d="M440-360q-17 0-28.5-11.5T400-400v-160q0-17 11.5-28.5T440-600h120q17 0 28.5 11.5T600-560v160q0 17-11.5 28.5T560-360H440Zm20-60h80v-120h-80v120Zm-300 60q-17 0-28.5-11.5T120-400v-160q0-17 11.5-28.5T160-600h120q17 0 28.5 11.5T320-560v40h-60v-20h-80v120h80v-20h60v40q0 17-11.5 28.5T280-360H160Zm520 120v-100q0-17 11.5-28.5T720-380h80v-40H680v-60h140q17 0 28.5 11.5T860-440v60q0 17-11.5 28.5T820-340h-80v40h120v60H680Z" />
                                     </Svg>
-                                    <Text style={[styles.dataText,{color:Co2Color(co2In)}]}>{co2In}</Text>
+                                    <Text style={[styles.dataText, { color: Co2Color(co2In) }]}>{co2In}</Text>
                                     <Text style={styles.buttonText}>Níveis de CO₂ (ppm)</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => router.push("VolatilScreen")}>
+                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("VolatilScreen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"
@@ -215,8 +220,8 @@ export default function MonitoringScreen() {
                                     >
                                         <Path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240ZM330-120 120-330v-300l210-210h300l210 210v300L630-120H330Zm34-80h232l164-164v-232L596-760H364L200-596v232l164 164Zm116-280Z" />
                                     </Svg>
-                                    <Text style={[styles.dataText,{color:CompostosVolateisColor(compostosVolateis),}]}>
-                                        {(compostosVolateis)}
+                                    <Text style={[styles.dataText, { color: CompostosVolateisColor(compostosVolateis) }]}>
+                                        {compostosVolateis}
                                     </Text>
                                     <Text style={styles.buttonText}>Compostos Voláteis (ppb)</Text>
                                 </TouchableOpacity>

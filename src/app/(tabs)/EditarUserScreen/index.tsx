@@ -8,6 +8,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { firestore, auth } from '../../../../firebaseConfig';
 import CustomModal, { CustomConfirmModal } from '../../../Components/CustomModal';
 import { router } from 'expo-router';
+
 const { width, height } = Dimensions.get('window');
 
 export default function EditarUserScreen() {
@@ -54,20 +55,20 @@ export default function EditarUserScreen() {
       alert('Precisamos de permissão para acessar suas fotos.');
       return;
     }
-  
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
     });
-  
+
     if (result.canceled || !result.assets || !result.assets[0]?.uri) {
       return;
     }
-  
+
     const uri = result.assets[0].uri;
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       setUploading(true);
       const userRef = doc(firestore, 'usuarios', user.uid);
@@ -80,63 +81,57 @@ export default function EditarUserScreen() {
       setUploading(false);
     }
   };
-  
+
   const handleSave = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+    const user = auth.currentUser;
+    if (!user) return;
 
+    const isChangingPassword = userData.password || confirmPassword || currentPassword;
 
-  const isChangingPassword = userData.password || confirmPassword || currentPassword;
-
-  if (isChangingPassword) {
-    
-    if (!userData.password || !confirmPassword || !currentPassword) {
-      alert('Para alterar a senha, preencha todos os campos de senha.');
-      return;
-    }
-
-    if (userData.password !== confirmPassword) {
-      alert('As novas senhas não coincidem!');
-      return;
-    }
-  }
-
-  try {
-    setModalLoading(true);
-    
     if (isChangingPassword) {
-      const credential = EmailAuthProvider.credential(
-        user.email || '',
-        currentPassword
-      );
-      
-      await reauthenticateWithCredential(user, credential);
-      await updatePassword(user, userData.password);
+      if (!userData.password || !confirmPassword || !currentPassword) {
+        alert('Para alterar a senha, preencha todos os campos de senha.');
+        return;
+      }
+
+      if (userData.password !== confirmPassword) {
+        alert('As novas senhas não coincidem!');
+        return;
+      }
     }
 
-    const userRef = doc(firestore, 'usuarios', user.uid);
-    await updateDoc(userRef, {
-      username: userData.username,
-      email: userData.email,
-    });
+    try {
+      setModalLoading(true);
 
-    setModalIsVisible(true);
-    setTimeout(() => {
-      router.push('MainScreen');
-    }, 1500);
-  } catch (error: any) {
-    console.error('Erro ao salvar dados:', error);
-    if (error.code === 'auth/wrong-password') {
-      alert('Senha atual incorreta. Por favor, tente novamente.');
-    } else if (error.code === 'auth/requires-recent-login') {
-      alert('Por segurança, faça login novamente para alterar sua senha.');
-    } else {
-      alert('Erro ao salvar dados. Tente novamente.');
+      if (isChangingPassword) {
+        const credential = EmailAuthProvider.credential(user.email || '', currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(user, userData.password);
+      }
+
+      const userRef = doc(firestore, 'usuarios', user.uid);
+      await updateDoc(userRef, {
+        username: userData.username,
+        email: userData.email,
+      });
+
+      setModalIsVisible(true);
+      setTimeout(() => {
+        router.push('MainScreen');
+      }, 1500);
+    } catch (error: any) {
+      console.error('Erro ao salvar dados:', error);
+      if (error.code === 'auth/wrong-password') {
+        alert('Senha atual incorreta. Por favor, tente novamente.');
+      } else if (error.code === 'auth/requires-recent-login') {
+        alert('Por segurança, faça login novamente para alterar sua senha.');
+      } else {
+        alert('Erro ao salvar dados. Tente novamente.');
+      }
+    } finally {
+      setModalLoading(false);
     }
-  } finally {
-    setModalLoading(false);
-  }
-};
+  };
 
   const handleCancel = () => {
     setModal2IsVisible(true);
@@ -144,7 +139,7 @@ export default function EditarUserScreen() {
 
   if (loading) {
     return (
-      <View style={[style.container, { justifyContent: 'center', alignItems: 'center' }]}>  
+      <View style={[style.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#006765" />
       </View>
     );
@@ -180,13 +175,21 @@ export default function EditarUserScreen() {
 
         <View style={style.secondPierce}>
           <TouchableOpacity style={style.photoSection} onPress={pickAndUploadImage} activeOpacity={0.7}>
-            {uploading ? (
-              <ActivityIndicator size="large" color="#006765" />
-            ) : userData.photoURL ? (
-              <Image source={{ uri: userData.photoURL }} style={style.profileImage} />
-            ) : (
-              <Image source={require("../../../../assets/UserProfileIcon.png")} style={style.profileImage} />
-            )}
+            <View style={{ position: 'relative' }}>
+              {uploading ? (
+                <ActivityIndicator size="large" color="#006765" />
+              ) : userData.photoURL ? (
+                <Image source={{ uri: userData.photoURL }} style={style.profileImage} />
+              ) : (
+                <Image source={require("../../../../assets/UserProfileIcon.png")} style={style.profileImage} />
+              )}
+              <MaterialCommunityIcons
+                name="pencil-circle"
+                size={24}
+                color="#006765"
+                style={style.editIcon}
+              />
+            </View>
             <Text style={style.editPhotoText}>Editar foto de usuário</Text>
           </TouchableOpacity>
 
@@ -304,8 +307,9 @@ export default function EditarUserScreen() {
         icon={"bookmark-check"}
         color={"#006462"}
         onConfirm={() => {
-          setModal2IsVisible(!modal2IsVisible)
-          router.push('MainScreen')}}
+          setModal2IsVisible(!modal2IsVisible);
+          router.push('MainScreen');
+        }}
       />
     </View>
   );
@@ -408,5 +412,12 @@ const style = StyleSheet.create({
     fontSize: height * 0.02,
     color: '#13D8B0',
     fontWeight: 'bold',
+  },
+  editIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 12,
   },
 });

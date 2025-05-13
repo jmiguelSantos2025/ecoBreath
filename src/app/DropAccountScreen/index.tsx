@@ -1,59 +1,49 @@
-import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { auth } from '../../../firebaseConfig';
 import { deleteUser } from 'firebase/auth';
 import { IconButton } from 'react-native-paper';
 import { router } from 'expo-router';
+import { useState } from 'react';
+import {CustomConfirmModal} from '../../Components/CustomModal';
 
 const { width, height } = Dimensions.get("window");
 
 export default function ConfigScreen() {
-    const onPressButton = async()=>{
-    
-    const user = auth.currentUser;
-    if(user){
-        Alert.alert(
-            "Tem certeza?",
-            "Essa ação é irreversivel. Sua conta será excluida permanentemente.",
-            [
-                {
-                    text:"Cancelar",
-                    style:"cancel"
-                },
-                {
-                    text:"Sim, excluir",
-                    style:"destructive",
-                    onPress: async()=>{
-                        try{
-                           {/*Função de deletar o usuario do auth , Lembrar*/} await deleteUser(user);
-                            alert("Conta excluida");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-                        }catch(error){
-                            if (error === "auth/requires-recent-login") {
-                                Alert.alert(
-                                  "Erro",
-                                  "Por segurança, faça login novamente e tente excluir sua conta."
-                                );
-                              } else {
-                                Alert.alert("Erro", "Não foi possível excluir sua conta.");
-                              }
-                        }
-                    }
-                }
-            ]
-        );
+  const excluirConta = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        setLoading(true);
+        await deleteUser(user);
+        setModalVisible(false);
+        alert("Conta excluída com sucesso.");
+        router.replace("/LoginScreen"); 
+      } catch (error: any) {
+        setModalVisible(false);
+        if (error.code === "auth/requires-recent-login") {
+          alert("Por segurança, faça login novamente e tente excluir sua conta.");
+        } else {
+          alert("Erro ao excluir conta. Tente novamente.");
+        }
+      } finally {
+        setLoading(false);
+      }
     }
-}
-    
+  };
+
   return (
     <View style={styles.container}>
-        <IconButton
-          icon="arrow-left"
-          size={30}
-          onPress={() => router.back()}
-          iconColor="white"
-          style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
-        />
+      <IconButton
+        icon="arrow-left"
+        size={30}
+        onPress={() => router.back()}
+        iconColor="white"
+        style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
+      />
       <View style={styles.header}>
         <Image
           source={require("../../../assets/LogoAzul.png")}
@@ -75,10 +65,20 @@ export default function ConfigScreen() {
           A saída acarretará na desconexão com a Máquina.
         </Text>
 
-        <TouchableOpacity style={styles.button} onPress={onPressButton}>
+        <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
           <Text style={styles.buttonText}>Sim</Text>
         </TouchableOpacity>
       </View>
+
+      <CustomConfirmModal
+        visible={modalVisible}
+        title="Tem certeza?"
+        message="Essa ação é irreversível. Sua conta será excluída permanentemente."
+        onClose={() => setModalVisible(false)}
+        onConfirm={excluirConta}
+        icon="alert-circle"
+        color="#E53935"
+      />
     </View>
   );
 }

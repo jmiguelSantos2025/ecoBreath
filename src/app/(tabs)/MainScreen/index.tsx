@@ -15,20 +15,30 @@ export default function MainScreen() {
   const [loadingName, setLoadingName] = useState(true);
   const [statusMachine, setStatusMachine] = useState(true);
   const [authMachine, setAuthMachine] = useState(false);
+  const [danger, setDanger] = useState(false);
+  const [dangerCo2, setDangerCo2] = useState(0);
+
+  
+  const [isNavigating, setIsNavigating] = useState(false);
+  const handleNavigate = (action: () => void) => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+    action();
+    setTimeout(() => setIsNavigating(false), 800); 
+  };
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
-
       if (user) {
         (async () => {
           try {
             const userRef = doc(firestore, 'usuarios', user.uid);
             const snap = await getDoc(userRef);
-            if (snap.exists() && snap.data().username) {
-              setUserName(snap.data().username);
-            } else {
-              setUserName('Usuário');
-            }
+            setUserName(snap.exists() && snap.data().username
+              ? snap.data().username
+              : 'Usuário'
+            );
           } catch (err) {
             console.error('Erro ao buscar username:', err);
             setUserName('Usuário');
@@ -40,22 +50,30 @@ export default function MainScreen() {
         setUserName('Usuário');
         setLoadingName(false);
       }
-      
-    }
-    
-  );
-  const statusRef = ref(database, 'conexao/Ligado');
-  const statusMachine = onValue(statusRef,(snapshot)=>{
-    const statusMachine = snapshot.val();
-    
-    setStatusMachine(statusMachine);
-    
+    });
 
-  })
+    const statusRef = ref(database, 'conexao/Ligado');
+    const statusListener = onValue(statusRef, snapshot => {
+      setStatusMachine(snapshot.val());
+    });
 
+    const co2Ref = ref(database, "SensoresPPM/CO2In");
+    const co2Listener = onValue(co2Ref, snapshot => {
+      const co2Value = snapshot.val();
+      setDangerCo2(co2Value);
+      if (statusMachine && co2Value >= 1000) {
+        setDanger(true);
+      } else {
+        setDanger(false);
+      }
+    });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      unsubscribe();
+      statusListener();
+      co2Listener();
+    };
+  }, [statusMachine]);
 
   return (
     <ImageBackground
@@ -67,7 +85,7 @@ export default function MainScreen() {
         <IconButton
           icon="arrow-left"
           size={30}
-          onPress={() => router.back()}
+          onPress={() => handleNavigate(() => router.back())}
           iconColor="white"
           style={{ position: "absolute", top: 20, left: 20, zIndex: 10, backgroundColor: "#428F77" }}
         />
@@ -91,22 +109,21 @@ export default function MainScreen() {
             )}
 
             <View style={styles.mainViewButton}>
-              {/* Card 1 */}
+              
               <View style={styles.viewButton}>
                 <TouchableOpacity
                   style={styles.button}
                   activeOpacity={0.7}
-                  onPress={() => {
-                    if(statusMachine){
-                      router.push('/MonitoringScreen')
-                    }else{
-                      setAuthMachine(!authMachine);
-                    }
-                    
+                  onPress={() =>
+                    handleNavigate(() => {
+                      if (statusMachine) {
+                        router.push('/MonitoringScreen');
+                      } else {
+                        setAuthMachine(!authMachine);
+                      }
+                    })
                   }
-                    
-                    
-               } >
+                >
                   <MaterialCommunityIcons
                     name="weather-windy"
                     size={width * 0.14}
@@ -114,10 +131,11 @@ export default function MainScreen() {
                   />
                   <Text style={styles.buttonText}>Monitoramento</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.button}
                   activeOpacity={0.7}
-                  onPress={() => router.push("PowerScreen")}
+                  onPress={() => handleNavigate(() => router.push('PowerScreen'))}
                 >
                   <MaterialCommunityIcons
                     name="power"
@@ -128,12 +146,11 @@ export default function MainScreen() {
                 </TouchableOpacity>
               </View>
 
-             
               <View style={styles.viewButton}>
                 <TouchableOpacity
                   style={styles.button}
                   activeOpacity={0.7}
-                  onPress={() => router.push("CallUsScreen")}
+                  onPress={() => handleNavigate(() => router.push('CallUsScreen'))}
                 >
                   <MaterialCommunityIcons
                     name="phone"
@@ -142,7 +159,12 @@ export default function MainScreen() {
                   />
                   <Text style={styles.buttonText}>Contate-nos</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={()=>router.push('ConfigScreen')}>
+
+                <TouchableOpacity
+                  style={styles.button}
+                  activeOpacity={0.7}
+                  onPress={() => handleNavigate(() => router.push('ConfigScreen'))}
+                >
                   <MaterialCommunityIcons
                     name="cog"
                     size={width * 0.14}
@@ -154,17 +176,29 @@ export default function MainScreen() {
             </View>
           </View>
         </View>
+
         <CustomModal
-                    visible={authMachine}
-                    title="Ligue a Maquina antes de continuar"
-                    message="Não é possivel visualizar os dados quando a maquina estiver desligada!"
-                    onClose={() =>{ setAuthMachine(false)
-                      router.push("PowerScreen");
-                    }
-                  }
-                    icon={"power"}
-                    color={"#006462"}
-                  />
+          visible={authMachine}
+          title="Ligue a Maquina antes de continuar"
+          message="Não é possivel visualizar os dados quando a maquina estiver desligada!"
+          onClose={() =>
+            handleNavigate(() => {
+              setAuthMachine(false);
+              router.push('PowerScreen');
+            })
+          }
+          icon="power"
+          color="#006462"
+        />
+
+        <CustomModal
+          visible={danger}
+          title="Níveis perigosos para a saúde"
+          message={`Os níveis de CO₂ estão em ${dangerCo2} ppm. Abra portas e janelas para ventilar o ambiente.`}
+          onClose={() => handleNavigate(() => setDanger(false))}
+          icon="alert-circle"
+          color="#D9534F"
+        />
       </View>
     </ImageBackground>
   );
