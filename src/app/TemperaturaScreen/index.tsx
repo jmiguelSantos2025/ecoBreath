@@ -18,7 +18,7 @@ import {
   VictoryLabel,
   VictoryPie
 } from "victory-native";
-import { onValue, ref } from "firebase/database";
+import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 import { Defs, LinearGradient, Stop } from "react-native-svg";
@@ -53,23 +53,72 @@ export default function TemperaturaScreen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "TempeUmid");
-    const unsubscribe = onValue(dbRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const sensorValue = data.Temperatura || 0;
-        setTemp(sensorValue);
-        const now = Date.now();
-        setTempHistory((prev) => {
-          const updated = [...prev, { x: now, y: sensorValue }]
-          const thirtyMinutesAgo = now - 30 * 60 * 1000;
-          return updated.filter((item) => item.x >= thirtyMinutesAgo);
-        });; 
-      }
-    });
+  const historicoRef = ref(database, "/HistoricoSensores");
+  const temperaturaAtualRef = ref(database, "/TempeUmid");
 
-    return () => unsubscribe();
-  }, []);
+
+  const onHistoricoChange = (snapshot: any) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+
+      const now = Date.now();
+      const cutoff = now - 30 * 60 * 1000; 
+
+      const agrupadoPorMinuto: Record<
+        string,
+        { sum: number; count: number; timestamp: number }
+      > = {};
+
+      Object.values(data).forEach((item: any) => {
+        if (item.timestamp >= cutoff && item.Temperatura !== undefined) {
+          const minuto = Math.floor(item.timestamp / 60000) * 60000;
+          if (!agrupadoPorMinuto[minuto]) {
+            agrupadoPorMinuto[minuto] = {
+              sum: 0,
+              count: 0,
+              timestamp: minuto,
+            };
+          }
+          agrupadoPorMinuto[minuto].sum += item.Temperatura;
+          agrupadoPorMinuto[minuto].count += 1;
+        }
+      });
+
+      const historico = Object.values(agrupadoPorMinuto)
+        .map((item) => ({
+          timestamp: item.timestamp,
+          temperatura: item.sum / item.count,
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+      const tempHistoryFormatted = historico.map((item) => ({
+        x: item.timestamp,
+        y: item.temperatura,
+      }));
+
+      setTempHistory(tempHistoryFormatted);
+    }
+  };
+
+  
+  const onTemperaturaAtualChange = (snapshot: any) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const tempAtual = data.Temperatura ?? 0;
+      setTemp(tempAtual);
+    }
+  };
+
+  onValue(historicoRef, onHistoricoChange);
+  onValue(temperaturaAtualRef, onTemperaturaAtualChange);
+
+  return () => {
+    off(historicoRef, "value", onHistoricoChange);
+    off(temperaturaAtualRef, "value", onTemperaturaAtualChange);
+  };
+}, []);
+
+  
 
   const chartSize = Math.min(width * 0.9, height * 0.4);
   const pieSize = Math.min(width * 0.55, height * 0.4);

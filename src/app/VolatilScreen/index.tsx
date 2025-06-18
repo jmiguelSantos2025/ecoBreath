@@ -19,7 +19,7 @@ import {
   VictoryLine,
   VictoryLabel,
 } from "victory-native";
-import { onValue, ref } from "firebase/database";
+import { off,  onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 import { Defs, LinearGradient, Stop } from "react-native-svg";
@@ -52,23 +52,71 @@ export default function VolatilScreen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "OutrosParametros/CCOV");
-    const unsubscribe = onValue(dbRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const coovValue = snapshot.val();
-        setCoovPPB(coovValue);
+  const historicoRef = ref(database, "/HistoricoSensores");
+  const coovAtualRef = ref(database, "/SensoresPPM");
 
-        const now = Date.now();
-        setCoovHistory((prev) => {
-          const updated = [...prev, { x: now, y: coovValue }];
-          const thirtyMinutesAgo = now - 30 * 60 * 1000;
-          return updated.filter((item) => item.x >= thirtyMinutesAgo);
-        });
-      }
-    });
 
-    return () => unsubscribe();
-  }, []);
+  const onHistoricoChange = (snapshot: any) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+
+      const now = Date.now();
+      const cutoff = now - 30 * 60 * 1000; 
+
+      const agrupadoPorMinuto: Record<
+        string,
+        { sum: number; count: number; timestamp: number }
+      > = {};
+
+      Object.values(data).forEach((item: any) => {
+        if (item.timestamp >= cutoff && item.CCOV !== undefined) {
+          const minuto = Math.floor(item.timestamp / 60000) * 60000;
+          if (!agrupadoPorMinuto[minuto]) {
+            agrupadoPorMinuto[minuto] = {
+              sum: 0,
+              count: 0,
+              timestamp: minuto,
+            };
+          }
+          agrupadoPorMinuto[minuto].sum += item.CCOV;
+          agrupadoPorMinuto[minuto].count += 1;
+        }
+      });
+
+      const historico = Object.values(agrupadoPorMinuto)
+        .map((item) => ({
+          timestamp: item.timestamp,
+          ccov: item.sum / item.count,
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+      const coovHistoryFormatted = historico.map((item) => ({
+        x: item.timestamp,
+        y: item.ccov,
+      }));
+
+      setCoovHistory(coovHistoryFormatted);
+    }
+  };
+
+  // COOV atual
+  const onCoovAtualChange = (snapshot: any) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const coovAtual = data.CCOV ?? 0;
+      setCoovPPB(coovAtual);
+    }
+  };
+
+  onValue(historicoRef, onHistoricoChange);
+  onValue(coovAtualRef, onCoovAtualChange);
+
+  return () => {
+    off(historicoRef, "value", onHistoricoChange);
+    off(coovAtualRef, "value", onCoovAtualChange);
+  };
+}, []);
+
 
   const chartSize = Math.min(width * 0.9, height * 0.4);
   const pieSize = Math.min(width * 0.55, height * 0.4);

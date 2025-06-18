@@ -61,7 +61,7 @@ export default function AirQualityScreen() {
   interface HistoricoSensores {
   timestamp: number;
   CCOV: number;
-  [key: string]: any; // permite que existam outros campos
+  [key: string]: any; 
 }
 
 
@@ -69,14 +69,13 @@ export default function AirQualityScreen() {
   const historicoRef = ref(database, "/HistoricoSensores");
   const outrosParametrosRef = ref(database, "/OutrosParametros");
 
-  // Callback para o histórico
+  
   const onHistoricoChange = (snapshot: any) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
 
       const now = Date.now();
-      const cutoff = now - 30 * 60 * 1000; // últimos 30 minutos
-
+      const cutoff = now - 30 * 60 * 1000; 
       const agrupadoPorMinuto: Record<
         string,
         { sum: number; count: number; timestamp: number }
@@ -121,20 +120,20 @@ export default function AirQualityScreen() {
     }
   };
 
-  // Callback para leitura em tempo real de OutrosParametros
+ 
   const onOutrosParametrosChange = (snapshot: any) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
       const ccovValor = data.CCOV || 0;
-      setVolatilePPM(ccovValor); // atualiza o gráfico de cima em tempo real
+      setVolatilePPM(ccovValor); 
     }
   };
 
-  // Ativa os listeners
+  
   onValue(historicoRef, onHistoricoChange);
   onValue(outrosParametrosRef, onOutrosParametrosChange);
 
-  // Cleanup dos listeners
+  
   return () => {
     off(historicoRef, "value", onHistoricoChange);
     off(outrosParametrosRef, "value", onOutrosParametrosChange);

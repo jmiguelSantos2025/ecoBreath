@@ -19,7 +19,7 @@ import {
   VictoryLine,
   VictoryLabel,
 } from "victory-native";
-import { onValue, ref } from "firebase/database";
+import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 import { Defs, LinearGradient, Stop } from "react-native-svg";
@@ -52,24 +52,75 @@ export default function Co2Screen() {
   };
 
   useEffect(() => {
-    const dbRef = ref(database, "SensoresPPM/CO2In");
-    const unsubscribe = onValue(dbRef, (snapshot) => {
+    const historicoRef = ref(database, "/HistoricoSensores");
+    const outrosParametrosRef = ref(database, "/SensoresPPM");
+
+    
+    const onHistoricoChange = (snapshot: any) => {
       if (snapshot.exists()) {
-        const ppm = snapshot.val() || 0;
-        setCo2PPM(ppm);
-
+        const data = snapshot.val();
         const now = Date.now();
-        setCo2History((prev) => {
-          const updated = [...prev, { x: now, y: ppm }];
-          const thirtyMinutesAgo = now - 30 * 60 * 1000;
-          return updated.filter((item) => item.x >= thirtyMinutesAgo);
-        });
-      }
-    });
+        const cutoff = now - 30 * 60 * 1000; 
 
-    return () => unsubscribe();
+        const agrupadoPorMinuto: Record<
+          string,
+          { sum: number; count: number; timestamp: number }
+        > = {};
+
+        Object.values(data).forEach((item: any) => {
+          if (item.timestamp >= cutoff && item.CO2 != null) {
+            const minuto = Math.floor(item.timestamp / 60000) * 60000;
+            if (!agrupadoPorMinuto[minuto]) {
+              agrupadoPorMinuto[minuto] = {
+                sum: 0,
+                count: 0,
+                timestamp: minuto,
+              };
+            }
+            agrupadoPorMinuto[minuto].sum += item.CO2;
+            agrupadoPorMinuto[minuto].count += 1;
+          }
+        });
+       
+
+        const historico = Object.values(agrupadoPorMinuto)
+          .map((item) => ({
+            timestamp: item.timestamp,
+            CO2: item.sum / item.count,
+          }))
+          .sort((a, b) => a.timestamp - b.timestamp);
+
+        const co2HistoryData = historico.map((item) => ({
+          x: item.timestamp,
+          y: item.CO2,
+        }));
+
+        setCo2History(co2HistoryData);
+       
+      }
+    };
+
+    
+    const onOutrosParametrosChange = (snapshot: any) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const co2In = data.CO2In || 0;
+        setCo2PPM(co2In);
+      }
+    };
+
+    
+    onValue(historicoRef, onHistoricoChange);
+    onValue(outrosParametrosRef, onOutrosParametrosChange);
+
+    
+    return () => {
+      off(historicoRef, "value", onHistoricoChange);
+      off(outrosParametrosRef, "value", onOutrosParametrosChange);
+    };
   }, []);
 
+  const totalPPM = co2PPM;
   const chartSize = Math.min(width * 0.9, height * 0.4);
   const pieSize = Math.min(width * 0.55, height * 0.4);
 
