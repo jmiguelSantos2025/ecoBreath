@@ -125,6 +125,7 @@ export default function AirQualityScreen() {
     if (snapshot.exists()) {
       const data = snapshot.val();
       const ccovValor = data.CCOV || 0;
+      const coValor = data.CO2 || 0;
       setVolatilePPM(ccovValor); 
     }
   };

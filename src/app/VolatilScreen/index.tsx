@@ -53,7 +53,7 @@ export default function VolatilScreen() {
 
   useEffect(() => {
   const historicoRef = ref(database, "/HistoricoSensores");
-  const coovAtualRef = ref(database, "/SensoresPPM");
+  const coovAtualRef = ref(database, "/OutrosParametros");
 
 
   const onHistoricoChange = (snapshot: any) => {
@@ -99,7 +99,7 @@ export default function VolatilScreen() {
     }
   };
 
-  // COOV atual
+
   const onCoovAtualChange = (snapshot: any) => {
     if (snapshot.exists()) {
       const data = snapshot.val();

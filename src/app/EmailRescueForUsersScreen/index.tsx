@@ -9,7 +9,7 @@ const { width, height } = Dimensions.get("screen");
 export default function EmailRescueScreen() {
     return (
         <View style={style.container}>
-            {/* Precisa ajeitar a logo */}
+           
             <View style={style.firstPierce}>
                 <Image source={require("../../../assets/LogoBranca.png")} />
             </View>

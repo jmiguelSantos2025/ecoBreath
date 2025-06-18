@@ -40,11 +40,12 @@ export default function RescuePasswordSetEmail() {
         setModalIsVisible(!modalIsVisible);
         setEmail("");
       } catch (error) {
-        setModal2IsVisible(!modal2IsVisible);
+
+        setModal2IsVisible(!modal3IsVisible);
         const Error = error;
       }
     } else {
-      setModal3IsVisible(!modal3IsVisible);
+      setModal3IsVisible(!modal2IsVisible);
     }
   };
 
@@ -175,9 +176,9 @@ export default function RescuePasswordSetEmail() {
             />
             <CustomModal
               visible={modal3IsVisible}
-              title="Campos obrigatórios"
+              title="Não há conta no usuário relatado"
               message={
-                "Por favor, preencha todos os campos para continuar."
+                "Por favor, verifique se seu usuário tem uma conta com esse email relatado."
               }
               onClose={() => setModal3IsVisible(false)}
               icon={"alert-outline"}

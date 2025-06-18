@@ -44,7 +44,6 @@ export default function NewUserScreen() {
     if (password == confirm) {
       setModalLoading(true);
 
-      
       const result = await signUp(email, password, user);
       setModalLoading(false);
       const error = result.error;
@@ -53,9 +52,7 @@ export default function NewUserScreen() {
         setConfirm("");
         setPassword("");
         setUser("");
-        
         setModal3IsVisible(!modal3IsVisible);
-        // Aqui é de sucesso
       } else {
         setEmail("");
         setConfirm("");
@@ -63,25 +60,19 @@ export default function NewUserScreen() {
         setUser("");
         setModalLoading(false);
         console.log(error);
-        if(error === "auth/invalid-email"){
+        if (error === "auth/invalid-email") {
           setModalEmailIncorrect(true);
-
-        }else{
-          console.log("Error: "+ error);
+        } else {
+          console.log("Error: " + error);
           setModalError(true);
-        // Aqui é de error
-
-
         }
       }
 
-
       setModalLoading(false);
-      }else {
+    } else {
       setModal2IsVisible(!modal2IsVisible);
     }
-  }
-
+  };
 
   const Database = async () => {
     if (!email || !password || !user || !confirm) {
@@ -89,7 +80,7 @@ export default function NewUserScreen() {
       return;
     } else {
       if (password.length >= 6) {
-          await handleSignUp();
+        await handleSignUp();
       } else {
         setModalPasswordSmall(true);
       }
@@ -97,241 +88,244 @@ export default function NewUserScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <ScrollView
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 20 : -200}
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
     >
-      <ImageBackground
-        source={require("../../../assets/TelaFundoTipo1Novo.png")}
-        style={style.imageBackground}
-        resizeMode="cover"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : -200}
       >
-        <ScrollView
-          contentContainerStyle={style.scrollViewContent}
-          keyboardShouldPersistTaps="handled"
+        <ImageBackground
+          source={require("../../../assets/TelaFundoTipo1Novo.png")}
+          style={style.imageBackground}
+          resizeMode="cover"
         >
-          <View style={style.container}>
-            <IconButton
-              icon="arrow-left"
-              size={30}
-              onPress={() => router.back()}
-              iconColor="white"
-              style={{
-                position: "absolute",
-                top: 20,
-                left: 20,
-                zIndex: 10,
-                backgroundColor: "#428F77",
-              }}
-            />
-            <View style={style.firstPierce}>
-              <Image
-                source={require("../../../assets/LogoBranca.png")}
-                style={style.logo}
+          <ScrollView
+            contentContainerStyle={style.scrollViewContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={style.container}>
+              <IconButton
+                icon="arrow-left"
+                size={30}
+                onPress={() => router.back()}
+                iconColor="white"
+                style={{
+                  position: "absolute",
+                  top: 20,
+                  left: 20,
+                  zIndex: 10,
+                  backgroundColor: "#428F77",
+                }}
               />
-            </View>
+              <View style={style.firstPierce}>
+                <Image
+                  source={require("../../../assets/LogoBranca.png")}
+                  style={style.logo}
+                />
+              </View>
 
-            <View style={style.secondPierce}>
-              <View style={style.contentContainer}>
-                <Text style={style.text}>Cadastre uma conta</Text>
+              <View style={style.secondPierce}>
+                <View style={style.contentContainer}>
+                  <Text style={style.text}>Cadastre uma conta</Text>
 
-                <View>
-                  <TextInput
-                    style={style.inputText}
-                    onChangeText={(Text) => setUser(Text)}
-                    label={"Usuário"}
-                    mode="outlined"
-                    underlineColorAndroid="transparent"
-                    right={
-                      <TextInput.Icon
-                        icon={({ size, color }) => (
-                          <MaterialCommunityIcons
-                            name={"account-circle"}
-                            size={size}
-                            color="#006765"
-                          />
-                        )}
-                      />
-                    }
-                    value={user}
-                    theme={{
-                      colors: {
-                        outline: "#D3D3D3",
-                        background: "white",
-                        primary: "#006765",
-                      },
-                      roundness: 10,
-                    }}
-                  />
-                  <TextInput
-                    style={style.inputText}
-                    onChangeText={(Text) => setEmail(Text)}
-                    value={email}
-                    label={"E-mail"}
-                    mode="outlined"
-                    underlineColorAndroid="transparent"
-                    right={
-                      <TextInput.Icon
-                        icon={({ size, color }) => (
-                          <MaterialCommunityIcons
-                            name={"email"}
-                            size={size}
-                            color="#006765"
-                          />
-                        )}
-                      />
-                    }
-                    theme={{
-                      colors: {
-                        outline: "#D3D3D3",
-                        background: "white",
-                        primary: "#006765",
-                      },
-                      roundness: 10,
-                    }}
-                  />
-                  <TextInput
-                    style={style.inputText}
-                    label={"Senha"}
-                    onChangeText={(Text) => setPassword(Text)}
-                    mode="outlined"
-                    underlineColorAndroid="transparent"
-                    right={
-                      <TextInput.Icon
-                        icon={({ size, color }) => (
-                          <MaterialCommunityIcons
-                            name={passwordVisible ? "eye-off" : "eye"}
-                            size={size}
-                            color="#006765"
-                            onPress={PressIcon}
-                          />
-                        )}
-                      />
-                    }
-                    value={password}
-                    secureTextEntry={passwordVisible}
-                    theme={{
-                      colors: {
-                        outline: "#D3D3D3",
-                        background: "white",
-                        primary: "#006765",
-                      },
-                      roundness: 10,
-                    }}
-                  />
-                  <TextInput
-                    style={style.inputText}
-                    label={"Confirme sua senha"}
-                    onChangeText={(Text) => setConfirm(Text)}
-                    mode="outlined"
-                    underlineColorAndroid="transparent"
-                    right={
-                      <TextInput.Icon
-                        icon={({ size, color }) => (
-                          <MaterialCommunityIcons
-                            name={
-                              confirmPassword
-                                ? "check-circle"
-                                : "check-circle-outline"
-                            }
-                            onPress={PressIconConfirm}
-                            size={size}
-                            color="#006765"
-                          />
-                        )}
-                      />
-                    }
-                    value={confirm}
-                    secureTextEntry={confirmPassword}
-                    theme={{
-                      colors: {
-                        outline: "#D3D3D3",
-                        background: "white",
-                        primary: "#006765",
-                      },
-                      roundness: 10,
-                    }}
-                  />
-                </View>
+                  <View>
+                    <TextInput
+                      style={style.inputText}
+                      onChangeText={(Text) => setUser(Text)}
+                      label={"Usuário"}
+                      mode="outlined"
+                      underlineColorAndroid="transparent"
+                      right={
+                        <TextInput.Icon
+                          icon={({ size, color }) => (
+                            <MaterialCommunityIcons
+                              name={"account-circle"}
+                              size={size}
+                              color="#006765"
+                            />
+                          )}
+                        />
+                      }
+                      value={user}
+                      theme={{
+                        colors: {
+                          outline: "#D3D3D3",
+                          background: "white",
+                          primary: "#006765",
+                        },
+                        roundness: 10,
+                      }}
+                    />
+                    <TextInput
+                      style={style.inputText}
+                      onChangeText={(Text) => setEmail(Text)}
+                      value={email}
+                      label={"E-mail"}
+                      mode="outlined"
+                      underlineColorAndroid="transparent"
+                      right={
+                        <TextInput.Icon
+                          icon={({ size, color }) => (
+                            <MaterialCommunityIcons
+                              name={"email"}
+                              size={size}
+                              color="#006765"
+                            />
+                          )}
+                        />
+                      }
+                      theme={{
+                        colors: {
+                          outline: "#D3D3D3",
+                          background: "white",
+                          primary: "#006765",
+                        },
+                        roundness: 10,
+                      }}
+                    />
+                    <TextInput
+                      style={style.inputText}
+                      label={"Senha"}
+                      onChangeText={(Text) => setPassword(Text)}
+                      mode="outlined"
+                      underlineColorAndroid="transparent"
+                      right={
+                        <TextInput.Icon
+                          icon={({ size, color }) => (
+                            <MaterialCommunityIcons
+                              name={passwordVisible ? "eye-off" : "eye"}
+                              size={size}
+                              color="#006765"
+                              onPress={PressIcon}
+                            />
+                          )}
+                        />
+                      }
+                      value={password}
+                      secureTextEntry={passwordVisible}
+                      theme={{
+                        colors: {
+                          outline: "#D3D3D3",
+                          background: "white",
+                          primary: "#006765",
+                        },
+                        roundness: 10,
+                      }}
+                    />
+                    <TextInput
+                      style={style.inputText}
+                      label={"Confirme sua senha"}
+                      onChangeText={(Text) => setConfirm(Text)}
+                      mode="outlined"
+                      underlineColorAndroid="transparent"
+                      right={
+                        <TextInput.Icon
+                          icon={({ size, color }) => (
+                            <MaterialCommunityIcons
+                              name={
+                                confirmPassword
+                                  ? "check-circle"
+                                  : "check-circle-outline"
+                              }
+                              onPress={PressIconConfirm}
+                              size={size}
+                              color="#006765"
+                            />
+                          )}
+                        />
+                      }
+                      value={confirm}
+                      secureTextEntry={confirmPassword}
+                      theme={{
+                        colors: {
+                          outline: "#D3D3D3",
+                          background: "white",
+                          primary: "#006765",
+                        },
+                        roundness: 10,
+                      }}
+                    />
+                  </View>
 
-                <View style={style.viewButton2}>
-                  <TouchableOpacity
-                    activeOpacity={0.6}
-                    style={style.layoutButton2}
-                    onPress={Database}
-                  >
-                    <Text style={style.buttonText2}>Cadastrar</Text>
-                  </TouchableOpacity>
+                  <View style={style.viewButton2}>
+                    <TouchableOpacity
+                      activeOpacity={0.6}
+                      style={style.layoutButton2}
+                      onPress={Database}
+                    >
+                      <Text style={style.buttonText2}>Cadastrar</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
+              <CustomModal
+                visible={modalIsVisible}
+                title="Campos obrigatórios"
+                message="Por favor, preencha todos os campos para continuar."
+                onClose={() => setModalIsVisible(false)}
+                icon={"alert-outline"}
+                color={"#006462"}
+              />
+              <CustomModal
+                visible={modal2IsVisible}
+                title="Senhas Diferentes"
+                message="Você deve colocar senhas iguais!"
+                onClose={() => setModal2IsVisible(false)}
+                icon={"lock-off"}
+                color={"#006462"}
+              />
+              <CustomModal
+                visible={modal3IsVisible}
+                title="Cadastro Realizado com Sucesso!"
+                message="Você realizou o cadastro com sucesso!"
+                onClose={() => {
+                  setModal3IsVisible(false);
+                  router.push("LoginScreen");
+                }}
+                icon={"account-circle"}
+                color={"#006462"}
+              />
+              <CustomModal
+                visible={modalLoading}
+                title="Carregando....."
+                message="Por favor, aguarde enquanto criamos seu usuário"
+                onClose={() => null}
+                icon={"loading"}
+                color={"#006462"}
+              />
+              <CustomModal
+                visible={modalPasswordSmall}
+                title="Senha menor que 6 digitos"
+                message="Por favor, digite sua senha com mais de 6 digitos"
+                onClose={() => setModalPasswordSmall(false)}
+                icon={"close-thick"}
+                color={"#006462"}
+              />
+              <CustomModal
+                visible={modalEmailIncorrect}
+                title="Digite um Email Válido"
+                message="Por favor, digite um email válido"
+                onClose={() => setModalEmailIncorrect(false)}
+                icon={"comment-account-outline"}
+                color={"#006462"}
+              />
+              <CustomModal
+                visible={modalError}
+                title="Error"
+                message="Por favor, Estamos com problemas no momento , tente novamente!"
+                onClose={() => setModalError(false)}
+                icon={"cloud-alert"}
+                color={"#006462"}
+              />
             </View>
-            <CustomModal
-              visible={modalIsVisible}
-              title="Campos obrigatórios"
-              message="Por favor, preencha todos os campos para continuar."
-              onClose={() => setModalIsVisible(false)}
-              icon={"alert-outline"}
-              color={"#006462"}
-            />
-            <CustomModal
-              visible={modal2IsVisible}
-              title="Senhas Diferentes"
-              message="Você deve colocar senhas iguais!"
-              onClose={() => setModal2IsVisible(false)}
-              icon={"lock-off"}
-              color={"#006462"}
-            />
-            <CustomModal
-              visible={modal3IsVisible}
-              title="Cadastro Realizado com Sucesso!"
-              message="Você realizou o cadastro com sucesso!"
-              onClose={() => {
-                setModal3IsVisible(false);
-                router.push("LoginScreen");
-              }}
-              icon={"account-circle"}
-              color={"#006462"}
-            />
-            <CustomModal
-              visible={modalLoading}
-              title="Carregando....."
-              message="Por favor, aguarde enquanto criamos seu usuário"
-              onClose={() => null}
-              icon={"loading"}
-              color={"#006462"}
-            />
-            <CustomModal
-              visible={modalPasswordSmall}
-              title="Senha menor que 6 digitos"
-              message="Por favor, digite sua senha com mais de 6 digitos"
-              onClose={() => setModalPasswordSmall(false)}
-              icon={"close-thick"}
-              color={"#006462"}
-              
-            />
-            <CustomModal
-              visible={modalEmailIncorrect}
-              title="Digite um Email Válido"
-              message="Por favor, digite um email válido"
-              onClose={() => setModalEmailIncorrect(false)}
-              icon={"comment-account-outline"}
-              color={"#006462"}
-              
-            />
-            <CustomModal
-              visible={modalError}
-              title="Error"
-              message="Por favor, Estamos com problemas no momento , tente novamente!"
-              onClose={() => setModalError(false)}
-              icon={"cloud-alert"}
-              color={"#006462"}
-              
-            />
-          </View>
-        </ScrollView>
-      </ImageBackground>
-    </KeyboardAvoidingView>
+          </ScrollView>
+        </ImageBackground>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
