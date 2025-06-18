@@ -21,7 +21,7 @@ import {
   VictoryTheme,
   VictoryArea,
 } from "victory-native";
-import { onValue, ref } from "firebase/database";
+import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { router } from "expo-router";
 
@@ -58,30 +58,91 @@ export default function AirQualityScreen() {
       .toString()
       .padStart(2, "0")}`;
   };
+  interface HistoricoSensores {
+  timestamp: number;
+  CCOV: number;
+  [key: string]: any; // permite que existam outros campos
+}
+
 
   useEffect(() => {
-    const dbRef = ref(database, "OutrosParametros");
-    const unsubscribe = onValue(dbRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const volatiles = data.CCOV;
-        const now = Date.now();
-        const cleanAir = Math.max(0, 6000 - volatiles);
-        setVolatilePPM(volatiles);
-        setHistory((prev) => {
-          const volH = [...prev.volatiles, { x: now, y: volatiles }];
-          const cleanH = [...prev.cleanAir, { x: now, y: cleanAir }];
-          const cutoff = now - 30 * 60 * 1000;
-          return {
-            volatiles: volH.filter((item) => item.x >= cutoff),
-            cleanAir: cleanH.filter((item) => item.x >= cutoff),
-          };
-        });
-      }
-    });
+  const historicoRef = ref(database, "/HistoricoSensores");
+  const outrosParametrosRef = ref(database, "/OutrosParametros");
 
-    return () => unsubscribe();
-  }, []);
+  // Callback para o histórico
+  const onHistoricoChange = (snapshot: any) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+
+      const now = Date.now();
+      const cutoff = now - 30 * 60 * 1000; // últimos 30 minutos
+
+      const agrupadoPorMinuto: Record<
+        string,
+        { sum: number; count: number; timestamp: number }
+      > = {};
+
+      Object.values(data).forEach((item: any) => {
+        if (item.timestamp >= cutoff) {
+          const minuto = Math.floor(item.timestamp / 60000) * 60000;
+          if (!agrupadoPorMinuto[minuto]) {
+            agrupadoPorMinuto[minuto] = {
+              sum: 0,
+              count: 0,
+              timestamp: minuto,
+            };
+          }
+          agrupadoPorMinuto[minuto].sum += item.CCOV || 0;
+          agrupadoPorMinuto[minuto].count += 1;
+        }
+      });
+
+      const historico = Object.values(agrupadoPorMinuto)
+        .map((item) => ({
+          timestamp: item.timestamp,
+          CCOV: item.sum / item.count,
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+      const volatilesHistory = historico.map((item) => ({
+        x: item.timestamp,
+        y: item.CCOV,
+      }));
+
+      const cleanAirHistory = historico.map((item) => ({
+        x: item.timestamp,
+        y: Math.max(0, 6000 - item.CCOV),
+      }));
+
+      setHistory({
+        volatiles: volatilesHistory,
+        cleanAir: cleanAirHistory,
+      });
+    }
+  };
+
+  // Callback para leitura em tempo real de OutrosParametros
+  const onOutrosParametrosChange = (snapshot: any) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const ccovValor = data.CCOV || 0;
+      setVolatilePPM(ccovValor); // atualiza o gráfico de cima em tempo real
+    }
+  };
+
+  // Ativa os listeners
+  onValue(historicoRef, onHistoricoChange);
+  onValue(outrosParametrosRef, onOutrosParametrosChange);
+
+  // Cleanup dos listeners
+  return () => {
+    off(historicoRef, "value", onHistoricoChange);
+    off(outrosParametrosRef, "value", onOutrosParametrosChange);
+  };
+}, []);
+
+
+
 
   const totalPPM = volatilePPM;
   const chartSize = Math.min(width * 0.9, height * 0.4);
@@ -117,6 +178,7 @@ export default function AirQualityScreen() {
         >
           <View style={styles.pieContainer}>
             <VictoryPie
+            key={volatilePPM}
               data={[
                 { x: "Gases", y: volatilePPM },
                 { x: "Ar puro", y: Math.max(0, 6000 - totalPPM) },
