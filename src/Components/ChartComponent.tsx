@@ -1,18 +1,25 @@
-import React from 'react';
-import { View } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { Dimensions, View } from "react-native";
+import { LineChart } from "react-native-chart-kit";
 
-interface ChartProps {
-  data: any[];
+interface ChartData {
+  timestamp: number;
+  CO2In?: number;
+  CO?: number;
+  CCOV?: number;
+  Temperatura?: number | null;
+}
+
+interface ChartComponentProps {
+  data: ChartData[];
   yAxisLabel?: string;
   yAxisSuffix?: string;
   chartTitle: string;
-  dataKey: string;
+  dataKey: keyof ChartData;
   color: string;
 }
 
-const ChartComponent: React.FC<ChartProps> = ({ 
+// Componente de gráfico separado
+const ChartComponent: React.FC<ChartComponentProps> = ({ 
   data, 
   yAxisLabel = '', 
   yAxisSuffix = '', 
@@ -27,7 +34,7 @@ const ChartComponent: React.FC<ChartProps> = ({
     new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   );
   
-  const values = data.map(item => item[dataKey]);
+  const values = data.map(item => item[dataKey] as number);
 
   return (
     <View style={{ marginVertical: 10 }}>
@@ -72,5 +79,3 @@ const ChartComponent: React.FC<ChartProps> = ({
     </View>
   );
 };
-
-export default ChartComponent;
