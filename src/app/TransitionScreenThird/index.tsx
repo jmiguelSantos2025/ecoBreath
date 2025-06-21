@@ -104,8 +104,8 @@ const style = StyleSheet.create({
     paddingBottom: height * 0.1, 
   },
   button: {
-    paddingHorizontal: 40,
-    paddingVertical: 15,
+    paddingHorizontal: 100,
+    paddingVertical: 40,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",

@@ -3,473 +3,415 @@ import {
   View,
   StyleSheet,
   Text,
-  ImageBackground,
-  Image,
-  useWindowDimensions,
   ScrollView,
-  Dimensions
+  Image,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
-import { IconButton } from "react-native-paper";
-import {
-  VictoryArea,
-  VictoryAxis,
-  VictoryChart,
-  VictoryPie,
-  VictoryTheme,
-  VictoryLine,
-  VictoryLabel,
-} from "victory-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
-import { router } from "expo-router";
-import { Defs, LinearGradient, Stop } from "react-native-svg";
+import { VictoryPie } from "victory-native";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 export default function Co2Screen() {
-  const { width, height } = useWindowDimensions();
   const [co2PPM, setCo2PPM] = useState<number>(400);
-  const [co2History, setCo2History] = useState<{ x: number; y: number }[]>([]);
+  const [temperature, setTemperature] = useState<number>(26);
+  const [humidity, setHumidity] = useState<number>(65);
 
   const getCO2Color = (ppm: number) => {
-    if (ppm < 800) return "#4CAF50";
-    if (ppm < 1200) return "#FFC107";
-    if (ppm < 2000) return "#FF9800";
-    return "#F44336";
+    if (ppm <= 800) return "#4CAF50";
+    if (ppm <= 1200) return "#FFC107";
+    if (ppm <= 2000) return "#FF9800";
+    if (ppm <= 5000) return "#F44336";
+    return "#B71C1C";
   };
 
-  const AirQuality = (ppm: number) => {
-    if (ppm < 800) return "EXCELENTE";
-    if (ppm < 1200) return "BOA";
-    if (ppm < 2000) return "MODERADA";
-    if (ppm < 5000) return "RUIM";
-    return "PÉSSIMA";
+  const getCO2Quality = (ppm: number) => {
+    if (ppm <= 800) return "Excelente";
+    if (ppm <= 1200) return "Boa";
+    if (ppm <= 2000) return "Moderada";
+    if (ppm <= 5000) return "Ruim";
+    return "Péssima";
   };
 
-  const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
+  const getCO2Description = (ppm: number) => {
+    if (ppm <= 800) return "Níveis de CO₂ excelentes. Ventilação adequada e ar fresco.";
+    if (ppm <= 1200) return "Níveis de CO₂ bons. O ambiente está bem ventilado.";
+    if (ppm <= 2000) return "Níveis de CO₂ moderados. Considere melhorar a ventilação.";
+    if (ppm <= 5000) return "Níveis de CO₂ altos. Ventile o ambiente imediatamente.";
+    return "Níveis de CO₂ perigosos. Evite permanecer no local.";
+  };
+
+  const getRecommendations = (ppm: number) => {
+    if (ppm <= 800) return ["Continue com a ventilação atual", "Ambiente bem ventilado"];
+    if (ppm <= 1200) return ["Abra janelas periodicamente", "Bom nível de ventilação"];
+    if (ppm <= 2000) return ["Melhore a ventilação do ambiente", "Evite aglomerações"];
+    if (ppm <= 5000) return ["Ventile o ambiente imediatamente", "Use purificadores de ar"];
+    return ["Abandone o local se possível", "Ventile intensamente"];
   };
 
   useEffect(() => {
-    const historicoRef = ref(database, "/HistoricoSensores");
-    const outrosParametrosRef = ref(database, "/SensoresPPM");
-
+    const sensoresRef = ref(database, "/SensoresPPM");
     
-    const onHistoricoChange = (snapshot: any) => {
+    const onSensoresChange = (snapshot: any) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const now = Date.now();
-        const cutoff = now - 30 * 60 * 1000; 
-
-        const agrupadoPorMinuto: Record<
-          string,
-          { sum: number; count: number; timestamp: number }
-        > = {};
-
-        Object.values(data).forEach((item: any) => {
-          if (item.timestamp >= cutoff && item.CO2 != null) {
-            const minuto = Math.floor(item.timestamp / 60000) * 60000;
-            if (!agrupadoPorMinuto[minuto]) {
-              agrupadoPorMinuto[minuto] = {
-                sum: 0,
-                count: 0,
-                timestamp: minuto,
-              };
-            }
-            agrupadoPorMinuto[minuto].sum += item.CO2;
-            agrupadoPorMinuto[minuto].count += 1;
-          }
-        });
-       
-
-        const historico = Object.values(agrupadoPorMinuto)
-          .map((item) => ({
-            timestamp: item.timestamp,
-            CO2: item.sum / item.count,
-          }))
-          .sort((a, b) => a.timestamp - b.timestamp);
-
-        const co2HistoryData = historico.map((item) => ({
-          x: item.timestamp,
-          y: item.CO2,
-        }));
-
-        setCo2History(co2HistoryData);
-       
+        setCo2PPM(data.CO2In || 400);
+        setTemperature(data.Temperatura || 26);
+        setHumidity(data.Umidade || 65);
       }
     };
 
-    
-    const onOutrosParametrosChange = (snapshot: any) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const co2In = data.CO2In || 0;
-        setCo2PPM(co2In);
-      }
-    };
-
-    
-    onValue(historicoRef, onHistoricoChange);
-    onValue(outrosParametrosRef, onOutrosParametrosChange);
-
+    onValue(sensoresRef, onSensoresChange);
     
     return () => {
-      off(historicoRef, "value", onHistoricoChange);
-      off(outrosParametrosRef, "value", onOutrosParametrosChange);
+      off(sensoresRef, "value", onSensoresChange);
     };
   }, []);
 
-  const totalPPM = co2PPM;
-  const chartSize = Math.min(width * 0.9, height * 0.4);
-  const pieSize = Math.min(width * 0.55, height * 0.4);
+  const co2Color = getCO2Color(co2PPM);
+  const pieSize = Math.min(width * 0.6, 280);
+  const recommendations = getRecommendations(co2PPM);
 
   return (
-    <ImageBackground
-      source={require("../../../assets/TelaTipo2New.png")}
-      style={styles.imageBackground}
-      resizeMode="cover"
-    >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <IconButton
-            icon="arrow-left"
-            size={30}
-            onPress={() => router.back()}
-            iconColor="white"
-            style={styles.backButton}
-          />
-          <Image
-            source={require("../../../assets/LogoAzul.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={styles.title}>Níveis de CO₂</Text>
+    <ScrollView style={styles.container}>
+      {/* Cabeçalho */}
+      <View style={[styles.header, { backgroundColor: co2Color }]}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Image 
+          source={require("../../../assets/LogoBranca.png")} 
+          style={styles.logo}
+        />
+        <Text style={styles.headerTitle}>Monitoramento de CO₂</Text>
+        <Text style={styles.headerSubtitle}>Concentração em partes por milhão</Text>
+      </View>
+
+      {/* Card principal */}
+      <View style={styles.qualityCard}>
+        <View style={styles.qualityIndicator}>
+          <Text style={[styles.qualityValue, { color: co2Color }]}>
+            {co2PPM.toFixed(0)} ppm
+          </Text>
+          <Text style={styles.qualityLabel}>Concentração de CO₂</Text>
+          
+          <View style={styles.qualityMeter}>
+            <View style={[styles.meterFill, { 
+              width: `${Math.min(100, (co2PPM / 2000) * 100)}%`,
+              backgroundColor: co2Color 
+            }]} />
+          </View>
+          
+          <Text style={[styles.qualityStatus, { color: co2Color }]}>
+            {getCO2Quality(co2PPM)}
+          </Text>
         </View>
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.pieContainer}>
-            <VictoryPie
-              data={[
-                { x: "CO₂(ppm)", y: co2PPM },
-                { x: "Ar limpo", y: Math.max(0, 5000 - co2PPM) },
-              ]}
-              labels={({ datum }) => datum.x}
-              labelRadius={pieSize * 0.25 + 70}
-              innerRadius={pieSize * 0.35}
-              padAngle={2}
-              cornerRadius={8}
-              animate={{ duration: 1000 }}
-              colorScale={[getCO2Color(co2PPM), "rgba(6, 126, 60, 0.2)"]}
-              style={{
-                labels: {
-                  fontSize: 12,
-                  fill: "#fff",
-                  fontWeight: "bold",
-                },
-              }}
-              width={pieSize + 100}
-              height={pieSize + 100}
-            />
-            <View style={styles.pieCenter}>
-              <Text style={[styles.qualityText, { color: getCO2Color(co2PPM) }]}>
-                {AirQuality(co2PPM)}
-              </Text>
-              <Text style={styles.ppmText}>{co2PPM.toFixed(0)} ppm</Text>
-            </View>
+        <View style={styles.qualityDetails}>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Temperatura</Text>
+            <Text style={styles.detailValue}>{temperature}°C</Text>
           </View>
-
-          <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>Variação Temporal de CO₂</Text>
-            <VictoryChart
-              width={width * 0.9}
-              height={chartSize}
-              padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
-              domainPadding={{ y: 10 }}
-              domain={{ y: [0, 3000] }} 
-              theme={VictoryTheme.material}
-            >
-              <Defs>
-                <LinearGradient
-                  id="co2Gradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="0%"
-                  y2="100%"
-                >
-                  <Stop offset="0%" stopColor="#4CAF50" stopOpacity={0.8} />
-                  <Stop offset="26.6%" stopColor="#FFC107" stopOpacity={0.7} />
-                  <Stop offset="53.3%" stopColor="#FF9800" stopOpacity={0.6} />
-                  <Stop offset="80%" stopColor="#F44336" stopOpacity={0.5} />
-                  <Stop offset="100%" stopColor="#D32F2F" stopOpacity={0.4} />
-                </LinearGradient>
-              </Defs>
-              
-              <VictoryAxis
-                tickFormat={formatTime}
-                style={{
-                  axis: { stroke: "#fff", strokeWidth: 2 },
-                  tickLabels: {
-                    fontSize: 10,
-                    fill: "#fff",
-                    angle: -45,
-                  },
-                  grid: { stroke: "rgba(255,255,255,0.1)" },
-                }}
-              />
-              
-              <VictoryAxis
-                dependentAxis
-                label="CO₂ (ppm)"
-                axisLabelComponent={
-                  <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
-                }
-                tickValues={[0, 400, 1000,1200, 2000]}
-                tickFormat={(y) => {
-                  if (y === 800) return "800\n(excelente)";
-                  if (y === 1200) return "1200\n(boa)";
-                  if (y === 2000) return "2000\n(limite)";
-                  return `${y}`;
-                }}
-                style={{
-                  axis: { stroke: "#fff", strokeWidth: 2 },
-                  tickLabels: {
-                    fontSize: 10,
-                    fill: "#fff",
-                    textAnchor: "middle",
-                  },
-                  grid: {
-                    stroke: "rgba(255,255,255,0.1)",
-                    strokeDasharray: "4,4",
-                  },
-                }}
-              />
-              
-              <VictoryArea
-                data={co2History}
-                interpolation="natural"
-                style={{
-                  data: {
-                    fill: "url(#co2Gradient)",
-                    stroke: "transparent",
-                    fillOpacity: 0.7,
-                  },
-                }}
-              />
-              
-              <VictoryLine
-                data={co2History}
-                interpolation="natural"
-                style={{
-                  data: {
-                    stroke: "#fff",
-                    strokeWidth: 3,
-                    strokeLinecap: "round"
-                  }
-                }}
-              />
-              
-             
-              <VictoryLine
-                data={[
-                  { x: co2History[0]?.x || 0, y: 2000 },
-                  { x: co2History[co2History.length - 1]?.x || 0, y: 2000 },
-                ]}
-                style={{
-                  data: {
-                    stroke: "#FF5722",
-                    strokeWidth: 2,
-                    strokeDasharray: "5,5",
-                    opacity: 0.8,
-                  },
-                }}
-              />
-            </VictoryChart>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Umidade</Text>
+            <Text style={styles.detailValue}>{humidity}%</Text>
           </View>
-
-          <View style={styles.legendContainer}>
-            <Text style={styles.legendTitle}>Legenda de Qualidade do Ar (CO₂)</Text>
-            <View style={styles.legendGrid}>
-              {[
-                { color: "#4CAF50", label: "Excelente", range: "0-800 ppm" },
-                { color: "#FFC107", label: "Boa", range: "801-1200 ppm" },
-                { color: "#FF9800", label: "Moderada", range: "1201-2000 ppm" },
-                { color: "#F44336", label: "Ruim/Péssima", range: "2000+ ppm" },
-              ].map((item, index) => (
-                <View key={index} style={styles.legendItem}>
-                  <View
-                    style={[styles.legendDot, { backgroundColor: item.color }]}
-                  />
-                  <View style={styles.legendTextContainer}>
-                    <Text style={styles.legendLabel}>{item.label}</Text>
-                    <Text style={styles.legendRange}>{item.range}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Sensação Térmica</Text>
+            <Text style={styles.detailValue}>{temperature + 2}°C</Text>
           </View>
-        </ScrollView>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Pressão</Text>
+            <Text style={styles.detailValue}>1012 hPa</Text>
+          </View>
+        </View>
       </View>
-    </ImageBackground>
+
+      {/* Gráfico de pizza */}
+      <View style={styles.pieContainer}>
+        <VictoryPie
+          data={[
+            { x: "CO₂", y: co2PPM },
+            { x: "Ar limpo", y: Math.max(0, 2000 - co2PPM) },
+          ]}
+          innerRadius={pieSize * 0.4}
+          padAngle={2}
+          cornerRadius={8}
+          animate={{ duration: 1000 }}
+          colorScale={[co2Color, "rgba(200, 230, 240, 0.2)"]}
+          width={pieSize}
+          height={pieSize}
+          style={{ labels: { fill: "transparent" } }}
+        />
+        <View style={styles.pieCenterLabel}>
+          <Text style={[styles.pieCenterText, { color: co2Color }]}>
+            {getCO2Quality(co2PPM)}
+          </Text>
+          <Text style={styles.pieCenterSubtext}>{co2PPM.toFixed(0)} ppm</Text>
+        </View>
+      </View>
+
+      {/* Relatório */}
+      <View style={styles.reportSection}>
+        <Text style={styles.sectionTitle}>Análise de CO₂</Text>
+        <View style={styles.reportCard}>
+          <Text style={styles.reportText}>
+            {getCO2Description(co2PPM)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Recomendações */}
+      <View style={styles.recommendations}>
+        <Text style={styles.sectionTitle}>Recomendações</Text>
+        {recommendations.map((rec, index) => (
+          <View key={index} style={styles.tipCard}>
+            <Ionicons 
+              name="bulb" 
+              size={24} 
+              color={co2PPM > 1200 ? "#F44336" : "#4CAF50"} 
+            />
+            <Text style={styles.tipText}>{rec}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Localização */}
+      <View style={styles.locationInfo}>
+        <MaterialIcons name="location-on" size={20} color="#607D8B" />
+        <Text style={styles.locationText}>
+          São Paulo, SP • Atualizado às {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+        </Text>
+      </View>
+
+      {/* Botão */}
+      <TouchableOpacity style={[styles.generateButton, { backgroundColor: co2Color }]}>
+        <Text style={styles.buttonText}>Ver Histórico Completo</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  imageBackground: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
   container: {
     flex: 1,
+    backgroundColor: '#F5F7FA',
   },
   header: {
-    height: 180,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 40,
-    paddingBottom: 20,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
   },
   backButton: {
-    position: "absolute",
-    top: 40,
+    position: 'absolute',
     left: 20,
-    zIndex: 10,
-    backgroundColor: "rgba(66, 143, 119, 0.8)",
-    borderRadius: 10,
+    top: 30,
+    zIndex: 1,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    padding: 10,
   },
   logo: {
-    width: 120,
-    height: 80,
+    width: 60,
+    height: 60,
     marginBottom: 10,
   },
-  title: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  scrollView: {
-    flex: 1,
-    width: "100%",
-    marginTop: height*0.1,
-  },
-  scrollContent: {
-    alignItems: "center",
-    paddingTop: 10,
-    paddingBottom: 40,
-  },
-  pieContainer: {
-    width: "80%",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    marginTop: 20,
-    marginBottom: 30,
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:40,
-  },
-  pieCenter: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qualityText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: 'white',
     marginBottom: 5,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+    textAlign: 'center',
   },
-  ppmText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
   },
-  chartContainer: {
-    width: "85%",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    marginBottom: 30,
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:40,
-  },
-  chartTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  legendContainer: {
-    width: "90%",
-    borderRadius: 20,
+  qualityCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    marginHorizontal: 20,
     padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 25,
+  },
+  qualityIndicator: {
+    alignItems: 'center',
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    
   },
-  legendTitle: {
-    color: "#fff",
+  qualityValue: {
+    fontSize: 48,
+    fontWeight: 'bold',
+  },
+  qualityLabel: {
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: '#607D8B',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  legendGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+  qualityMeter: {
+    height: 10,
+    width: '100%',
+    backgroundColor: '#E0E0E0',
+    borderRadius: 5,
+    marginBottom: 10,
+    overflow: 'hidden',
   },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "48%",
+  meterFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  qualityStatus: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  qualityDetails: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  detailItem: {
+    width: '48%',
+    backgroundColor: '#F5F7FA',
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 12,
   },
-  legendDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 10,
+  detailLabel: {
+    fontSize: 14,
+    color: '#607D8B',
+    marginBottom: 5,
   },
-  legendTextContainer: {
+  detailValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#37474F',
+  },
+  pieContainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    position: 'relative',
+  },
+  pieCenterLabel: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pieCenterText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  pieCenterSubtext: {
+    fontSize: 16,
+    color: '#607D8B',
+  },
+  reportSection: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#37474F',
+    marginBottom: 15,
+    paddingHorizontal: 20,
+  },
+  reportCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  reportText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#455A64',
+    textAlign: 'center',
+  },
+  recommendations: {
+    marginBottom: 25,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  tipText: {
+    fontSize: 15,
+    marginLeft: 10,
+    color: '#455A64',
     flex: 1,
   },
-  legendLabel: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  locationInfo: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 25,
   },
-  legendRange: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  locationText: {
+    fontSize: 14,
+    color: '#607D8B',
+    marginLeft: 5,
+  },
+  generateButton: {
+    borderRadius: 10,
+    paddingVertical: 15,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

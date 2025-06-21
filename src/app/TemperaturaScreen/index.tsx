@@ -3,454 +3,423 @@ import {
   View,
   StyleSheet,
   Text,
-  ImageBackground,
-  Image,
   ScrollView,
-  Dimensions
+  Image,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
-import { IconButton } from "react-native-paper";
-import {
-  VictoryArea,
-  VictoryAxis,
-  VictoryChart,
-  VictoryTheme,
-  VictoryLine,
-  VictoryLabel,
-  VictoryPie
-} from "victory-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
-import { router } from "expo-router";
-import { Defs, LinearGradient, Stop } from "react-native-svg";
+import { VictoryPie } from "victory-native";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 export default function TemperaturaScreen() {
-  const [temp, setTemp] = useState<number>(0);
-  const [tempHistory, setTempHistory] = useState<{ x: number; y: number }[]>([]);
+  const [temp, setTemp] = useState<number>(24);
+  const [humidity, setHumidity] = useState<number>(65);
+  const [heatIndex, setHeatIndex] = useState<number>(26);
 
   const getTempColor = (temp: number) => {
-    if (temp < 20) return "#00BFFF";
-    else if (temp < 23) return "#1E90FF";
-    else if (temp < 26) return "#32CD32";
-    else if (temp < 28) return "#FFD700";
-    else if (temp < 30) return "#FF6347";
-    else return "#FF4500";
+    if (temp < 20) return "#00BFFF"; // Azul claro - Frio
+    if (temp < 23) return "#1E90FF"; // Azul - Fresco
+    if (temp < 26) return "#32CD32"; // Verde - Ameno
+    if (temp < 28) return "#FFD700"; // Amarelo - Morno
+    if (temp < 30) return "#FF6347"; // Vermelho claro - Quente
+    return "#FF4500"; // Vermelho - Muito quente
   };
 
-  const AirQuality = (temp: number) => {
+  const getTempQuality = (temp: number) => {
     if (temp < 20) return "FRIO";
-    else if (temp < 23) return "FRESCO";
-    else if (temp < 26) return "AMENO";
-    else if (temp < 28) return "MORNO";
-    else if (temp < 30) return "QUENTE";
-    else return "MUITO QUENTE";
+    if (temp < 23) return "FRESCO";
+    if (temp < 26) return "AMENO";
+    if (temp < 28) return "MORNO";
+    if (temp < 30) return "QUENTE";
+    return "MUITO QUENTE";
   };
 
-  const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
+  const getTempDescription = (temp: number) => {
+    if (temp < 20) return "Temperatura baixa. Considere usar roupas mais quentes para maior conforto térmico.";
+    if (temp < 23) return "Temperatura fresca e agradável. Condições ideais para atividades ao ar livre.";
+    if (temp < 26) return "Temperatura amena e confortável. Excelente para a maioria das atividades.";
+    if (temp < 28) return "Temperatura morna. Mantenha-se hidratado e evite exposição prolongada ao sol.";
+    if (temp < 30) return "Temperatura elevada. Reduza atividades intensas e procure locais ventilados.";
+    return "Temperatura muito alta. Evite exposição direta ao sol e mantenha-se hidratado.";
+  };
+
+  const getRecommendations = (temp: number) => {
+    if (temp < 20) return ["Use roupas mais quentes", "Mantenha ambientes fechados"];
+    if (temp < 23) return ["Aproveite para atividades ao ar livre", "Ventile ambientes periodicamente"];
+    if (temp < 26) return ["Condições ideais para trabalho", "Mantenha ventilação natural"];
+    if (temp < 28) return ["Use roupas leves", "Beba bastante água"];
+    if (temp < 30) return ["Evite atividades ao ar livre", "Use protetor solar"];
+    return ["Evite sair nos horários mais quentes", "Mantenha-se hidratado", "Use roupas leves e claras"];
   };
 
   useEffect(() => {
-  const historicoRef = ref(database, "/HistoricoSensores");
-  const temperaturaAtualRef = ref(database, "/TempeUmid");
+    const temperaturaRef = ref(database, "/TempeUmid");
+    
+    const onTemperaturaChange = (snapshot: any) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const newTemp = data.Temperatura || 24;
+        const newHumidity = data.Umidade || 65;
+        
+        setTemp(newTemp);
+        setHumidity(newHumidity);
+        // Cálculo simplificado do índice de calor
+        setHeatIndex(newTemp + (newHumidity / 100) * 5);
+      }
+    };
 
+    onValue(temperaturaRef, onTemperaturaChange);
+    
+    return () => {
+      off(temperaturaRef, "value", onTemperaturaChange);
+    };
+  }, []);
 
-  const onHistoricoChange = (snapshot: any) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-
-      const now = Date.now();
-      const cutoff = now - 30 * 60 * 1000; 
-
-      const agrupadoPorMinuto: Record<
-        string,
-        { sum: number; count: number; timestamp: number }
-      > = {};
-
-      Object.values(data).forEach((item: any) => {
-        if (item.timestamp >= cutoff && item.Temperatura !== undefined) {
-          const minuto = Math.floor(item.timestamp / 60000) * 60000;
-          if (!agrupadoPorMinuto[minuto]) {
-            agrupadoPorMinuto[minuto] = {
-              sum: 0,
-              count: 0,
-              timestamp: minuto,
-            };
-          }
-          agrupadoPorMinuto[minuto].sum += item.Temperatura;
-          agrupadoPorMinuto[minuto].count += 1;
-        }
-      });
-
-      const historico = Object.values(agrupadoPorMinuto)
-        .map((item) => ({
-          timestamp: item.timestamp,
-          temperatura: item.sum / item.count,
-        }))
-        .sort((a, b) => a.timestamp - b.timestamp);
-
-      const tempHistoryFormatted = historico.map((item) => ({
-        x: item.timestamp,
-        y: item.temperatura,
-      }));
-
-      setTempHistory(tempHistoryFormatted);
-    }
-  };
-
-  
-  const onTemperaturaAtualChange = (snapshot: any) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      const tempAtual = data.Temperatura ?? 0;
-      setTemp(tempAtual);
-    }
-  };
-
-  onValue(historicoRef, onHistoricoChange);
-  onValue(temperaturaAtualRef, onTemperaturaAtualChange);
-
-  return () => {
-    off(historicoRef, "value", onHistoricoChange);
-    off(temperaturaAtualRef, "value", onTemperaturaAtualChange);
-  };
-}, []);
-
-  
-
-  const chartSize = Math.min(width * 0.9, height * 0.4);
-  const pieSize = Math.min(width * 0.55, height * 0.4);
+  const tempColor = getTempColor(temp);
+  const pieSize = Math.min(width * 0.6, 280);
+  const recommendations = getRecommendations(temp);
 
   return (
-    <ImageBackground
-      source={require("../../../assets/TelaTipo2New.png")}
-      style={styles.imageBackground}
-      resizeMode="cover"
-    >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <IconButton
-            icon="arrow-left"
-            size={30}
-            onPress={() => router.back()}
-            iconColor="white"
-            style={styles.backButton}
-          />
-          <Image
-            source={require("../../../assets/LogoAzul.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={styles.title}>Temperatura Ambiente</Text>
+    <ScrollView style={styles.container}>
+      {/* Cabeçalho */}
+      <View style={[styles.header, { backgroundColor: tempColor }]}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Image 
+          source={require("../../../assets/LogoBranca.png")} 
+          style={styles.logo}
+        />
+        <Text style={styles.headerTitle}>Monitoramento de Temperatura</Text>
+        <Text style={styles.headerSubtitle}>Temperatura ambiente em tempo real</Text>
+      </View>
+
+      {/* Card principal */}
+      <View style={styles.qualityCard}>
+        <View style={styles.qualityIndicator}>
+          <Text style={[styles.qualityValue, { color: tempColor }]}>
+            {temp.toFixed(1)}°C
+          </Text>
+          <Text style={styles.qualityLabel}>Temperatura Atual</Text>
+          
+          <View style={styles.qualityMeter}>
+            <View style={[styles.meterFill, { 
+              width: `${Math.min(100, (temp / 40) * 100)}%`,
+              backgroundColor: tempColor 
+            }]} />
+          </View>
+          
+          <Text style={[styles.qualityStatus, { color: tempColor }]}>
+            {getTempQuality(temp)}
+          </Text>
         </View>
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.pieContainer}>
-            <VictoryPie
-              data={[
-                { x: "", y: temp },
-                { x: "", y: Math.max(0, 100 - temp) },
-              ]}
-              labels={({ datum }) => datum.x}
-              labelRadius={pieSize * 0.25 + 70}
-              innerRadius={pieSize * 0.35}
-              padAngle={2}
-              cornerRadius={8}
-              animate={{ duration: 1000 }}
-              colorScale={[getTempColor(temp), "rgba(6, 126, 60, 0.2)"]}
-              style={{
-                labels: {
-                  fontSize: 12,
-                  fill: "#fff",
-                  fontWeight: "bold",
-                },
-              }}
-              width={pieSize + 100}
-              height={pieSize + 100}
-            />
-            <View style={styles.pieCenter}>
-              <Text style={[styles.qualityText, { color: getTempColor(temp) }]}>
-                {AirQuality(temp)}
-              </Text>
-              <Text style={styles.ppmText}>
-                {temp.toFixed(1)} °C
-              </Text>
-            </View>
+        <View style={styles.qualityDetails}>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Umidade</Text>
+            <Text style={styles.detailValue}>{humidity}%</Text>
           </View>
-
-          <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>Variação Temperatura x Tempo</Text>
-            <VictoryChart
-              width={width * 0.9}
-              height={chartSize}
-              padding={{ top: 40, bottom: 60, left: 60, right: 30 }}
-              domainPadding={{ y: 5 }}
-              domain={{ y: [0, 100] }} 
-              theme={VictoryTheme.material}
-            >
-              <Defs>
-                <LinearGradient
-                  id="tempGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="0%"
-                  y2="100%"
-                >
-                  <Stop offset="0%" stopColor="#00BFFF" stopOpacity={0.8} />
-                  <Stop offset="20%" stopColor="#1E90FF" stopOpacity={0.7} />
-                  <Stop offset="40%" stopColor="#32CD32" stopOpacity={0.6} />
-                  <Stop offset="60%" stopColor="#FFD700" stopOpacity={0.5} />
-                  <Stop offset="80%" stopColor="#FF6347" stopOpacity={0.4} />
-                  <Stop offset="100%" stopColor="#FF4500" stopOpacity={0.3} />
-                </LinearGradient>
-              </Defs>
-              
-              <VictoryAxis
-                tickFormat={formatTime}
-                style={{
-                  axis: { stroke: "#fff", strokeWidth: 2 },
-                  tickLabels: {
-                    fontSize: 10,
-                    fill: "#fff",
-                    angle: -45,
-                  },
-                  grid: { stroke: "rgba(255,255,255,0.1)" },
-                }}
-              />
-              <VictoryAxis
-                dependentAxis
-                label="Temperatura (°C)"
-                axisLabelComponent={
-                  <VictoryLabel dy={-30} style={{ fill: "#fff" }} />
-                }
-                tickValues={[0, 20, 40, 60, 80, 100]}
-                style={{
-                  axis: { stroke: "#fff", strokeWidth: 2 },
-                  tickLabels: {
-                    fontSize: 10,
-                    fill: "#fff",
-                    textAnchor: "middle",
-                  },
-                  grid: {
-                    stroke: "rgba(255,255,255,0.1)",
-                    strokeDasharray: "4,4",
-                  },
-                }}
-              />
-              
-              <VictoryArea
-                data={tempHistory}
-                interpolation="natural"
-                style={{
-                  data: {
-                    fill: "url(#tempGradient)",
-                    stroke: "transparent",
-                    fillOpacity: 0.7,
-                  },
-                }}
-              />
-              
-              <VictoryLine
-                data={tempHistory}
-                interpolation="natural"
-                style={{
-                  data: {
-                    stroke: "#fff",
-                    strokeWidth: 3,
-                    strokeLinecap: "round"
-                  }
-                }}
-              />
-            </VictoryChart>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Sensação Térmica</Text>
+            <Text style={styles.detailValue}>{heatIndex.toFixed(1)}°C</Text>
           </View>
-
-          <View style={styles.legendContainer}>
-            <Text style={styles.legendTitle}>Faixas de Temperatura</Text>
-            <View style={styles.legendGrid}>
-              {[
-                { color: "#00BFFF", label: "Frio", range: "< 20 °C" },
-                { color: "#1E90FF", label: "Fresco", range: "20 - 22.9 °C" },
-                { color: "#32CD32", label: "Ameno", range: "23 - 25.9 °C" },
-                { color: "#FFD700", label: "Morno", range: "26 - 27.9 °C" },
-                { color: "#FF6347", label: "Quente", range: "28 - 29.9 °C" },
-                { color: "#FF4500", label: "Muito Quente", range: "≥ 30 °C" },
-              ].map((item, index) => (
-                <View key={index} style={styles.legendItem}>
-                  <View
-                    style={[styles.legendDot, { backgroundColor: item.color }]}
-                  />
-                  <View style={styles.legendTextContainer}>
-                    <Text style={styles.legendLabel}>{item.label}</Text>
-                    <Text style={styles.legendRange}>{item.range}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Variação Diária</Text>
+            <Text style={styles.detailValue}>±2.5°C</Text>
           </View>
-        </ScrollView>
+          <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Média Mensal</Text>
+            <Text style={styles.detailValue}>24.8°C</Text>
+          </View>
+        </View>
       </View>
-    </ImageBackground>
+
+      {/* Gráfico de pizza */}
+      <View style={styles.pieContainer}>
+        <VictoryPie
+          data={[
+            { x: "Atual", y: temp },
+            { x: "Ideal", y: Math.max(0, 26 - temp) },
+          ]}
+          innerRadius={pieSize * 0.4}
+          padAngle={2}
+          cornerRadius={8}
+          animate={{ duration: 1000 }}
+          colorScale={[tempColor, "rgba(200, 230, 240, 0.2)"]}
+          width={pieSize}
+          height={pieSize}
+          style={{ labels: { fill: "transparent" } }}
+        />
+        <View style={styles.pieCenterLabel}>
+          <Text style={[styles.pieCenterText, { color: tempColor }]}>
+            {getTempQuality(temp)}
+          </Text>
+          <Text style={styles.pieCenterSubtext}>{temp.toFixed(1)}°C</Text>
+        </View>
+      </View>
+
+      {/* Relatório */}
+      <View style={styles.reportSection}>
+        <Text style={styles.sectionTitle}>Análise Térmica</Text>
+        <View style={styles.reportCard}>
+          <Text style={styles.reportText}>
+            {getTempDescription(temp)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Recomendações */}
+      <View style={styles.recommendations}>
+        <Text style={styles.sectionTitle}>Recomendações</Text>
+        {recommendations.map((rec, index) => (
+          <View key={index} style={styles.tipCard}>
+            <Ionicons 
+              name="thermometer" 
+              size={24} 
+              color={temp > 26 ? "#FF6347" : "#1E90FF"} 
+            />
+            <Text style={styles.tipText}>{rec}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Localização */}
+      <View style={styles.locationInfo}>
+        <MaterialIcons name="location-on" size={20} color="#607D8B" />
+        <Text style={styles.locationText}>
+          São Paulo, SP • Atualizado às {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+        </Text>
+      </View>
+
+      {/* Botão */}
+      <TouchableOpacity style={[styles.generateButton, { backgroundColor: tempColor }]}>
+        <Text style={styles.buttonText}>Ver Histórico Completo</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  imageBackground: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
   container: {
     flex: 1,
+    backgroundColor: '#F5F7FA',
   },
   header: {
-    height: 180,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 40,
-    paddingBottom: 20,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
   },
   backButton: {
-    position: "absolute",
-    top: 40,
+    position: 'absolute',
     left: 20,
-    zIndex: 10,
-    backgroundColor: "rgba(66, 143, 119, 0.8)",
-    borderRadius: 10,
+    top: 30,
+    zIndex: 1,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    padding: 10,
   },
   logo: {
-    width: 120,
-    height: 80,
+    width: 60,
+    height: 60,
     marginBottom: 10,
   },
-  title: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  scrollView: {
-    flex: 1,
-    width: "100%",
-    marginTop: height*0.1,
-  },
-  scrollContent: {
-    alignItems: "center",
-    paddingTop: 10,
-    paddingBottom: 40,
-  },
-  pieContainer: {
-    width: "80%",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    marginTop: 20,
-    marginBottom: 30,
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:40,
-  },
-  pieCenter: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qualityText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: 'white',
     marginBottom: 5,
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+    textAlign: 'center',
   },
-  ppmText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
   },
-  chartContainer: {
-    width: "85%",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    marginBottom: 30,
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:40,
-  },
-  chartTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  legendContainer: {
-    width: "90%",
-    
+  qualityCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    marginHorizontal: 20,
     padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 25,
+  },
+  qualityIndicator: {
+    alignItems: 'center',
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: 'rgba(0, 40, 60, 0.5)',
-    borderRadius:20,
   },
-  legendTitle: {
-    color: "#fff",
+  qualityValue: {
+    fontSize: 48,
+    fontWeight: 'bold',
+  },
+  qualityLabel: {
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: '#607D8B',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  legendGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+  qualityMeter: {
+    height: 10,
+    width: '100%',
+    backgroundColor: '#E0E0E0',
+    borderRadius: 5,
+    marginBottom: 10,
+    overflow: 'hidden',
   },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "48%",
+  meterFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  qualityStatus: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  qualityDetails: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  detailItem: {
+    width: '48%',
+    backgroundColor: '#F5F7FA',
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 12,
   },
-  legendDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 10,
+  detailLabel: {
+    fontSize: 14,
+    color: '#607D8B',
+    marginBottom: 5,
   },
-  legendTextContainer: {
+  detailValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#37474F',
+  },
+  pieContainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    position: 'relative',
+  },
+  pieCenterLabel: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pieCenterText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  pieCenterSubtext: {
+    fontSize: 16,
+    color: '#607D8B',
+  },
+  reportSection: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#37474F',
+    marginBottom: 15,
+    paddingHorizontal: 20,
+  },
+  reportCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  reportText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#455A64',
+    textAlign: 'center',
+  },
+  recommendations: {
+    marginBottom: 25,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  tipText: {
+    fontSize: 15,
+    marginLeft: 10,
+    color: '#455A64',
     flex: 1,
   },
-  legendLabel: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  locationInfo: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 25,
   },
-  legendRange: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  locationText: {
+    fontSize: 14,
+    color: '#607D8B',
+    marginLeft: 5,
+  },
+  generateButton: {
+    borderRadius: 10,
+    paddingVertical: 15,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

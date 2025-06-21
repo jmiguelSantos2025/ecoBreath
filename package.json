@@ -59,7 +59,8 @@
     "react-native-web": "~0.19.13",
     "react-native-web-maps": "^0.3.0",
     "victory": "^37.3.6",
-    "victory-native": "^37.3.6"
+    "victory-native": "^37.3.6",
+    "expo-haptics": "~14.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
