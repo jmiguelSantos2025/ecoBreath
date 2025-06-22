@@ -25,7 +25,7 @@ export default function Co2Screen() {
   const [showModalPDF,setShowModalPDF] = useState(false);
 
   const getCO2Color = (ppm: number) => {
-    if (ppm <= 800) return "#4CAF50";
+    if (ppm <= 800) return "#13D8B0";
     if (ppm <= 1200) return "#FFC107";
     if (ppm <= 2000) return "#FF9800";
     if (ppm <= 5000) return "#F44336";
@@ -84,7 +84,7 @@ export default function Co2Screen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Cabeçalho */}
+    
       <View style={[styles.header, { backgroundColor: co2Color }]}>
         <TouchableOpacity 
           style={styles.backButton} 
@@ -100,7 +100,7 @@ export default function Co2Screen() {
         <Text style={styles.headerSubtitle}>Concentração em partes por milhão</Text>
       </View>
 
-      {/* Card principal */}
+      
       <View style={styles.qualityCard}>
         <View style={styles.qualityIndicator}>
           <Text style={[styles.qualityValue, { color: co2Color }]}>
@@ -140,7 +140,7 @@ export default function Co2Screen() {
         </View>
       </View>
 
-      {/* Gráfico de pizza */}
+     
       <View style={styles.pieContainer}>
         <VictoryPie
           data={[
@@ -164,7 +164,7 @@ export default function Co2Screen() {
         </View>
       </View>
 
-      {/* Relatório */}
+      
       <View style={styles.reportSection}>
         <Text style={styles.sectionTitle}>Análise de CO₂</Text>
         <View style={styles.reportCard}>
@@ -174,7 +174,7 @@ export default function Co2Screen() {
         </View>
       </View>
 
-      {/* Recomendações */}
+      
       <View style={styles.recommendations}>
         <Text style={styles.sectionTitle}>Recomendações</Text>
         {recommendations.map((rec, index) => (
@@ -182,22 +182,22 @@ export default function Co2Screen() {
             <Ionicons 
               name="bulb" 
               size={24} 
-              color={co2PPM > 1200 ? "#F44336" : "#4CAF50"} 
+              color={co2PPM > 1200 ? "#F44336" : "#13D8B0"} 
             />
             <Text style={styles.tipText}>{rec}</Text>
           </View>
         ))}
       </View>
 
-      {/* Localização */}
+    
       <View style={styles.locationInfo}>
         <MaterialIcons name="location-on" size={20} color="#607D8B" />
         <Text style={styles.locationText}>
-          São Paulo, SP • Atualizado às {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+          Manaus, AM • Atualizado às {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
         </Text>
       </View>
 
-      {/* Botão */}
+     
       <TouchableOpacity style={[styles.generateButton, { backgroundColor: co2Color }]} onPress={()=>setShowModalPDF(true)}>
         <Text style={styles.buttonText}>Ver Histórico Completo</Text>
       </TouchableOpacity>

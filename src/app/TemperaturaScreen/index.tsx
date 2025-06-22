@@ -25,12 +25,12 @@ export default function TemperaturaScreen() {
   const [showModalPDF,setShowModalPDF] = useState(false);
 
   const getTempColor = (temp: number) => {
-    if (temp < 20) return "#00BFFF"; // Azul claro - Frio
-    if (temp < 23) return "#1E90FF"; // Azul - Fresco
-    if (temp < 26) return "#32CD32"; // Verde - Ameno
-    if (temp < 28) return "#FFD700"; // Amarelo - Morno
-    if (temp < 30) return "#FF6347"; // Vermelho claro - Quente
-    return "#FF4500"; // Vermelho - Muito quente
+    if (temp < 20) return "#00BFFF";
+    if (temp < 23) return "#1E90FF"; 
+    if (temp < 26) return "#32CD32"; 
+    if (temp < 30) return "#13D8B0"; 
+    if (temp > 30) return "#FF6347";
+    return "#FF4500"; 
   };
 
   const getTempQuality = (temp: number) => {
@@ -59,7 +59,8 @@ export default function TemperaturaScreen() {
     if (temp < 30) return ["Evite atividades ao ar livre", "Use protetor solar"];
     return ["Evite sair nos horários mais quentes", "Mantenha-se hidratado", "Use roupas leves e claras"];
   };
-  const GeneratePDF = async(inicio:Date, fim:Date) =>{
+
+  const GeneratePDF = async(inicio:Date, fim:Date) => {
     await RelatorioPDF({inicio, fim});
   }
 
@@ -74,7 +75,6 @@ export default function TemperaturaScreen() {
         
         setTemp(newTemp);
         setHumidity(newHumidity);
-        // Cálculo simplificado do índice de calor
         setHeatIndex(newTemp + (newHumidity / 100) * 5);
       }
     };
@@ -91,7 +91,7 @@ export default function TemperaturaScreen() {
   const recommendations = getRecommendations(temp);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Cabeçalho */}
       <View style={[styles.header, { backgroundColor: tempColor }]}>
         <TouchableOpacity 
@@ -108,12 +108,15 @@ export default function TemperaturaScreen() {
         <Text style={styles.headerSubtitle}>Temperatura ambiente em tempo real</Text>
       </View>
 
-      {/* Card principal */}
+      {/* Card de Qualidade */}
       <View style={styles.qualityCard}>
         <View style={styles.qualityIndicator}>
-          <Text style={[styles.qualityValue, { color: tempColor }]}>
-            {temp.toFixed(1)}°C
-          </Text>
+          <View style={styles.qualityHeader}>
+            <MaterialIcons name="device-thermostat" size={28} color={tempColor} />
+            <Text style={[styles.qualityValue, { color: tempColor }]}>
+              {temp.toFixed(1)}°C
+            </Text>
+          </View>
           <Text style={styles.qualityLabel}>Temperatura Atual</Text>
           
           <View style={styles.qualityMeter}>
@@ -130,26 +133,34 @@ export default function TemperaturaScreen() {
 
         <View style={styles.qualityDetails}>
           <View style={styles.detailItem}>
+            <MaterialIcons name="water-drop" size={20} color="#607D8B" />
             <Text style={styles.detailLabel}>Umidade</Text>
             <Text style={styles.detailValue}>{humidity}%</Text>
           </View>
           <View style={styles.detailItem}>
+            <MaterialIcons name="whatshot" size={20} color="#607D8B" />
             <Text style={styles.detailLabel}>Sensação Térmica</Text>
             <Text style={styles.detailValue}>{heatIndex.toFixed(1)}°C</Text>
           </View>
           <View style={styles.detailItem}>
+            <Ionicons name="trending-up" size={20} color="#607D8B" />
             <Text style={styles.detailLabel}>Variação Diária</Text>
             <Text style={styles.detailValue}>±2.5°C</Text>
           </View>
           <View style={styles.detailItem}>
+            <MaterialIcons name="calendar-today" size={20} color="#607D8B" />
             <Text style={styles.detailLabel}>Média Mensal</Text>
             <Text style={styles.detailValue}>24.8°C</Text>
           </View>
         </View>
       </View>
 
-      {/* Gráfico de pizza */}
+      {/* Gráfico */}
       <View style={styles.pieContainer}>
+        <View style={styles.sectionHeader}>
+          <MaterialIcons name="insert-chart" size={24} color="#37474F" />
+          <Text style={styles.sectionTitle}>Análise Gráfica</Text>
+        </View>
         <VictoryPie
           data={[
             { x: "Atual", y: temp },
@@ -172,9 +183,12 @@ export default function TemperaturaScreen() {
         </View>
       </View>
 
-      {/* Relatório */}
+      {/* Análise Térmica */}
       <View style={styles.reportSection}>
-        <Text style={styles.sectionTitle}>Análise Térmica</Text>
+        <View style={styles.sectionHeader}>
+          <MaterialIcons name="analytics" size={24} color="#37474F" />
+          <Text style={styles.sectionTitle}>Análise Térmica</Text>
+        </View>
         <View style={styles.reportCard}>
           <Text style={styles.reportText}>
             {getTempDescription(temp)}
@@ -184,7 +198,10 @@ export default function TemperaturaScreen() {
 
       {/* Recomendações */}
       <View style={styles.recommendations}>
-        <Text style={styles.sectionTitle}>Recomendações</Text>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="bulb" size={24} color="#37474F" />
+          <Text style={styles.sectionTitle}>Recomendações</Text>
+        </View>
         {recommendations.map((rec, index) => (
           <View key={index} style={styles.tipCard}>
             <Ionicons 
@@ -201,19 +218,24 @@ export default function TemperaturaScreen() {
       <View style={styles.locationInfo}>
         <MaterialIcons name="location-on" size={20} color="#607D8B" />
         <Text style={styles.locationText}>
-          São Paulo, SP • Atualizado às {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+          Manaus, AM • Atualizado às {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
         </Text>
       </View>
 
-      {/* Botão */}
-      <TouchableOpacity style={[styles.generateButton, { backgroundColor: tempColor }]} onPress={()=>setShowModalPDF(true)}>
+      {/* Botão de Histórico */}
+      <TouchableOpacity 
+        style={[styles.generateButton, { backgroundColor: tempColor }]} 
+        onPress={() => setShowModalPDF(true)}
+      >
+        <MaterialIcons name="history" size={24} color="white" />
         <Text style={styles.buttonText}>Ver Histórico Completo</Text>
       </TouchableOpacity>
+
       <DatePickerModal
-                visible={showModalPDF}
-                onClose={()=> setShowModalPDF(false)}
-                onGenerate={GeneratePDF}
-                />
+        visible={showModalPDF}
+        onClose={() => setShowModalPDF(false)}
+        onGenerate={GeneratePDF}
+      />
     </ScrollView>
   );
 }
@@ -274,6 +296,11 @@ const styles = StyleSheet.create({
     elevation: 3,
     marginBottom: 25,
   },
+  qualityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   qualityIndicator: {
     alignItems: 'center',
     marginBottom: 20,
@@ -281,6 +308,7 @@ const styles = StyleSheet.create({
   qualityValue: {
     fontSize: 48,
     fontWeight: 'bold',
+    marginLeft: 10,
   },
   qualityLabel: {
     fontSize: 16,
@@ -315,16 +343,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+    alignItems: 'center',
   },
   detailLabel: {
     fontSize: 14,
     color: '#607D8B',
     marginBottom: 5,
+    marginTop: 5,
+    textAlign: 'center',
   },
   detailValue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#37474F',
+    textAlign: 'center',
   },
   pieContainer: {
     backgroundColor: 'white',
@@ -340,6 +372,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     position: 'relative',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    alignSelf: 'flex-start',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#37474F',
+    marginLeft: 10,
   },
   pieCenterLabel: {
     position: 'absolute',
@@ -357,13 +402,6 @@ const styles = StyleSheet.create({
   },
   reportSection: {
     marginBottom: 25,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#37474F',
-    marginBottom: 15,
-    paddingHorizontal: 20,
   },
   reportCard: {
     backgroundColor: 'white',
@@ -417,10 +455,13 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   generateButton: {
+    flexDirection: 'row',
     borderRadius: 10,
     paddingVertical: 15,
+    paddingHorizontal: 20,
     marginHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -432,5 +473,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    marginLeft: 10,
   },
 });

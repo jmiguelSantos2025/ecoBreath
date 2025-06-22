@@ -150,7 +150,7 @@ export default function MainScreen() {
                 <TouchableOpacity
                   style={styles.button}
                   activeOpacity={0.7}
-                  onPress={() => handleNavigate(() => /*router.push('CallUsScreen')*/router.push('Pdf'))}
+                  onPress={() => handleNavigate(() => router.push('CallUsScreen'))}
                 >
                   <MaterialCommunityIcons
                     name="phone"

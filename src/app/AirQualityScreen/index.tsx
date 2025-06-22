@@ -231,30 +231,36 @@ export default function AirQualityScreen() {
 
       
       <View style={styles.referenceSection}>
-        <Text style={styles.sectionTitle}>Índice de Qualidade do Ar (IQA)</Text>
-        <View style={styles.referenceScale}>
-          <View style={[styles.referenceItem, { backgroundColor: '#4CAF50' }]}>
-            <Text style={styles.referenceText}>0-800</Text>
-            <Text style={styles.referenceLabel}>Excelente</Text>
-          </View>
-          <View style={[styles.referenceItem, { backgroundColor: '#FFC107' }]}>
-            <Text style={styles.referenceText}>801-1200</Text>
-            <Text style={styles.referenceLabel}>Boa</Text>
-          </View>
-          <View style={[styles.referenceItem, { backgroundColor: '#FF9800' }]}>
-            <Text style={styles.referenceText}>1201-2000</Text>
-            <Text style={styles.referenceLabel}>Moderada</Text>
-          </View>
-          <View style={[styles.referenceItem, { backgroundColor: '#F44336' }]}>
-            <Text style={styles.referenceText}>2001-5000</Text>
-            <Text style={styles.referenceLabel}>Ruim</Text>
-          </View>
-          <View style={[styles.referenceItem, { backgroundColor: '#B71C1C' }]}>
-            <Text style={styles.referenceText}>5000+</Text>
-            <Text style={styles.referenceLabel}>Péssima</Text>
-          </View>
-        </View>
-      </View>
+ 
+  <View style={styles.sectionHeader}>
+    <MaterialIcons name="insert-chart" size={24} color="#37474F" />
+    <Text style={styles.sectionTitle}>Índice de Qualidade do Ar (IQA)</Text>
+  </View>
+  
+
+  <View style={styles.referenceScale}>
+    <View style={[styles.referenceItem, { backgroundColor: '#4CAF50' }]}>
+      <Text style={styles.referenceText}>0-800</Text>
+      <Text style={styles.referenceLabel}>Excelente</Text>
+    </View>
+    <View style={[styles.referenceItem, { backgroundColor: '#FFC107' }]}>
+      <Text style={styles.referenceText}>801-1200</Text>
+      <Text style={styles.referenceLabel}>Boa</Text>
+    </View>
+    <View style={[styles.referenceItem, { backgroundColor: '#FF9800' }]}>
+      <Text style={styles.referenceText}>1201-2000</Text>
+      <Text style={styles.referenceLabel}>Moderada</Text>
+    </View>
+    <View style={[styles.referenceItem, { backgroundColor: '#F44336' }]}>
+      <Text style={styles.referenceText}>2001-5000</Text>
+      <Text style={styles.referenceLabel}>Ruim</Text>
+    </View>
+    <View style={[styles.referenceItem, { backgroundColor: '#B71C1C' }]}>
+      <Text style={styles.referenceText}>5000+</Text>
+      <Text style={styles.referenceLabel}>Péssima</Text>
+    </View>
+  </View>
+</View>
 
    
       <View style={styles.reportSection}>
@@ -325,6 +331,7 @@ export default function AirQualityScreen() {
 }
 
 const styles = StyleSheet.create({
+  
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',
