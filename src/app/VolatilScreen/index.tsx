@@ -13,6 +13,8 @@ import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { VictoryPie } from "victory-native";
+import RelatorioPDF from "../../Components/RelatorioPDF";
+import { DatePickerModal } from "../../Components/CustomModal";
 
 const { width } = Dimensions.get("window");
 
@@ -20,6 +22,7 @@ export default function VolatilScreen() {
   const [coovPPB, setCoovPPB] = useState<number>(400);
   const [temperature, setTemperature] = useState<number>(26);
   const [humidity, setHumidity] = useState<number>(65);
+  const [showModalPDF,setShowModalPDF] = useState(false);
 
   const getCoovColor = (ppb: number) => {
     if (ppb <= 800) return "#4CAF50";
@@ -52,6 +55,9 @@ export default function VolatilScreen() {
     if (ppb <= 5000) return ["Ventile o ambiente imediatamente", "Considere usar purificadores de ar"];
     return ["Abandone o local se possível", "Ventile intensamente o ambiente"];
   };
+  const GeneratePDF = async(inicio:Date, fim:Date) =>{
+      await RelatorioPDF({inicio, fim});
+    }
 
   useEffect(() => {
     const outrosParametrosRef = ref(database, "/OutrosParametros");
@@ -60,7 +66,7 @@ export default function VolatilScreen() {
       if (snapshot.exists()) {
         const data = snapshot.val();
         setCoovPPB(data.CCOV || 400);
-        setTemperature(data.Temperatura || 26);
+        setTemperature(data.Temperatura || null);
         setHumidity(data.Umidade || 65);
       }
     };
@@ -192,9 +198,14 @@ export default function VolatilScreen() {
       </View>
 
       {/* Botão */}
-      <TouchableOpacity style={[styles.generateButton, { backgroundColor: coovColor }]}>
+      <TouchableOpacity style={[styles.generateButton, { backgroundColor: coovColor }]}  onPress={()=>setShowModalPDF(true)}>
         <Text style={styles.buttonText}>Ver Histórico Completo</Text>
       </TouchableOpacity>
+      <DatePickerModal
+                visible={showModalPDF}
+                onClose={()=> setShowModalPDF(false)}
+                onGenerate={GeneratePDF}
+                />
     </ScrollView>
   );
 }

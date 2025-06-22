@@ -1,8 +1,16 @@
-import React from "react";
-import { Modal, View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Platform,
+  Alert,
+} from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface CustomModalProps {
   visible: boolean;
@@ -13,10 +21,15 @@ interface CustomModalProps {
   onClose: () => void;
 }
 
-
 interface CustomConfirmModalProps extends CustomModalProps {
   onConfirm: () => void;
   confirmMode?: boolean;
+}
+
+interface DatePickerModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onGenerate: (inicio: Date, fim: Date) => void;
 }
 
 export function CustomConfirmModal({
@@ -37,10 +50,18 @@ export function CustomConfirmModal({
           <Text style={styles.modalMessage}>{message}</Text>
 
           <View style={styles.buttonRow}>
-            <Pressable style={[styles.button, styles.cancelButton]} onPress={onClose}>
-              <Text style={[styles.buttonText, { color: "#07C3C3" }]}>Cancelar</Text>
+            <Pressable
+              style={[styles.button, styles.cancelButton]}
+              onPress={onClose}
+            >
+              <Text style={[styles.buttonText, { color: "#07C3C3" }]}>
+                Cancelar
+              </Text>
             </Pressable>
-            <Pressable style={[styles.button, styles.confirmButton]} onPress={onConfirm}>
+            <Pressable
+              style={[styles.button, styles.confirmButton]}
+              onPress={onConfirm}
+            >
               <Text style={[styles.buttonText, { color: "white" }]}>Sim</Text>
             </Pressable>
           </View>
@@ -66,7 +87,10 @@ export default function CustomModal({
             name={icon}
             size={70}
             color={color}
-            style={[styles.icon, { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }]}
+            style={[
+              styles.icon,
+              { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] },
+            ]}
           />
           <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalMessage}>{message}</Text>
@@ -82,6 +106,7 @@ export default function CustomModal({
     </Modal>
   );
 }
+
 export function CustomModalLogin({
   visible,
   title,
@@ -98,12 +123,128 @@ export function CustomModalLogin({
             name={icon}
             size={70}
             color={color}
-            style={[styles.icon, { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }]}
+            style={[
+              styles.icon,
+              { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] },
+            ]}
           />
           <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalMessage}>{message}</Text>
+        </View>
+      </View>
+    </Modal>
+  );
+}
 
-          
+export function DatePickerModal({
+  visible,
+  onClose,
+  onGenerate,
+}: DatePickerModalProps) {
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
+  const handleGenerate = () => {
+    if (startDate > endDate) {
+      Alert.alert(
+        "Datas inválidas",
+        "A data inicial deve ser anterior à data final"
+      );
+      return;
+    }
+    onGenerate(startDate, endDate);
+    onClose();
+  };
+
+  const onStartChange = (event: any, selectedDate?: Date) => {
+    setShowStartPicker(false);
+    if (selectedDate) {
+      setStartDate(selectedDate);
+    }
+  };
+
+  const onEndChange = (event: any, selectedDate?: Date) => {
+    setShowEndPicker(false);
+    if (selectedDate) {
+      setEndDate(selectedDate);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("pt-BR");
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContainer, styles.dateModalContainer]}>
+          <Icon
+            name="calendar-text"
+            size={50}
+            color="#08C5C1"
+            style={styles.icon}
+          />
+          <Text style={styles.modalTitle}>Selecione o período</Text>
+
+          <View style={styles.datePickerContainer}>
+            <Text style={styles.label}>Data Inicial:</Text>
+            <Pressable
+              style={styles.dateButton}
+              onPress={() => setShowStartPicker(true)}
+            >
+              <Text style={styles.dateText}>{formatDate(startDate)}</Text>
+            </Pressable>
+
+            <Text style={[styles.label, { marginTop: 20 }]}>Data Final:</Text>
+            <Pressable
+              style={styles.dateButton}
+              onPress={() => setShowEndPicker(true)}
+            >
+              <Text style={styles.dateText}>{formatDate(endDate)}</Text>
+            </Pressable>
+
+            {showStartPicker && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="default"
+                onChange={onStartChange}
+                maximumDate={new Date()}
+              />
+            )}
+
+            {showEndPicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="default"
+                onChange={onEndChange}
+                minimumDate={startDate}
+                maximumDate={new Date()}
+              />
+            )}
+          </View>
+
+          <View style={styles.buttonRow}>
+            <Pressable
+              style={[styles.button, styles.cancelButton]}
+              onPress={onClose}
+            >
+              <Text style={[styles.buttonText, { color: "#07C3C3" }]}>
+                Cancelar
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.confirmButton]}
+              onPress={handleGenerate}
+            >
+              <Text style={[styles.buttonText, { color: "white" }]}>
+                Gerar PDF
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>
@@ -129,6 +270,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
+  dateModalContainer: {
+    width: "85%",
+    padding: 25,
+  },
   icon: {
     marginBottom: 10,
   },
@@ -137,6 +282,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
+    color: "#333",
   },
   modalMessage: {
     fontSize: Platform.OS === "web" ? RFValue(12) : 14,
@@ -165,7 +311,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  
   buttonRow: {
     flexDirection: "row",
     width: "100%",
@@ -190,5 +335,25 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: "bold",
     fontSize: 16,
+  },
+  datePickerContainer: {
+    width: "100%",
+    marginBottom: 25,
+  },
+  label: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 8,
+  },
+  dateButton: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#333",
   },
 });

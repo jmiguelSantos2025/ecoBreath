@@ -16,10 +16,13 @@ import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { VictoryPie } from "victory-native";
 import * as Haptics from 'expo-haptics';
+import RelatorioPDF from "../../Components/RelatorioPDF";
+import { DatePickerModal } from "../../Components/CustomModal";
 
 export default function AirQualityScreen() {
   const [volatilePPM, setVolatilePPM] = useState<number>(200);
   const [scaleAnim] = useState(new Animated.Value(1));
+  const [showModalPDF,setShowModalPDF] = useState(false);
 
   useEffect(() => {
     const outrosParametrosRef = ref(database, "/OutrosParametros");
@@ -28,6 +31,7 @@ export default function AirQualityScreen() {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const newPPM = data.CCOV || 0;
+        const newco2 = data.CO2 || 0;
         setVolatilePPM(newPPM);
         
         
@@ -111,6 +115,9 @@ export default function AirQualityScreen() {
     ];
   };
 
+  const GeneratePDF = async(inicio:Date, fim:Date) =>{
+    await RelatorioPDF({inicio, fim});
+  }
   const pieSize = Math.min(Dimensions.get("window").width * 0.7, 300);
   const airColor = getAirColor(volatilePPM);
   const qualityText = getAirQualityText(volatilePPM);
@@ -162,7 +169,7 @@ export default function AirQualityScreen() {
       >
         <View style={styles.qualityIndicator}>
           <Text style={[styles.qualityValue, { color: airColor }]}>
-            {volatilePPM.toFixed(0)} ppb
+            {volatilePPM.toFixed(0) } ppb
           </Text>
           <Text style={styles.qualityLabel}>Concentração de COVs</Text>
           
@@ -298,11 +305,21 @@ export default function AirQualityScreen() {
      
       <TouchableOpacity 
         style={[styles.actionButton, { backgroundColor: airColor }]}
-        onPress={() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)}
+        onPress={() => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setShowModalPDF(true);
+
+        }}
       >
         <Text style={styles.buttonText}>Histórico de Qualidade do Ar</Text>
         <Ionicons name="stats-chart" size={20} color="white" />
       </TouchableOpacity>
+
+      <DatePickerModal
+          visible={showModalPDF}
+          onClose={()=> setShowModalPDF(false)}
+          onGenerate={GeneratePDF}
+          />
     </ScrollView>
   );
 }

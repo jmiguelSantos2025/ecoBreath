@@ -13,6 +13,8 @@ import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { VictoryPie } from "victory-native";
+import { DatePickerModal } from "../../Components/CustomModal";
+import RelatorioPDF from "../../Components/RelatorioPDF";
 
 const { width } = Dimensions.get("window");
 
@@ -20,6 +22,7 @@ export default function Co2Screen() {
   const [co2PPM, setCo2PPM] = useState<number>(400);
   const [temperature, setTemperature] = useState<number>(26);
   const [humidity, setHumidity] = useState<number>(65);
+  const [showModalPDF,setShowModalPDF] = useState(false);
 
   const getCO2Color = (ppm: number) => {
     if (ppm <= 800) return "#4CAF50";
@@ -52,6 +55,9 @@ export default function Co2Screen() {
     if (ppm <= 5000) return ["Ventile o ambiente imediatamente", "Use purificadores de ar"];
     return ["Abandone o local se possível", "Ventile intensamente"];
   };
+  const GeneratePDF = async(inicio:Date, fim:Date) =>{
+      await RelatorioPDF({inicio, fim});
+    }
 
   useEffect(() => {
     const sensoresRef = ref(database, "/SensoresPPM");
@@ -192,9 +198,14 @@ export default function Co2Screen() {
       </View>
 
       {/* Botão */}
-      <TouchableOpacity style={[styles.generateButton, { backgroundColor: co2Color }]}>
+      <TouchableOpacity style={[styles.generateButton, { backgroundColor: co2Color }]} onPress={()=>setShowModalPDF(true)}>
         <Text style={styles.buttonText}>Ver Histórico Completo</Text>
       </TouchableOpacity>
+      <DatePickerModal
+                visible={showModalPDF}
+                onClose={()=> setShowModalPDF(false)}
+                onGenerate={GeneratePDF}
+                />
     </ScrollView>
   );
 }

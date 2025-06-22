@@ -13,6 +13,8 @@ import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
 import { VictoryPie } from "victory-native";
+import RelatorioPDF from "../../Components/RelatorioPDF";
+import { DatePickerModal } from "../../Components/CustomModal";
 
 const { width } = Dimensions.get("window");
 
@@ -20,6 +22,7 @@ export default function TemperaturaScreen() {
   const [temp, setTemp] = useState<number>(24);
   const [humidity, setHumidity] = useState<number>(65);
   const [heatIndex, setHeatIndex] = useState<number>(26);
+  const [showModalPDF,setShowModalPDF] = useState(false);
 
   const getTempColor = (temp: number) => {
     if (temp < 20) return "#00BFFF"; // Azul claro - Frio
@@ -56,6 +59,9 @@ export default function TemperaturaScreen() {
     if (temp < 30) return ["Evite atividades ao ar livre", "Use protetor solar"];
     return ["Evite sair nos horários mais quentes", "Mantenha-se hidratado", "Use roupas leves e claras"];
   };
+  const GeneratePDF = async(inicio:Date, fim:Date) =>{
+    await RelatorioPDF({inicio, fim});
+  }
 
   useEffect(() => {
     const temperaturaRef = ref(database, "/TempeUmid");
@@ -200,9 +206,14 @@ export default function TemperaturaScreen() {
       </View>
 
       {/* Botão */}
-      <TouchableOpacity style={[styles.generateButton, { backgroundColor: tempColor }]}>
+      <TouchableOpacity style={[styles.generateButton, { backgroundColor: tempColor }]} onPress={()=>setShowModalPDF(true)}>
         <Text style={styles.buttonText}>Ver Histórico Completo</Text>
       </TouchableOpacity>
+      <DatePickerModal
+                visible={showModalPDF}
+                onClose={()=> setShowModalPDF(false)}
+                onGenerate={GeneratePDF}
+                />
     </ScrollView>
   );
 }
