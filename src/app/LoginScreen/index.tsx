@@ -17,7 +17,7 @@ import { router } from "expo-router";
 import { RFValue } from "react-native-responsive-fontsize";
 import {signInWithEmailAndPassword} from "firebase/auth";
 import { auth} from "../../../firebaseConfig";
-import CustomModal from "../../Components/CustomModal";
+import CustomModal, { CustomModalLogin } from "../../Components/CustomModal";
 
 const { width, height } = Dimensions.get("window");
 
@@ -201,17 +201,14 @@ export default function LoginScreen() {
             icon={"alert-outline"}
             color={"#006462"}
           />
-          <CustomModal
+          <CustomModalLogin
             visible={modalLoading}
             title="Carregando....."
             message="Por favor, aguarde enquanto entramos com seu usuário"
-            onClose={() =>{ setModalLoading(false)
-              router.push("MainScreen");
-            }
-          }
-            icon={"loading"}
+            icon={"account-arrow-right"}
             color={"#006462"}
           />
+          
           
         </View>
       </ImageBackground>

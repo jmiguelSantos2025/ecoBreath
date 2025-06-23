@@ -183,7 +183,7 @@ export default function TemperaturaScreen() {
         </View>
       </View>
 
-      {/* Análise Térmica */}
+     
       <View style={styles.reportSection}>
         <View style={styles.sectionHeader}>
           <MaterialIcons name="analytics" size={24} color="#37474F" />
@@ -196,7 +196,7 @@ export default function TemperaturaScreen() {
         </View>
       </View>
 
-      {/* Recomendações */}
+      
       <View style={styles.recommendations}>
         <View style={styles.sectionHeader}>
           <Ionicons name="bulb" size={24} color="#37474F" />
@@ -214,7 +214,7 @@ export default function TemperaturaScreen() {
         ))}
       </View>
 
-      {/* Localização */}
+  
       <View style={styles.locationInfo}>
         <MaterialIcons name="location-on" size={20} color="#607D8B" />
         <Text style={styles.locationText}>
@@ -222,7 +222,7 @@ export default function TemperaturaScreen() {
         </Text>
       </View>
 
-      {/* Botão de Histórico */}
+   
       <TouchableOpacity 
         style={[styles.generateButton, { backgroundColor: tempColor }]} 
         onPress={() => setShowModalPDF(true)}

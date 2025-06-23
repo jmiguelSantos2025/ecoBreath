@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -19,6 +20,14 @@ interface CustomModalProps {
   icon: string;
   color: string;
   onClose: () => void;
+}
+interface CustomModalLoginProps {
+  visible: boolean;
+  title: string;
+  message: string;
+  icon: string;
+  color: string;
+  
 }
 
 interface CustomConfirmModalProps extends CustomModalProps {
@@ -79,6 +88,10 @@ export default function CustomModal({
   color,
   onClose,
 }: CustomModalProps) {
+  
+
+  const [showButton,setShowButton] = useState(false);
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalOverlay}>
@@ -112,24 +125,36 @@ export function CustomModalLogin({
   title,
   message,
   icon,
-  color,
-  onClose,
-}: CustomModalProps) {
+  color = "#006462", // Valor padrão para a cor
+}: CustomModalLoginProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal 
+      visible={visible} 
+      transparent 
+      animationType="fade"
+      onRequestClose={() => {}} 
+    >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Icon
-            name={icon}
-            size={70}
-            color={color}
-            style={[
-              styles.icon,
-              { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] },
-            ]}
-          />
+        <View style={[styles.modalContainer, styles.loginModalContainer]}>
+          
+          <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
+            <Icon
+              name={icon}
+              size={50}
+              color={color}
+              style={styles.icon}
+            />
+          </View>
+          
           <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalMessage}>{message}</Text>
+          
+       
+          <ActivityIndicator 
+            size="large" 
+            color={color} 
+            style={styles.loader}
+          />
         </View>
       </View>
     </Modal>
@@ -277,19 +302,39 @@ const styles = StyleSheet.create({
   icon: {
     marginBottom: 10,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+  loginModalContainer: {
+    width: "80%",
+    padding: 30,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+   modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 8,
     textAlign: "center",
     color: "#333",
   },
+  
   modalMessage: {
-    fontSize: Platform.OS === "web" ? RFValue(12) : 14,
+    fontSize: 15,
     textAlign: "center",
-    marginBottom: 20,
-    paddingHorizontal: 5,
-    color: "#7B7B7B",
+    marginBottom: 25,
+    color: "#666",
+    lineHeight: 22,
+  },
+  
+  loader: {
+    marginTop: 15,
   },
   buttonContainer: {
     width: "100%",
