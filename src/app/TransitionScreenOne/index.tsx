@@ -25,6 +25,7 @@ export default function TransitionScreenOne() {
             width: scaledSize,
             height: scaledSize,
             borderRadius: scaledSize / 2,
+            
             justifyContent: 'center',
             alignItems: 'center',
         };
@@ -54,5 +55,6 @@ const style = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        
     },
 });

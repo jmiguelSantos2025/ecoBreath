@@ -20,8 +20,9 @@ const { width } = Dimensions.get("window");
 
 export default function VolatilScreen() {
   const [coovPPB, setCoovPPB] = useState<number>(400);
-  const [temperature, setTemperature] = useState<number>(26);
-  const [humidity, setHumidity] = useState<number>(65);
+  const [temperature, setTemperature] = useState(26);
+  const [humidity, setHumidity] = useState<number>(0);
+  const [co, setCo] = useState<number>(0);
   const [showModalPDF,setShowModalPDF] = useState(false);
 
   const getCoovColor = (ppb: number) => {
@@ -61,20 +62,43 @@ export default function VolatilScreen() {
 
   useEffect(() => {
     const outrosParametrosRef = ref(database, "/OutrosParametros");
+    const tempeUmidRef = ref(database, "/TempeUmid");
+    const outrosDadosRef = ref(database, "/SensoresPPM");
     
     const onOutrosParametrosChange = (snapshot: any) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        setCoovPPB(data.CCOV || 400);
-        setTemperature(data.Temperatura || null);
-        setHumidity(data.Umidade || 65);
+        setCoovPPB(data.CCOV || 0);
+        setCo(data.CO || 0);
+        
+
+       
+      }
+    };
+    const onTempeUmidChange = (snapshot1: any) => {
+      if (snapshot1.exists()) {
+        const data = snapshot1.val();
+        setTemperature(data.Temperatura || "Sem dados em ");
+        setHumidity(data.Umidade || 0);
+      }
+    };
+    const onOtherDataChange = (snapshot1: any) => {
+     
+      if (snapshot1.exists()) {
+        const data = snapshot1.val();
+        const co = data.CO || 0
+        setCo(co);
       }
     };
 
     onValue(outrosParametrosRef, onOutrosParametrosChange);
+    onValue(tempeUmidRef, onTempeUmidChange);
+    onValue(outrosDadosRef, onOtherDataChange);
     
     return () => {
       off(outrosParametrosRef, "value", onOutrosParametrosChange);
+      off(tempeUmidRef, "value", onTempeUmidChange);
+      off(outrosDadosRef, "value", onOtherDataChange);
     };
   }, []);
 
@@ -106,7 +130,7 @@ export default function VolatilScreen() {
           <Text style={[styles.qualityValue, { color: coovColor }]}>
             {coovPPB.toFixed(0)} ppb
           </Text>
-          <Text style={styles.qualityLabel}>Concentração de COV</Text>
+          <Text style={styles.qualityLabel}>Concentração de CCOV</Text>
           
           <View style={styles.qualityMeter}>
             <View style={[styles.meterFill, { 
@@ -127,15 +151,15 @@ export default function VolatilScreen() {
           </View>
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Umidade</Text>
-            <Text style={styles.detailValue}>{humidity}%</Text>
+            <Text style={styles.detailValue}>{humidity.toFixed(0)}%</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Variação Diária</Text>
-            <Text style={styles.detailValue}>±150 ppb</Text>
+            <Text style={styles.detailLabel}>Níveis de CO</Text>
+            <Text style={styles.detailValue}>{co} ppm</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Média Mensal</Text>
-            <Text style={styles.detailValue}>850 ppb</Text>
+            <Text style={styles.detailLabel}>Sensação Termica</Text>
+            <Text style={styles.detailValue}>{temperature+2}°C</Text>
           </View>
         </View>
       </View>

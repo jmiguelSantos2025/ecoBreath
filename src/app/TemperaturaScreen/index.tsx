@@ -23,6 +23,8 @@ export default function TemperaturaScreen() {
   const [humidity, setHumidity] = useState<number>(65);
   const [heatIndex, setHeatIndex] = useState<number>(26);
   const [showModalPDF,setShowModalPDF] = useState(false);
+  const [co,setco] = useState<number>(0);
+  const [ccov,setCcov] = useState<number>(0);
 
   const getTempColor = (temp: number) => {
     if (temp < 20) return "#00BFFF";
@@ -66,23 +68,46 @@ export default function TemperaturaScreen() {
 
   useEffect(() => {
     const temperaturaRef = ref(database, "/TempeUmid");
-    
+    const outrosDadosRef = ref(database, "/SensoresPPM");
+    const otherParametros = ref(database, "/OutrosParametros");
     const onTemperaturaChange = (snapshot: any) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const newTemp = data.Temperatura || 24;
-        const newHumidity = data.Umidade || 65;
+        const newTemp = data.Temperatura || null;
+        const newHumidity = data.Umidade || null;
         
         setTemp(newTemp);
         setHumidity(newHumidity);
         setHeatIndex(newTemp + (newHumidity / 100) * 5);
       }
     };
+    const onOtherDataChange = (snapshot1: any) => {
+     
+      if (snapshot1.exists()) {
+        const data = snapshot1.val();
+        const co = data.CO || 0
+        setco(co);
+      }
+    };
+    const onOtherParametrosChange = (snapshot2: any) => {
+      
+      if (snapshot2.exists()) {
+        const data = snapshot2.val();
+        const ccov = data.CCOV || 0;
+       
+        setCcov(ccov);
+      }
+    };
 
     onValue(temperaturaRef, onTemperaturaChange);
+    onValue(outrosDadosRef, onOtherDataChange);
+    onValue(otherParametros, onOtherParametrosChange);
+
     
     return () => {
       off(temperaturaRef, "value", onTemperaturaChange);
+      off(outrosDadosRef, "value", onOtherDataChange);
+      off(otherParametros, "value", onOtherParametrosChange);
     };
   }, []);
 
@@ -92,7 +117,6 @@ export default function TemperaturaScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Cabeçalho */}
       <View style={[styles.header, { backgroundColor: tempColor }]}>
         <TouchableOpacity 
           style={styles.backButton} 
@@ -108,7 +132,7 @@ export default function TemperaturaScreen() {
         <Text style={styles.headerSubtitle}>Temperatura ambiente em tempo real</Text>
       </View>
 
-      {/* Card de Qualidade */}
+
       <View style={styles.qualityCard}>
         <View style={styles.qualityIndicator}>
           <View style={styles.qualityHeader}>
@@ -135,27 +159,27 @@ export default function TemperaturaScreen() {
           <View style={styles.detailItem}>
             <MaterialIcons name="water-drop" size={20} color="#607D8B" />
             <Text style={styles.detailLabel}>Umidade</Text>
-            <Text style={styles.detailValue}>{humidity}%</Text>
+            <Text style={styles.detailValue}>{humidity.toFixed(0)}%</Text>
           </View>
           <View style={styles.detailItem}>
             <MaterialIcons name="whatshot" size={20} color="#607D8B" />
             <Text style={styles.detailLabel}>Sensação Térmica</Text>
-            <Text style={styles.detailValue}>{heatIndex.toFixed(1)}°C</Text>
+            <Text style={styles.detailValue}>{heatIndex.toFixed(0)}°C</Text>
           </View>
           <View style={styles.detailItem}>
             <Ionicons name="trending-up" size={20} color="#607D8B" />
-            <Text style={styles.detailLabel}>Variação Diária</Text>
-            <Text style={styles.detailValue}>±2.5°C</Text>
+            <Text style={styles.detailLabel}>Níveis de CCOV</Text>
+            <Text style={styles.detailValue}>{ccov} ppb</Text>
           </View>
           <View style={styles.detailItem}>
             <MaterialIcons name="calendar-today" size={20} color="#607D8B" />
-            <Text style={styles.detailLabel}>Média Mensal</Text>
-            <Text style={styles.detailValue}>24.8°C</Text>
+            <Text style={styles.detailLabel}>Níveis de CO</Text>
+            <Text style={styles.detailValue}>{co} ppm</Text>
           </View>
         </View>
       </View>
 
-      {/* Gráfico */}
+      
       <View style={styles.pieContainer}>
         <View style={styles.sectionHeader}>
           <MaterialIcons name="insert-chart" size={24} color="#37474F" />
@@ -164,7 +188,7 @@ export default function TemperaturaScreen() {
         <VictoryPie
           data={[
             { x: "Atual", y: temp },
-            { x: "Ideal", y: Math.max(0, 26 - temp) },
+            { x: "Maximo", y: Math.max(0, 100 - temp) },
           ]}
           innerRadius={pieSize * 0.4}
           padAngle={2}
@@ -175,7 +199,7 @@ export default function TemperaturaScreen() {
           height={pieSize}
           style={{ labels: { fill: "transparent" } }}
         />
-        <View style={styles.pieCenterLabel}>
+        <View style={[styles.pieCenterLabel]}>
           <Text style={[styles.pieCenterText, { color: tempColor }]}>
             {getTempQuality(temp)}
           </Text>
@@ -392,9 +416,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pieCenterText: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 5,
+    marginTop: 40,
   },
   pieCenterSubtext: {
     fontSize: 16,
