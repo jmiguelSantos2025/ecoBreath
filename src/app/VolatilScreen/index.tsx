@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, FontAwesome, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
@@ -56,9 +56,10 @@ export default function VolatilScreen() {
     if (ppb <= 5000) return ["Ventile o ambiente imediatamente", "Considere usar purificadores de ar"];
     return ["Abandone o local se possível", "Ventile intensamente o ambiente"];
   };
-  const GeneratePDF = async(inicio:Date, fim:Date) =>{
-      await RelatorioPDF({inicio, fim});
-    }
+  
+  const GeneratePDF = async(inicio:Date, fim:Date) => {
+    await RelatorioPDF({inicio, fim});
+  }
 
   useEffect(() => {
     const outrosParametrosRef = ref(database, "/OutrosParametros");
@@ -70,11 +71,9 @@ export default function VolatilScreen() {
         const data = snapshot.val();
         setCoovPPB(data.CCOV || 0);
         setCo(data.CO || 0);
-        
-
-       
       }
     };
+    
     const onTempeUmidChange = (snapshot1: any) => {
       if (snapshot1.exists()) {
         const data = snapshot1.val();
@@ -82,8 +81,8 @@ export default function VolatilScreen() {
         setHumidity(data.Umidade || 0);
       }
     };
+    
     const onOtherDataChange = (snapshot1: any) => {
-     
       if (snapshot1.exists()) {
         const data = snapshot1.val();
         const co = data.CO || 0
@@ -108,7 +107,6 @@ export default function VolatilScreen() {
 
   return (
     <ScrollView style={styles.container}>
-     
       <View style={[styles.header, { backgroundColor: coovColor }]}>
         <TouchableOpacity 
           style={styles.backButton} 
@@ -120,16 +118,21 @@ export default function VolatilScreen() {
           source={require("../../../assets/LogoBranca.png")} 
           style={styles.logo}
         />
-        <Text style={styles.headerTitle}>Gases Voláteis</Text>
-        <Text style={styles.headerSubtitle}>Concentração em partes por bilhão</Text>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerTitle}>Gases Voláteis</Text>
+        </View>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerSubtitle}>Concentração em partes por bilhão</Text>
+        </View>
       </View>
 
-     
       <View style={styles.qualityCard}>
         <View style={styles.qualityIndicator}>
-          <Text style={[styles.qualityValue, { color: coovColor }]}>
-            {coovPPB.toFixed(0)} ppb
-          </Text>
+          <View style={styles.qualityValueContainer}>
+            <Text style={[styles.qualityValue, { color: coovColor }]}>
+              {coovPPB.toFixed(0)} ppb
+            </Text>
+          </View>
           <Text style={styles.qualityLabel}>Concentração de CCOV</Text>
           
           <View style={styles.qualityMeter}>
@@ -139,32 +142,45 @@ export default function VolatilScreen() {
             }]} />
           </View>
           
-          <Text style={[styles.qualityStatus, { color: coovColor }]}>
-            {getCoovQuality(coovPPB)}
-          </Text>
+          <View style={styles.qualityStatusContainer}>
+            <Text style={[styles.qualityStatus, { color: coovColor }]}>
+              {getCoovQuality(coovPPB)}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.qualityDetails}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Temperatura</Text>
+            <View style={styles.detailIconContainer}>
+              <FontAwesome name="thermometer-half" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Temperatura</Text>
+            </View>
             <Text style={styles.detailValue}>{temperature}°C</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Umidade</Text>
+            <View style={styles.detailIconContainer}>
+              <FontAwesome name="tint" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Umidade</Text>
+            </View>
             <Text style={styles.detailValue}>{humidity.toFixed(0)}%</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Níveis de CO</Text>
+            <View style={styles.detailIconContainer}>
+              <MaterialCommunityIcons name="molecule-co" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Níveis de CO</Text>
+            </View>
             <Text style={styles.detailValue}>{co} ppm</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Sensação Termica</Text>
+            <View style={styles.detailIconContainer}>
+              <MaterialCommunityIcons name="weather-windy" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Sensação Térmica</Text>
+            </View>
             <Text style={styles.detailValue}>{temperature+2}°C</Text>
           </View>
         </View>
       </View>
 
-      
       <View style={styles.pieContainer}>
         <VictoryPie
           data={[
@@ -188,23 +204,30 @@ export default function VolatilScreen() {
         </View>
       </View>
 
-      
       <View style={styles.reportSection}>
-        <Text style={styles.sectionTitle}>Análise de Qualidade do Ar</Text>
+        <View style={styles.sectionTitleContainer}>
+          <Feather name="bar-chart-2" size={20} color="#37474F" />
+          <Text style={styles.sectionTitle}>Análise de Qualidade do Ar</Text>
+        </View>
         <View style={styles.reportCard}>
-          <Text style={styles.reportText}>
-            {getCoovDescription(coovPPB)}
-          </Text>
+          <View style={styles.reportTextContainer}>
+            <MaterialIcons name="info" size={20} color="#455A64" style={styles.reportIcon} />
+            <Text style={styles.reportText}>
+              {getCoovDescription(coovPPB)}
+            </Text>
+          </View>
         </View>
       </View>
 
-     
       <View style={styles.recommendations}>
-        <Text style={styles.sectionTitle}>Recomendações</Text>
+        <View style={styles.sectionTitleContainer}>
+          <Feather name="alert-triangle" size={20} color="#37474F" />
+          <Text style={styles.sectionTitle}>Recomendações</Text>
+        </View>
         {recommendations.map((rec, index) => (
           <View key={index} style={styles.tipCard}>
             <Ionicons 
-              name="filter" 
+              name={index === 0 ? "leaf" : "bulb"} 
               size={24} 
               color={coovPPB > 1200 ? "#F44336" : "#13D8B0"} 
             />
@@ -213,7 +236,6 @@ export default function VolatilScreen() {
         ))}
       </View>
 
-      
       <View style={styles.locationInfo}>
         <MaterialIcons name="location-on" size={20} color="#607D8B" />
         <Text style={styles.locationText}>
@@ -221,15 +243,21 @@ export default function VolatilScreen() {
         </Text>
       </View>
 
-     
-      <TouchableOpacity style={[styles.generateButton, { backgroundColor: coovColor }]}  onPress={()=>setShowModalPDF(true)}>
-        <Text style={styles.buttonText}>Ver Histórico Completo</Text>
+      <TouchableOpacity 
+        style={[styles.generateButton, { backgroundColor: coovColor }]}  
+        onPress={() => setShowModalPDF(true)}
+      >
+        <View style={styles.buttonContent}>
+          <MaterialIcons name="history" size={24} color="white" />
+          <Text style={styles.buttonText}>Ver Histórico Completo</Text>
+        </View>
       </TouchableOpacity>
+      
       <DatePickerModal
-                visible={showModalPDF}
-                onClose={()=> setShowModalPDF(false)}
-                onGenerate={GeneratePDF}
-                />
+        visible={showModalPDF}
+        onClose={() => setShowModalPDF(false)}
+        onGenerate={GeneratePDF}
+      />
     </ScrollView>
   );
 }
@@ -266,11 +294,18 @@ const styles = StyleSheet.create({
     height: 60,
     marginBottom: 10,
   },
+  headerTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  headerIcon: {
+    marginRight: 8,
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: 'white',
-    marginBottom: 5,
     textAlign: 'center',
   },
   headerSubtitle: {
@@ -294,6 +329,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  qualityValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  valueIcon: {
+    marginRight: 10,
+  },
   qualityValue: {
     fontSize: 48,
     fontWeight: 'bold',
@@ -316,6 +358,13 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 5,
   },
+  qualityStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusIcon: {
+    marginRight: 8,
+  },
   qualityStatus: {
     fontSize: 18,
     fontWeight: '600',
@@ -332,10 +381,15 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+  detailIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   detailLabel: {
     fontSize: 14,
     color: '#607D8B',
-    marginBottom: 5,
+    marginLeft: 8,
   },
   detailValue: {
     fontSize: 16,
@@ -374,12 +428,17 @@ const styles = StyleSheet.create({
   reportSection: {
     marginBottom: 25,
   },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 20,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#37474F',
-    marginBottom: 15,
-    paddingHorizontal: 20,
+    marginLeft: 8,
   },
   reportCard: {
     backgroundColor: 'white',
@@ -392,11 +451,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  reportTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  reportIcon: {
+    marginRight: 10,
+    marginTop: 2,
+  },
   reportText: {
     fontSize: 15,
     lineHeight: 22,
     color: '#455A64',
-    textAlign: 'center',
+    flex: 1,
   },
   recommendations: {
     marginBottom: 25,
@@ -444,9 +511,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   buttonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    marginLeft: 10,
   },
 });

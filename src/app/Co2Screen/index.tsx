@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, FontAwesome, Feather, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { off, onValue, ref } from "firebase/database";
 import { database } from "../../../firebaseConfig";
@@ -23,6 +23,7 @@ export default function Co2Screen() {
   const [temperature, setTemperature] = useState<number>(26);
   const [humidity, setHumidity] = useState<number>(65);
   const [showModalPDF,setShowModalPDF] = useState(false);
+  const [co, setCo] = useState<number>(0);
 
   const getCO2Color = (ppm: number) => {
     if (ppm <= 800) return "#13D8B0";
@@ -60,21 +61,33 @@ export default function Co2Screen() {
     }
 
   useEffect(() => {
-    const sensoresRef = ref(database, "/SensoresPPM");
+    const TempeUmidRef = ref(database, "/TempeUmid");
+    const outrosDadosRef = ref(database, "/SensoresPPM");
     
     const onSensoresChange = (snapshot: any) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        setCo2PPM(data.CO2In || 400);
-        setTemperature(data.Temperatura || 26);
-        setHumidity(data.Umidade || 65);
+        
+        setTemperature(data.Temperatura || null);
+        setHumidity(data.Umidade || 0);
+      }
+    };
+    const onOtherDataChange = (snapshot1: any) => {
+     
+      if (snapshot1.exists()) {
+        const data = snapshot1.val();
+        const co = data.CO || 0
+        setCo2PPM(data.CO2In || 0);
+        setCo(co);
       }
     };
 
-    onValue(sensoresRef, onSensoresChange);
+    onValue(TempeUmidRef, onSensoresChange);
+    onValue(outrosDadosRef, onOtherDataChange);
     
     return () => {
-      off(sensoresRef, "value", onSensoresChange);
+      off(TempeUmidRef, "value", onSensoresChange);
+      off(outrosDadosRef, "value", onOtherDataChange);
     };
   }, []);
 
@@ -96,16 +109,21 @@ export default function Co2Screen() {
           source={require("../../../assets/LogoBranca.png")} 
           style={styles.logo}
         />
-        <Text style={styles.headerTitle}>Monitoramento de CO₂</Text>
+        <View style={styles.headerIconContainer}>
+         
+          <Text style={styles.headerTitle}>Monitoramento de CO₂</Text>
+        </View>
         <Text style={styles.headerSubtitle}>Concentração em partes por milhão</Text>
       </View>
 
-      
       <View style={styles.qualityCard}>
         <View style={styles.qualityIndicator}>
-          <Text style={[styles.qualityValue, { color: co2Color }]}>
-            {co2PPM.toFixed(0)} ppm
-          </Text>
+          <View style={styles.qualityValueContainer}>
+            
+            <Text style={[styles.qualityValue, { color: co2Color }]}>
+              {co2PPM.toFixed(0)} ppm
+            </Text>
+          </View>
           <Text style={styles.qualityLabel}>Concentração de CO₂</Text>
           
           <View style={styles.qualityMeter}>
@@ -122,25 +140,36 @@ export default function Co2Screen() {
 
         <View style={styles.qualityDetails}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Temperatura</Text>
+            <View style={styles.detailIconContainer}>
+              <FontAwesome name="thermometer-half" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Temperatura</Text>
+            </View>
             <Text style={styles.detailValue}>{temperature}°C</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Umidade</Text>
-            <Text style={styles.detailValue}>{humidity}%</Text>
+            <View style={styles.detailIconContainer}>
+              <FontAwesome5 name="water" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Umidade</Text>
+            </View>
+            <Text style={styles.detailValue}>{humidity.toFixed(0)}%</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Sensação Térmica</Text>
+            <View style={styles.detailIconContainer}>
+              <MaterialCommunityIcons name="weather-windy" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Sensação Térmica</Text>
+            </View>
             <Text style={styles.detailValue}>{temperature + 2}°C</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Pressão</Text>
-            <Text style={styles.detailValue}>1012 hPa</Text>
+            <View style={styles.detailIconContainer}>
+              <MaterialCommunityIcons name="molecule" size={20} color="#607D8B" />
+              <Text style={styles.detailLabel}>Níveis de CO</Text>
+            </View>
+            <Text style={styles.detailValue}>{co} ppm</Text>
           </View>
         </View>
       </View>
 
-     
       <View style={styles.pieContainer}>
         <VictoryPie
           data={[
@@ -157,6 +186,7 @@ export default function Co2Screen() {
           style={{ labels: { fill: "transparent" } }}
         />
         <View style={styles.pieCenterLabel}>
+          
           <Text style={[styles.pieCenterText, { color: co2Color }]}>
             {getCO2Quality(co2PPM)}
           </Text>
@@ -164,9 +194,11 @@ export default function Co2Screen() {
         </View>
       </View>
 
-      
       <View style={styles.reportSection}>
-        <Text style={styles.sectionTitle}>Análise de CO₂</Text>
+        <View style={styles.sectionHeader}>
+          <Feather name="bar-chart-2" size={24} color="#37474F" />
+          <Text style={styles.sectionTitle}>Análise de CO₂</Text>
+        </View>
         <View style={styles.reportCard}>
           <Text style={styles.reportText}>
             {getCO2Description(co2PPM)}
@@ -174,9 +206,11 @@ export default function Co2Screen() {
         </View>
       </View>
 
-      
       <View style={styles.recommendations}>
-        <Text style={styles.sectionTitle}>Recomendações</Text>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="bulb-outline" size={24} color="#37474F" />
+          <Text style={styles.sectionTitle}>Recomendações</Text>
+        </View>
         {recommendations.map((rec, index) => (
           <View key={index} style={styles.tipCard}>
             <Ionicons 
@@ -189,7 +223,6 @@ export default function Co2Screen() {
         ))}
       </View>
 
-    
       <View style={styles.locationInfo}>
         <MaterialIcons name="location-on" size={20} color="#607D8B" />
         <Text style={styles.locationText}>
@@ -197,15 +230,19 @@ export default function Co2Screen() {
         </Text>
       </View>
 
-     
-      <TouchableOpacity style={[styles.generateButton, { backgroundColor: co2Color }]} onPress={()=>setShowModalPDF(true)}>
+      <TouchableOpacity 
+        style={[styles.generateButton, { backgroundColor: co2Color }]} 
+        onPress={()=>setShowModalPDF(true)}
+      >
+        <MaterialIcons name="history" size={24} color="white" />
         <Text style={styles.buttonText}>Ver Histórico Completo</Text>
       </TouchableOpacity>
+      
       <DatePickerModal
-                visible={showModalPDF}
-                onClose={()=> setShowModalPDF(false)}
-                onGenerate={GeneratePDF}
-                />
+        visible={showModalPDF}
+        onClose={()=> setShowModalPDF(false)}
+        onGenerate={GeneratePDF}
+      />
     </ScrollView>
   );
 }
@@ -242,11 +279,16 @@ const styles = StyleSheet.create({
     height: 60,
     marginBottom: 10,
   },
+  headerIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: 'white',
-    marginBottom: 5,
+    marginLeft: 10,
     textAlign: 'center',
   },
   headerSubtitle: {
@@ -270,9 +312,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  qualityValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   qualityValue: {
     fontSize: 48,
     fontWeight: 'bold',
+    marginLeft: 10,
   },
   qualityLabel: {
     fontSize: 16,
@@ -308,10 +355,15 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+  detailIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   detailLabel: {
     fontSize: 14,
     color: '#607D8B',
-    marginBottom: 5,
+    marginLeft: 5,
   },
   detailValue: {
     fontSize: 16,
@@ -341,7 +393,7 @@ const styles = StyleSheet.create({
   pieCenterText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginVertical: 5,
   },
   pieCenterSubtext: {
     fontSize: 16,
@@ -350,12 +402,17 @@ const styles = StyleSheet.create({
   reportSection: {
     marginBottom: 25,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 20,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#37474F',
-    marginBottom: 15,
-    paddingHorizontal: 20,
+    marginLeft: 10,
   },
   reportCard: {
     backgroundColor: 'white',
@@ -409,10 +466,13 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   generateButton: {
+    flexDirection: 'row',
     borderRadius: 10,
     paddingVertical: 15,
+    paddingHorizontal: 20,
     marginHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -424,5 +484,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    marginLeft: 10,
   },
 });
