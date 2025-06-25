@@ -7,7 +7,7 @@
     "icon": "./assets/LogoBrancaSplash.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme":"ecoBreath",
+    "scheme": "ecoBreath",
     "splash": {
       "image": "./assets/LogoAzul.png",
       "resizeMode": "contain",
@@ -15,38 +15,53 @@
     },
     "ios": {
       "supportsTablet": true,
-      "budleIdentifier": "com.ecoBreath.ecoBreathApp"
+      "bundleIdentifier": "com.ecoBreath.ecoBreathApp"
     },
     "android": {
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "INTERNET","NOTIFICATIONS"],
-      "intentFilters":{
-        "action": "VIEW",
-        "data":[
-          {
-            "scheme":"ecoBreath",
-            "host":"reset-password"
-          }
-        ],
-        "category":["BROWSABLE", "DEFAULT"]
-      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "INTERNET",
+        "NOTIFICATIONS"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "ecoBreath",
+              "host": "reset-password"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/LogoAzul.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jjoaosantos301270.ecoBreath"
     },
     "web": {
       "favicon": "./assets/LogoAzul.png"
     },
     "plugins": [
-     "expo-router",
-     [
-      "expo-notifications",
-      {
-        "icon": "./assets/notification-icon.png",
-        "color": "#13D8B0"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#13D8B0"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2f7a9331-6d02-4f9a-9a48-ab7aab129d6c"
       }
-     ]
-      
-    ]
+    }
   }
 }
