@@ -13,7 +13,7 @@ export default function TransitionScreenOne() {
         scale.value = withTiming(6, { duration: 2500 });
 
         const timeout = setTimeout(() => {
-            router.push('/TransitionScreenThird');
+            router.push('/TutorialScreen');
         }, 2000);
 
         return () => clearTimeout(timeout);
@@ -49,7 +49,7 @@ const style = StyleSheet.create({
     container: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#13D8B0',
+        backgroundColor: '#13DB80',
     },
     fullScreen: {
         flex: 1,

@@ -1,5 +1,6 @@
 import { View, Text, Image, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -30,7 +31,7 @@ export default function TutorialScreen() {
               <Image
                 source={require('../../../assets/LogoTutorial.png')}
                 style={styles.image}
-                resizeMode="contain"
+                resizeMode="cover"
               />
             </View>
             
@@ -78,7 +79,8 @@ export default function TutorialScreen() {
                   "Ligue o dispositivo na tomada",
                   "Conecte-se ao Wi-Fi do dispositivo",
                   "Abra o aplicativo EcoBreath",
-                  "Siga as instruções de calibração",
+                  "Abra a tela de conexão",
+                  "Conecte à maquina EcoBreath",
                   "Monitore a qualidade do ar"
                 ].map((step, index) => (
                   <View key={index} style={styles.instructionCard}>
@@ -93,13 +95,14 @@ export default function TutorialScreen() {
               <View style={styles.bottomContainer}>
                 <TouchableOpacity 
                   style={styles.startButton}
+                  onPress={()=>router.push("/LoginScreen")}
                 >
                   <Text style={styles.startButtonText}>Começar</Text>
                 </TouchableOpacity>
                 
                 <View style={styles.footerNoteContainer}>
                   <Text style={styles.footerNote}>
-                    Para melhores resultados, mantenha o dispositivo em local ventilado
+                    Para melhores resultados, mantenha o dispositivo em local fechado
                   </Text>
                 </View>
                 
@@ -147,23 +150,21 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: responsiveHeight(25), 
+    height: responsiveHeight(50), 
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: responsiveHeight(3),
   },
   image: {
-    width: responsiveWidth(70), 
-    height: responsiveHeight(20), 
-    maxHeight: 200,
+    width: responsiveWidth(100), 
+    height: responsiveHeight(50), 
   },
   title: {
-    fontSize: responsiveHeight(3.5),
+    fontSize: responsiveHeight(4),
     fontWeight: '700',
     color: '#00A3C4',
     textAlign: 'center',
     marginBottom: responsiveHeight(1),
-    fontFamily: 'Roboto_700Bold',
     maxWidth: '90%',
   },
   subtitle: {
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: responsiveHeight(2),
-    color: '#5A5A5A',
+    color: '#b7b7b7',
     textAlign: 'center',
     lineHeight: responsiveHeight(3),
     paddingHorizontal: responsiveWidth(8),

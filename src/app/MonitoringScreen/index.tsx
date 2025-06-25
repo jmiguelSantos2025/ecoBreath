@@ -178,6 +178,8 @@ export default function MonitoringScreen() {
                                     />
                                     <Text style={[styles.dataText, { color: AirQualityColor(co2In) }]}>{AirQuality(co2In)}</Text>
                                     <Text style={styles.buttonText}>Qualidade do ar</Text>
+                                    <Text style={[styles.buttonText,{fontSize:10,fontWeight:"200"}]}>(Clique aqui para mais informações)</Text>
+                                    
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("TemperaturaScreen")}>
                                     <Svg
@@ -193,22 +195,24 @@ export default function MonitoringScreen() {
                                         {temperatura.toFixed(0) + "ºC"}
                                     </Text>
                                     <Text style={styles.buttonText}>Temperatura(ºC)</Text>
+                                     <Text style={[styles.buttonText,{fontSize:10,fontWeight:"200"}]}>(Clique aqui para mais informações)</Text>
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.viewButton}>
-                                <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("Co2Screen")}>
+                                <TouchableOpacity style={styles.button}  activeOpacity={0.7} onPress={() => handleNavigate("Co2Screen")}>
                                     <Svg
                                         height={height * 0.07}
                                         viewBox="0 -960 960 960"
                                         width={width * 0.18}
                                         fill="#07C3C3"
                                         style={{ marginBottom: 5 }}
-                                    >
+                                                        >
                                         <Path d="M440-360q-17 0-28.5-11.5T400-400v-160q0-17 11.5-28.5T440-600h120q17 0 28.5 11.5T600-560v160q0 17-11.5 28.5T560-360H440Zm20-60h80v-120h-80v120Zm-300 60q-17 0-28.5-11.5T120-400v-160q0-17 11.5-28.5T160-600h120q17 0 28.5 11.5T320-560v40h-60v-20h-80v120h80v-20h60v40q0 17-11.5 28.5T280-360H160Zm520 120v-100q0-17 11.5-28.5T720-380h80v-40H680v-60h140q17 0 28.5 11.5T860-440v60q0 17-11.5 28.5T820-340h-80v40h120v60H680Z" />
                                     </Svg>
                                     <Text style={[styles.dataText, { color: Co2Color(co2In) }]}>{co2In}</Text>
                                     <Text style={styles.buttonText}>Níveis de CO₂ (ppm)</Text>
+                                     <Text style={[styles.buttonText,{fontSize:10,fontWeight:"200"}]}>(Clique aqui para mais informações)</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleNavigate("VolatilScreen")}>
                                     <Svg
@@ -223,7 +227,9 @@ export default function MonitoringScreen() {
                                     <Text style={[styles.dataText, { color: CompostosVolateisColor(compostosVolateis) }]}>
                                         {compostosVolateis}
                                     </Text>
+                                    
                                     <Text style={styles.buttonText}>Compostos Voláteis (ppb)</Text>
+                                     <Text style={[styles.buttonText,{fontSize:10,fontWeight:"200"}]}>(Clique aqui para mais informações)</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
