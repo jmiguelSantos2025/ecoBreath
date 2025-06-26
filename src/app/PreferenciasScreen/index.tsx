@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, Switch, Alert, Modal } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import * as Notifications from 'expo-notifications';
@@ -10,6 +10,7 @@ const { width, height } = Dimensions.get("window");
                       
 export default function PreferenciasScreen() {
   const [isEnable, setIsEnable] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const touchSwitch = async () => {
     const newValue = !isEnable;
@@ -30,10 +31,20 @@ export default function PreferenciasScreen() {
       Alert.alert(
         'Notificações desativadas',
         'O app não pode remover permissões já concedidas. Para revogar totalmente, vá até as configurações do sistema.'
-        
       );
       setIsEnable(true);
     }
+  };
+
+  const handleDeleteAccount = () => {
+    setModalVisible(true);
+  };
+
+  const confirmDelete = () => {
+    setModalVisible(false);
+    
+    Alert.alert('Conta excluída', 'Sua conta foi excluída com sucesso.');
+    router.replace('/login'); 
   };
 
   return (
@@ -62,9 +73,10 @@ export default function PreferenciasScreen() {
         </View>
 
         <View style={style.ViewButton}>
+         
           <View style={style.button}>
             <View style={style.viewIconButton}>
-              <MaterialCommunityIcons name='information' size={RFValue(20)} color='#fff' />
+              <MaterialCommunityIcons name='bell' size={RFValue(20)} color='#fff' />
             </View>
             <View style={style.viewTitleButton}>
               <Text style={style.titleButton}>Ativar notificações</Text>
@@ -77,6 +89,21 @@ export default function PreferenciasScreen() {
               value={isEnable}
             />
           </View>
+
+         
+          <TouchableOpacity 
+            style={[style.button, { backgroundColor: '#E74C3C' }]}
+            onPress={handleDeleteAccount}
+          >
+            <View style={style.viewIconButton}>
+              <MaterialCommunityIcons name='trash-can' size={RFValue(20)} color='#fff' />
+            </View>
+            <View style={style.viewTitleButton}>
+              <Text style={style.titleButton}>Deslogar da conta</Text>
+              <Text style={style.textButton}>Sua conexão com a maquina será perdida</Text>
+            </View>
+            <MaterialCommunityIcons name='chevron-right' size={RFValue(20)} color='#fff' />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -123,7 +150,7 @@ const style = StyleSheet.create({
     textAlign: "center",
   },
   viewImage: {
-    marginBottom: height * 0.2,
+    marginBottom: height * 0.1,
   },
   image: {
     width: RFValue(100),
@@ -156,13 +183,50 @@ const style = StyleSheet.create({
     color: "#fff",
     opacity: 0.8,
   },
-  iconContainer: {
-    backgroundColor: "#ECE6F0",
-    borderRadius: 5,
-    padding: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: RFValue(15),
+    padding: RFValue(20),
+    alignItems: 'center',
+  },
+  modalIcon: {
+    marginBottom: RFValue(15),
+  },
+  modalTitle: {
+    fontSize: RFValue(20),
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: RFValue(10),
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: RFValue(14),
+    color: '#7F8C8D',
+    textAlign: 'center',
+    marginBottom: RFValue(20),
+    lineHeight: RFValue(20),
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    padding: RFValue(12),
+    borderRadius: RFValue(8),
+    alignItems: 'center',
+    marginHorizontal: RFValue(5),
+  },
+  modalButtonText: {
+    fontSize: RFValue(16),
+    fontWeight: '600',
   },
 });

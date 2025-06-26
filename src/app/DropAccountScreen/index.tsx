@@ -80,6 +80,7 @@ export default function ConfigScreen() {
         color="#E53935"
       />
     </View>
+
   );
 }
 

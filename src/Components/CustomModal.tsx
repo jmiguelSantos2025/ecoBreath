@@ -13,6 +13,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
+
 interface CustomModalProps {
   visible: boolean;
   title: string;
@@ -125,7 +126,7 @@ export function CustomModalLogin({
   title,
   message,
   icon,
-  color = "#006462", // Valor padrão para a cor
+  color = "#006462", 
 }: CustomModalLoginProps) {
   return (
     <Modal 
