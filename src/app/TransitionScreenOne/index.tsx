@@ -13,7 +13,7 @@ export default function TransitionScreenOne() {
         scale.value = withTiming(6, { duration: 2500 });
 
         const timeout = setTimeout(() => {
-            router.push('/TutorialScreen');
+            router.push("TutorialScreen");
         }, 2000);
 
         return () => clearTimeout(timeout);

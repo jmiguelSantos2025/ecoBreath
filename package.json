@@ -62,7 +62,9 @@
     "victory-native": "^37.3.6",
     "expo-haptics": "~14.0.1",
     "expo-linear-gradient": "~14.0.2",
-    "@react-native-async-storage/async-storage": "1.23.1"
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "expo-updates": "~0.27.4",
+    "expo-location": "~18.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

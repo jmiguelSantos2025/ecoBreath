@@ -2,12 +2,12 @@
   "expo": {
     "name": "ecoBreath",
     "slug": "ecoBreath",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/LogoBrancaSplash.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "ecoBreath",
+    "scheme": "ecobreath",
     "splash": {
       "image": "./assets/LogoAzul.png",
       "resizeMode": "contain",
@@ -22,18 +22,23 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "INTERNET",
-        "NOTIFICATIONS"
+        "NOTIFICATIONS",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
       ],
       "intentFilters": [
         {
           "action": "VIEW",
           "data": [
             {
-              "scheme": "ecoBreath",
+              "scheme": "comgooglemaps",
               "host": "reset-password"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "adaptiveIcon": {
@@ -62,6 +67,12 @@
       "eas": {
         "projectId": "2f7a9331-6d02-4f9a-9a48-ab7aab129d6c"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2f7a9331-6d02-4f9a-9a48-ab7aab129d6c"
     }
   }
 }

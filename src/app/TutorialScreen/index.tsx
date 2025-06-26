@@ -95,7 +95,7 @@ export default function TutorialScreen() {
               <View style={styles.bottomContainer}>
                 <TouchableOpacity 
                   style={styles.startButton}
-                  onPress={()=>router.push("/LoginScreen")}
+                  onPress={()=>router.push("/TransitionScreenThird")}
                 >
                   <Text style={styles.startButtonText}>Começar</Text>
                 </TouchableOpacity>
@@ -247,7 +247,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-    minWidth: responsiveWidth(50),
+    width: "80%",
+    maxWidth:300,
+    alignSelf:"center"
   },
   startButtonText: {
     color: 'white',
@@ -289,5 +291,8 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: responsiveHeight(1),
+    justifyContent:"center",
+    paddingHorizontal:responsiveWidth(5),
+    
   },
 });
