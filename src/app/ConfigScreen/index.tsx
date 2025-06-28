@@ -90,8 +90,8 @@ pegarImage();
                             <MaterialCommunityIcons name='logout' size={RFValue(20)} color='#fff' />
                         </View>
                         <View style={style.viewTitleButton}>
-                            <Text style={style.titleButton}>Sair da Conta</Text>
-                            <Text style={style.textButton}>Deslogar da Conta</Text>
+                            <Text style={style.titleButton}>Excluir Conta</Text>
+                            <Text style={style.textButton}>Deleção permanente da conta</Text>
                         </View>
                     </TouchableOpacity>
                 </View>

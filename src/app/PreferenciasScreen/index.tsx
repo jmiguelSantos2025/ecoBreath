@@ -5,6 +5,7 @@ import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import * as Notifications from 'expo-notifications';
 import { IconButton } from 'react-native-paper';
 import { router } from 'expo-router';
+import { CustomConfirmModal } from '../../Components/CustomModal';
 
 const { width, height } = Dimensions.get("window");
                       
@@ -42,9 +43,7 @@ export default function PreferenciasScreen() {
 
   const confirmDelete = () => {
     setModalVisible(false);
-    
-    Alert.alert('Conta excluída', 'Sua conta foi excluída com sucesso.');
-    router.replace('/login'); 
+    router.replace('/LoginScreen'); 
   };
 
   return (
@@ -92,7 +91,7 @@ export default function PreferenciasScreen() {
 
          
           <TouchableOpacity 
-            style={[style.button, { backgroundColor: '#E74C3C' }]}
+            style={[style.button]}
             onPress={handleDeleteAccount}
           >
             <View style={style.viewIconButton}>
@@ -106,6 +105,15 @@ export default function PreferenciasScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <CustomConfirmModal
+              visible={modalVisible}
+              title="Tem certeza?"
+              message="Essa ação causará saida uma saida do aplicativo."
+              onClose={() => setModalVisible(false)}
+              onConfirm={confirmDelete}
+              icon="alert-circle"
+              color="#E53935"
+            />
     </View>
   );
 }

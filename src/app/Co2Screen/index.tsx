@@ -77,7 +77,7 @@ export default function Co2Screen() {
       if (snapshot1.exists()) {
         const data = snapshot1.val();
         const co = data.CO || 0
-        setCo2PPM(data.CO2In || 0);
+        setCo2PPM(data.CO2Out || 0);
         setCo(co);
       }
     };
@@ -158,7 +158,7 @@ export default function Co2Screen() {
               <MaterialCommunityIcons name="weather-windy" size={20} color="#607D8B" />
               <Text style={styles.detailLabel}>Sensação Térmica</Text>
             </View>
-            <Text style={styles.detailValue}>{temperature + 2}°C</Text>
+            <Text style={styles.detailValue}>{`${(temperature+2).toFixed(1)}°C`}</Text>
           </View>
           <View style={styles.detailItem}>
             <View style={styles.detailIconContainer}>
